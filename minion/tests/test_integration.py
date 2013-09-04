@@ -14,8 +14,7 @@ class TestMinion(TestCase):
         def show(request):
             return Response("Hello World!")
 
-        request = Request(path="/show")
-        response = minion.serve(request)
+        response = minion.serve(Request(path="/show"))
         self.assertEqual(response, Response("Hello World!"))
 
 

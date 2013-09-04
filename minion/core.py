@@ -1,4 +1,4 @@
-from minion.request import WSGIRequest
+from minion.request import Response, WSGIRequest
 from minion.routers import SimpleRouter
 
 
@@ -16,7 +16,9 @@ class Application(object):
 
     def serve(self, request):
         view, kwargs = self.router.match(request)
-        return view(request, **kwargs)
+        if view is not None:
+            return view(request, **kwargs)
+        return Response(code=404)
 
 
 def wsgi_app(application, request_class=WSGIRequest):

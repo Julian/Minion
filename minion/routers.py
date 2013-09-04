@@ -8,4 +8,4 @@ class SimpleRouter(object):
         self.routes[route] = fn
 
     def match(self, request):
-        return self.routes[request.path], {}
+        return self.routes.get(request.path), {}

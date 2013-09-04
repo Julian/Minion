@@ -28,7 +28,7 @@ class Response(object):
 
     default_code = 200
 
-    def __init__(self, content, code=None, headers=None):
+    def __init__(self, content="", code=None, headers=None):
         self.content = content
 
         if code is None:
