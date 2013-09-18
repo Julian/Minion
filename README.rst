@@ -17,7 +17,7 @@ following ways:
 
     * Call views with arguments rather than thread locals
     * Allow alternative routing implementations
-    * Provide more a robust configuration interface
+    * Provide a more robust configuration interface
 
 
 In some ways it's inspired by `Klein <https://github.com/Twisted/Klein>`_\'s
