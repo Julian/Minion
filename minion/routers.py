@@ -1,11 +1,8 @@
 """
-Fundamental routing building blocks: routers and dispatchers.
+Fundamental routing building blocks.
 
-This module defines implementations of the two central routing objects:
-routers and dispatchers.
-
-A router maps URLs to "view" names. A dispatcher calls a view and passes along
-any additional arguments (besides the request object).
+This module defines (different) implementations of routers -- objects which map
+(URL) paths to views and view arguments.
 
 """
 
