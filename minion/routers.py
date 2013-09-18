@@ -9,10 +9,8 @@ This module defines (different) implementations of routers -- objects which map
 try:
     import routes
 except ImportError:
-    routes = None
-
-
-if routes is not None:
+    pass
+else:
     class RoutesRouter(object):
         def __init__(self, mapper=None):
             if mapper is None:
