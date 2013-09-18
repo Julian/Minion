@@ -1,0 +1,11 @@
+language: python
+python:
+  - "pypy"
+  - "2.7"
+  - "3.3"
+install:
+    - python setup.py --quiet install
+script:
+    - pip install twisted -r test-requirements.txt
+    - trial minion
+    - python -m doctest README.rst
