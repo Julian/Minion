@@ -8,9 +8,9 @@ class Application(object):
             router = SimpleRouter()
         self.router = router
 
-    def route(self, route):
+    def route(self, route, **kwargs):
         def _add_route(fn):
-            self.router.add_route(route, fn)
+            self.router.add_route(route, fn, **kwargs)
             return fn
         return _add_route
 

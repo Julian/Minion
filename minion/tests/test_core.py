@@ -7,6 +7,17 @@ from minion.routers import SimpleRouter
 
 
 class TestApplication(TestCase):
+    def test_it_delegates_routes_to_the_router(self):
+        router = mock.Mock(spec=SimpleRouter())
+        application = core.Application(router=router)
+
+        fn = mock.Mock()
+        application.route("/foo/bar", baz=2)(fn)
+
+        router.add_route.assert_called_once_with("/foo/bar", fn, baz=2)
+
+
+class TestApplicationIntegration(TestCase):
     def setUp(self):
         self.router = mock.Mock(spec=SimpleRouter())
         self.application = core.Application(router=self.router)
