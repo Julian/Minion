@@ -22,6 +22,10 @@ class TestRoutesRouter(TestCase):
         matched = self.router.match(Request(path="/route/2013"))
         self.assertEqual(matched, (fn, {"year" : "2013", "stuff" : "12"}))
 
+    def test_it_does_not_route_unknown_paths(self):
+        matched = self.router.match(Request(path="/route"))
+        self.assertEqual(matched, (None, {}))
+
 
 class TestSimpleRouter(TestCase):
     def setUp(self):

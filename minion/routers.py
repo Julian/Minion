@@ -27,6 +27,9 @@ if routes is not None:
 
         def match(self, request):
             match = self._mapper.match(request.path)
+            if match is None:
+                return None, {}
+
             fn = match.pop("minion_target")
             return fn, match
 
