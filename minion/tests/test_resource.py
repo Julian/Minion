@@ -7,17 +7,17 @@ from minion import resource
 class TestResourceBin(TestCase):
     def setUp(self):
         self.bin = resource.Bin()
+        self.fn = mock.Mock(__name__="a_view")
 
     def test_it_stores_resources(self):
         @self.bin.provides("iron")
         def make_iron():
             return 12
 
-        fn = mock.Mock(__name__="a_view")
-        returned = self.bin.needs(["iron"])(fn)(1, "foo", bar=3)
+        returned = self.bin.needs(["iron"])(self.fn)(1, "foo", bar=3)
 
-        self.assertIs(returned, fn.return_value)
-        fn.assert_called_once_with(1, "foo", bar=3, iron=12)
+        self.assertIs(returned, self.fn.return_value)
+        self.fn.assert_called_once_with(1, "foo", bar=3, iron=12)
 
     def test_multiple_needs(self):
         @self.bin.provides("iron")
@@ -29,7 +29,6 @@ class TestResourceBin(TestCase):
         def make_wine():
             return thing
 
-        fn = mock.Mock(__name__="a_view")
-        self.bin.needs(["wine", "iron"])(fn)(1)
+        self.bin.needs(["wine", "iron"])(self.fn)(1)
 
-        fn.assert_called_once_with(1, iron=12, wine=thing)
+        self.fn.assert_called_once_with(1, iron=12, wine=thing)

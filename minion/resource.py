@@ -9,6 +9,8 @@ class Bin(object):
         """
         Declare that the decorated callable provides the given resource.
 
+        :argument str resource: the name of the new resource
+
         """
 
         def _provides(fn):
@@ -19,6 +21,8 @@ class Bin(object):
     def needs(self, resources):
         """
         Wrap the decorated callable to include the given resources when called.
+
+        :argument iterable resources: the needed resource names
 
         """
 
