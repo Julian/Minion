@@ -29,3 +29,17 @@ class TestWSGIMinion(TestCase):
         wsgi = TestApp(wsgi_app(minion))
         response = wsgi.get("/respond", status=200)
         self.assertEqual(response.body, "Yep!")
+
+    def test_it_sets_headers(self):
+        minion = Application()
+
+        @minion.route("/respond")
+        def show(request):
+            return Response(
+                "{}",
+                headers={"Content-Type" : "application/json"}
+            )
+
+        wsgi = TestApp(wsgi_app(minion))
+        response = wsgi.get("/respond", status=200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")

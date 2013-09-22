@@ -25,6 +25,6 @@ def wsgi_app(application, request_class=WSGIRequest):
     def wsgi(environ, start_response):
         request = request_class(environ)
         response = application.serve(request)
-        start_response(response.status, response.headers)
+        start_response(response.status, response.headers.items())
         return [response.content]
     return wsgi

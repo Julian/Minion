@@ -36,7 +36,7 @@ class Response(object):
         self.code = code
 
         if headers is None:
-            headers = []
+            headers = {}
         self.headers = headers
 
     def __eq__(self, other):
