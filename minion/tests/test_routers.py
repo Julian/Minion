@@ -20,6 +20,18 @@ class RouterTestMixin(object):
         matched = self.router.match(Request(path="/route"))
         self.assertEqual(matched, (fn, {}))
 
+    def test_it_routes_routes_for_specified_methods(self):
+        fn = mock.Mock()
+        self.router.add_route("/route", fn, methods=["POST"])
+        matched = self.router.match(Request(path="/route", method="POST"))
+        self.assertEqual(matched, (fn, {}))
+
+    def test_it_does_not_route_routes_for_unspecified_methods(self):
+        fn = mock.Mock()
+        self.router.add_route("/route", fn, methods=["POST"])
+        matched = self.router.match(Request(path="/route", method="GET"))
+        self.assertEqual(matched, (None, {}))
+
     def test_it_does_not_route_unknown_paths(self):
         matched = self.router.match(Request(path="/route"))
         self.assertEqual(matched, (None, {}))

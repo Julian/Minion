@@ -8,7 +8,8 @@ HTTP_STATUS_CODES = dict(
 
 
 class Request(object):
-    def __init__(self, path):
+    def __init__(self, path, method="GET"):
+        self.method = method
         self.path = path
 
     def __repr__(self):
@@ -18,6 +19,10 @@ class Request(object):
 class WSGIRequest(object):
     def __init__(self, environ):
         self.environ = environ
+
+    @property
+    def method(self):
+        return self.environ["REQUEST_METHOD"]
 
     @property
     def path(self):
