@@ -29,6 +29,29 @@ else:
             return fn, match
 
 
+try:
+    import werkzeug.routing
+except ImportError:
+    pass
+else:
+    class WerkzeugRouter(object):
+        def __init__(self, map=None):
+            if map is None:
+                map = werkzeug.routing.Map()
+            self._map = map
+            self._adapter = self._map.bind("")  # XXX: server_name
+
+        def add_route(self, route, fn, **kwargs):
+            rule = werkzeug.routing.Rule(route, endpoint=fn)
+            self._map.add(rule)
+
+        def match(self, request):
+            if not self._adapter.test(request.path):
+                return None, {}
+            return self._adapter.match(request.path)
+
+
+
 class SimpleRouter(object):
     def __init__(self, routes=None):
         if routes is None:
