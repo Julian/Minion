@@ -37,7 +37,7 @@ class RouterTestMixin(object):
         self.assertEqual(matched, (None, {}))
 
 
-@skipIf(routers.routes is None, "routes not found")
+@skipIf(not hasattr(routers, "RoutesRouter"), "routes not found")
 class TestRoutesRouter(RouterTestMixin, TestCase):
     def setUp(self):
         self.router = routers.RoutesRouter()
@@ -49,7 +49,7 @@ class TestRoutesRouter(RouterTestMixin, TestCase):
         self.assertEqual(matched, (fn, {"year" : "2013", "stuff" : "12"}))
 
 
-@skipIf(routers.werkzeug is None, "werkzeug not found")
+@skipIf(not hasattr(routers, "WerkzeugRouter"), "werkzeug not found")
 class TestWerkzeugRouter(RouterTestMixin, TestCase):
     def setUp(self):
         self.router = routers.WerkzeugRouter()
