@@ -18,6 +18,11 @@ class TestResourceBin(TestCase):
 
         self.assertIn("cheese", self.bin)
 
+    def test_it_contains_globals(self):
+        self.assertNotIn("cheese", self.bin)
+        self.bin.globals["cheese"] = 12
+        self.assertIn("cheese", self.bin)
+
     def test_it_provides_resources_to_things_that_need_them(self):
         @self.bin.provides("iron")
         def make_iron():
@@ -59,7 +64,7 @@ class TestResourceBin(TestCase):
 
         self.fn.assert_called_once_with(cheese=18, iron=24, wine=1)
 
-    def test_it_can_contain_globals(self):
+    def test_it_provides_globals(self):
         self.assertEqual(self.bin.globals, {})
         important_thing = self.bin.globals["important_thing"] = mock.Mock()
         self.bin.needs(["important_thing"])(self.fn)()

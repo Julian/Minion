@@ -10,8 +10,8 @@ class Bin(object):
         self._resources = {}
         self.globals = dict(globals)
 
-    def __contains__(self, resource_name):
-        return resource_name in self._resources
+    def __contains__(self, resource):
+        return resource in self._resources or resource in self.globals
 
     @property
     def resources(self):
