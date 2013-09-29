@@ -178,8 +178,7 @@ loader = jinja2.DictLoader(
         )
     )
 )
-env = jinja2.Environment(loader=loader)
-bin.provides("j2env")(lambda : env)
+bin.globals["j2env"] = jinja2.Environment(loader=loader)
 
 
 if __name__ == "__main__":
