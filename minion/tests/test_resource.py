@@ -33,6 +33,14 @@ class TestResourceBin(TestCase):
         self.assertIs(returned, self.fn.return_value)
         self.fn.assert_called_once_with(1, "foo", bar=3, iron=12)
 
+    def test_it_provides_a_new_resource_instance_each_time(self):
+        fn = self.bin.needs(["sugar"])(self.fn)
+        sugar = mock.Mock()
+        self.bin.provides("sugar")(sugar)
+        fn()
+        fn()
+        self.assertEqual(sugar.call_count, 2)
+
     def test_multiple_needs(self):
         @self.bin.provides("iron")
         def make_iron():
@@ -73,10 +81,23 @@ class TestResourceBin(TestCase):
     def test_it_knows_its_resources(self):
         for resource in "milk", "honey", "gold":
             self.bin.provides(resource)(mock.Mock())
-
         self.assertEqual(self.bin.resources, set(["milk", "honey", "gold"]))
 
-    def test_non_existent_resource(self):
+    def test_a_non_existent_resource_raises_an_exception_when_called(self):
+        fn = self.bin.needs(["iron"])(self.fn)
+
         with self.assertRaises(resource.NoSuchResource) as e:
-            self.bin.needs(["iron"])
+            fn()
         self.assertEqual(e.exception.args, ("iron",))
+
+    def test_resources_can_be_created_right_before_call_time(self):
+        """
+        A resource provision can be done after declaring something needs it.
+
+        """
+
+        fn = self.bin.needs(["cake"])(self.fn)
+        cake = mock.Mock()
+        self.bin.provides("cake")(cake)
+        fn()
+        self.fn.assert_called_once_with(cake=cake.return_value)

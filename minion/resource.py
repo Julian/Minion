@@ -38,27 +38,18 @@ class Bin(object):
 
         """
 
-        global_resources, to_create = [], []
-
-        for name in resources:
-            if name in self.globals:
-                global_resources.append((name, self.globals[name]))
-            elif name in self._resources:
-                to_create.append((name, self._resources[name]))
-            else:
-                raise NoSuchResource(name)
-
         def _needs(fn):
             @wraps(fn)
             def wrapped(*args, **kwargs):
-                kwargs.update(
-                    (name, resource) for name, resource in global_resources
-                    if name not in kwargs
-                )
-                kwargs.update(
-                    (name, create()) for name, create in to_create
-                    if name not in kwargs
-                )
+                for resource in resources:
+                    if resource in kwargs:
+                        continue
+                    elif resource in self.globals:
+                        kwargs[resource] = self.globals[resource]
+                    elif resource in self._resources:
+                        kwargs[resource] = self._resources[resource]()
+                    else:
+                        raise NoSuchResource(resource)
                 return fn(*args, **kwargs)
             return wrapped
         return _needs
