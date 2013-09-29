@@ -2,8 +2,16 @@ from functools import wraps
 
 
 class Bin(object):
-    def __init__(self):
+    def __init__(self, globals=()):
         self._resources = {}
+        self.globals = dict(globals)
+
+    def __contains__(self, resource_name):
+        return resource_name in self._resources
+
+    @property
+    def resources(self):
+        return self._resources.viewkeys()
 
     def provides(self, resource):
         """
@@ -26,13 +34,19 @@ class Bin(object):
 
         """
 
+        global_resources, to_create = [], []
+
+        for name in resources:
+            if name in self.globals:
+                global_resources.append((name, self.globals[name]))
+            else:
+                to_create.append((name, self._resources[name]))
+
         def _needs(fn):
             @wraps(fn)
             def wrapped(*args, **kwargs):
-                kwargs.update(
-                    (resource, self._resources[resource]())
-                    for resource in resources
-                )
+                kwargs.update(global_resources)
+                kwargs.update((name, create()) for name, create in to_create)
                 return fn(*args, **kwargs)
             return wrapped
         return _needs
