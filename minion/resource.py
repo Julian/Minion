@@ -1,6 +1,10 @@
 from functools import wraps
 
 
+class NoSuchResource(LookupError):
+    pass
+
+
 class Bin(object):
     def __init__(self, globals=()):
         self._resources = {}
@@ -39,8 +43,10 @@ class Bin(object):
         for name in resources:
             if name in self.globals:
                 global_resources.append((name, self.globals[name]))
-            else:
+            elif name in self._resources:
                 to_create.append((name, self._resources[name]))
+            else:
+                raise NoSuchResource(name)
 
         def _needs(fn):
             @wraps(fn)

@@ -70,3 +70,8 @@ class TestResourceBin(TestCase):
             self.bin.provides(resource)(mock.Mock())
 
         self.assertEqual(self.bin.resources, set(["milk", "honey", "gold"]))
+
+    def test_non_existent_resource(self):
+        with self.assertRaises(resource.NoSuchResource) as e:
+            self.bin.needs(["iron"])
+        self.assertEqual(e.exception.args, ("iron",))
