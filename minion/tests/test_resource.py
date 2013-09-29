@@ -42,6 +42,23 @@ class TestResourceBin(TestCase):
 
         self.fn.assert_called_once_with(1, iron=12, wine=thing)
 
+    def test_it_provides_only_unprovided_resources(self):
+        """
+        It should still be possible to pass in arguments if desired.
+
+        """
+
+        @self.bin.provides("iron")
+        def make_iron():
+            return 12
+
+        self.bin.globals["cheese"] = 18
+        self.bin.globals["wine"] = 13
+
+        self.bin.needs(["wine", "iron", "cheese"])(self.fn)(iron=24, wine=1)
+
+        self.fn.assert_called_once_with(cheese=18, iron=24, wine=1)
+
     def test_it_can_contain_globals(self):
         self.assertEqual(self.bin.globals, {})
         important_thing = self.bin.globals["important_thing"] = mock.Mock()

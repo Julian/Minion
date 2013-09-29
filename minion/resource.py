@@ -45,8 +45,14 @@ class Bin(object):
         def _needs(fn):
             @wraps(fn)
             def wrapped(*args, **kwargs):
-                kwargs.update(global_resources)
-                kwargs.update((name, create()) for name, create in to_create)
+                kwargs.update(
+                    (name, resource) for name, resource in global_resources
+                    if name not in kwargs
+                )
+                kwargs.update(
+                    (name, create()) for name, create in to_create
+                    if name not in kwargs
+                )
                 return fn(*args, **kwargs)
             return wrapped
         return _needs
