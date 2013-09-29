@@ -51,7 +51,7 @@ def add_entry(request, db, j2env):
 
 @app.route("/login", methods=["GET", "POST"])
 @bin.needs(["j2env"])
-def login(request):
+def login(request, j2env):
     error = None
     if request.method == "POST":
         if request.form["username"] != config["credentials"]["user"]:
