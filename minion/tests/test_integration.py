@@ -12,10 +12,10 @@ class TestMinion(TestCase):
 
         @minion.route("/show")
         def show(request):
-            return Response("Hello World!")
+            return Response(b"Hello World!")
 
         response = minion.serve(Request(path="/show"))
-        self.assertEqual(response, Response("Hello World!"))
+        self.assertEqual(response, Response(b"Hello World!"))
 
 
 class TestWSGIMinion(TestCase):
@@ -24,11 +24,11 @@ class TestWSGIMinion(TestCase):
 
         @minion.route("/respond")
         def show(request):
-            return Response("Yep!")
+            return Response(b"Yep!")
 
         wsgi = TestApp(wsgi_app(minion))
         response = wsgi.get("/respond", status=200)
-        self.assertEqual(response.body, "Yep!")
+        self.assertEqual(response.body, b"Yep!")
 
     def test_it_sets_headers(self):
         minion = Application()
@@ -36,7 +36,7 @@ class TestWSGIMinion(TestCase):
         @minion.route("/respond")
         def show(request):
             return Response(
-                "{}",
+                b"{}",
                 headers={"Content-Type" : "application/json"}
             )
 

@@ -1,5 +1,7 @@
 from functools import wraps
 
+from minion.compat import viewkeys
+
 
 class DuplicateResource(Exception):
     pass
@@ -19,7 +21,7 @@ class Bin(object):
 
     @property
     def resources(self):
-        return self._resources.viewkeys()
+        return viewkeys(self._resources)
 
     def provides(self, resource):
         """
