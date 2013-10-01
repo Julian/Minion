@@ -1,6 +1,10 @@
 from functools import wraps
 
 
+class DuplicateResource(Exception):
+    pass
+
+
 class NoSuchResource(LookupError):
     pass
 
@@ -26,6 +30,8 @@ class Bin(object):
         """
 
         def _provides(fn):
+            if resource in self.resources:
+                raise DuplicateResource(resource)
             self._resources[resource] = fn
             return fn
         return _provides
@@ -53,3 +59,12 @@ class Bin(object):
                 return fn(*args, **kwargs)
             return wrapped
         return _needs
+
+    def remove(self, resource):
+        """
+        Remove the given resource from the bin.
+
+        """
+
+        self._resources.pop(resource, None)
+        self.globals.pop(resource, None)

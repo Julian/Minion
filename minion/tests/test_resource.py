@@ -101,3 +101,20 @@ class TestResourceBin(TestCase):
         self.bin.provides("cake")(cake)
         fn()
         self.fn.assert_called_once_with(cake=cake.return_value)
+
+    def test_remove(self):
+        self.bin.provides("gold")(mock.Mock())
+        self.assertIn("gold", self.bin)
+        self.bin.remove("gold")
+        self.assertNotIn("gold", self.bin)
+
+    def test_remove_global(self):
+        self.bin.globals["silver"] = mock.Mock()
+        self.assertIn("silver", self.bin)
+        self.bin.remove("silver")
+        self.assertNotIn("silver", self.bin)
+
+    def test_quashing_an_existing_resource_raises_an_exception(self):
+        self.bin.provides("iron")(mock.Mock())
+        with self.assertRaises(resource.DuplicateResource):
+            self.bin.provides("iron")(mock.Mock())
