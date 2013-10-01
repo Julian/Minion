@@ -4,8 +4,8 @@ python:
   - "2.7"
   - "3.3"
 install:
-    - pip install twisted -r test-requirements.txt
+    - pip install pytest -r test-requirements.txt
     - python setup.py --quiet install
 script:
-    - trial minion
+    - py.test -s minion
     - python -m doctest README.rst

@@ -1,9 +1,11 @@
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
+from minion.compat import iteritems
+
 
 HTTP_STATUS_CODES = dict(
     (code, "{0} {1}".format(code, phrase))
-    for code, phrase in HTTP_STATUS_PHRASES.iteritems()
+    for code, phrase in iteritems(HTTP_STATUS_PHRASES)
 )
 
 

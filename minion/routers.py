@@ -6,7 +6,7 @@ This module defines (different) implementations of routers -- objects which map
 
 """
 
-import urllib
+from minion.compat import urlencode
 
 
 try:
@@ -99,7 +99,6 @@ class SimpleRouter(object):
 
     def url_for(self, route_name, **kwargs):
         url = self._names.get(route_name, route_name)
-        query = urllib.urlencode(kwargs)
-        if query:
-            url += "?" + query
+        if kwargs:
+            url += "?" + urlencode(kwargs)
         return url
