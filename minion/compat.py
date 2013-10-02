@@ -7,7 +7,7 @@ PY3 = sys.version_info[0] >= 3
 
 if PY3:
     from urllib.parse import urlencode
-    iteritems = methodcaller("items")
+    iteritems = viewitems = methodcaller("items")
     items = lambda d : list(d.items())
     viewkeys = methodcaller("keys")
 else:
@@ -15,3 +15,4 @@ else:
     iteritems = methodcaller("iteritems")
     items = methodcaller("items")
     viewkeys = methodcaller("viewkeys")
+    viewitems = methodcaller("viewitems")

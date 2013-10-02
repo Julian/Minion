@@ -4,10 +4,13 @@ from minion.routers import SimpleRouter
 
 
 class Application(object):
-    def __init__(self, router=None):
+    def __init__(self, router=None, jinja=None):
         if router is None:
             router = SimpleRouter()
         self.router = router
+
+        if jinja is not None:
+            self.bind_jinja_environment(jinja)
 
     def route(self, route, **kwargs):
         def _add_route(fn):
@@ -20,6 +23,19 @@ class Application(object):
         if view is not None:
             return view(request, **kwargs)
         return Response(code=404)
+
+    def bind_jinja_environment(self, environment):
+        """
+        Bind useful pieces of the application to the given Jinja2 environment.
+
+        :type environment: :class:`jinja2.Environment`
+
+        """
+
+        environment.globals.update([
+            ("app", self),
+            ("router", self.router),
+        ])
 
 
 def wsgi_app(application, request_class=WSGIRequest):

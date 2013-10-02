@@ -1,7 +1,13 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 import mock
 
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
+
 from minion import core
+from minion.compat import viewitems
 from minion.request import Request
 from minion.routers import SimpleRouter
 
@@ -15,6 +21,17 @@ class TestApplication(TestCase):
         application.route("/foo/bar", baz=2)(fn)
 
         router.add_route.assert_called_once_with("/foo/bar", fn, baz=2)
+
+    @skipIf(jinja2 is None, "jinja2 not found")
+    def test_it_can_bind_to_jinja_environments(self):
+        environment = jinja2.Environment()
+        application = core.Application(jinja=environment)
+        self.assertGreaterEqual(
+            viewitems(environment.globals), {
+                ("app", application),
+                ("router", application.router),
+            }
+        )
 
 
 class TestApplicationIntegration(TestCase):
