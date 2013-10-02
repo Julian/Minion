@@ -17,16 +17,16 @@ import examples.static
 
 
 CSS = os.path.join(os.path.dirname(examples.static.__file__), "flaskr.css")
-config = {
-    "credentials" : {"user" : "admin", "password" : "default"},
-    "database" : {"uri" : "/tmp/flaskr.db"},
-}
 loader = jinja2.FileSystemLoader(
     os.path.join(os.path.dirname(__file__), "templates", "flaskr"),
 )
 app = Application(
     jinja=jinja2.Environment(loader=loader),
     router=WerkzeugRouter(),
+    config = {
+        "credentials" : {"user" : "admin", "password" : "default"},
+        "database" : {"uri" : "/tmp/flaskr.db"},
+    },
 )
 
 
@@ -55,8 +55,8 @@ def add_entry(request, db, jinja):
 
 
 @app.route("/login", methods=["GET", "POST"])
-@app.bin.needs(["jinja"])
-def login(request, jinja):
+@app.bin.needs(["config", "jinja"])
+def login(request, config, jinja):
     error = None
     if request.method == "POST":
         if request.form["username"] != config["credentials"]["user"]:
@@ -87,7 +87,8 @@ def style(request):
 
 
 @app.bin.provides("db")
-def connect_db():
+@app.bin.needs(["config"])
+def connect_db(config):
     """Connects to the specific database."""
     rv = sqlite3.connect(config["database"]["uri"])
     rv.row_factory = sqlite3.Row
