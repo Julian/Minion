@@ -7,7 +7,7 @@ except ImportError:
     jinja2 = None
 
 from minion import core, resource
-from minion.compat import viewitems
+from minion.compat import iteritems, viewitems
 from minion.request import Request
 from minion.routers import SimpleRouter
 
@@ -22,10 +22,23 @@ class TestApplication(TestCase):
 
         router.add_route.assert_called_once_with("/foo/bar", fn, baz=2)
 
-    def test_it_can_bind_to_bins(self):
+    def test_binds_to_its_bin(self):
+        app = core.Application()
+        expected = {"app" : app, "config" : app.config}
+        self.assertEqual(
+            {k : v for k, v in iteritems(app.bin.globals) if k in expected},
+            expected,
+        )
+
+    def test_it_can_bind_to_other_bins(self):
+        app = core.Application()
         bin = resource.Bin()
-        application = core.Application(bin=bin)
-        self.assertEqual(bin.globals["app"], application)
+        app.bind_bin(bin)
+        expected = {"app" : app, "config" : app.config}
+        self.assertEqual(
+            {k : v for k, v in iteritems(bin.globals) if k in expected},
+            expected,
+        )
 
     @skipIf(jinja2 is None, "jinja2 not found")
     def test_it_can_bind_to_jinja_environments(self):
@@ -36,7 +49,7 @@ class TestApplication(TestCase):
             viewitems(environment.globals), {
                 ("app", application),
                 ("router", application.router),
-            }
+            },
         )
 
 

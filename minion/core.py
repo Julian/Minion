@@ -5,16 +5,19 @@ from minion.routers import SimpleRouter
 
 
 class Application(object):
-    def __init__(self, bin=None, router=None, jinja=None):
+    def __init__(self, config=None, bin=None, router=None, jinja=None):
+        if config is None:
+            config = {}
         if bin is None:
             bin = resource.Bin()
         if router is None:
             router = SimpleRouter()
 
         self.bin = bin
-        self.bind_bin(bin)
+        self.config = config
         self.router = router
 
+        self.bind_bin(bin)
         if jinja is not None:
             self.bind_jinja_environment(jinja)
 
@@ -39,6 +42,7 @@ class Application(object):
         """
 
         bin.globals["app"] = self
+        bin.globals["config"] = self.config
 
     def bind_jinja_environment(self, environment, resource_name="jinja"):
         """
