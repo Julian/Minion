@@ -41,8 +41,11 @@ class Application(object):
 
         """
 
-        bin.globals["app"] = self
-        bin.globals["config"] = self.config
+        bin.globals.update([
+            ("app", self),
+            ("config", self.config),
+            ("router", self.router),
+        ])
 
     def bind_jinja_environment(self, environment, resource_name="jinja"):
         """
@@ -57,6 +60,7 @@ class Application(object):
         self.bin.globals[resource_name] = environment
         environment.globals.update([
             ("app", self),
+            ("config", self.config),
             ("router", self.router),
         ])
 

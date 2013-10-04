@@ -7,12 +7,22 @@ except ImportError:
     jinja2 = None
 
 from minion import core, resource
-from minion.compat import iteritems, viewitems
+from minion.compat import iteritems
 from minion.request import Request
 from minion.routers import SimpleRouter
 
 
 class TestApplication(TestCase):
+    def assertSubdict(self, subdict, of):
+        """
+        Assert that the given thing is a subdict of the given dict.
+
+        """
+
+        subdict = dict(subdict)
+        matches = {k : v for k, v in iteritems(of) if k in subdict}
+        self.assertEqual(subdict, matches)
+
     def test_it_delegates_routes_to_the_router(self):
         router = mock.Mock(spec=SimpleRouter())
         application = core.Application(router=router)
@@ -24,32 +34,40 @@ class TestApplication(TestCase):
 
     def test_binds_to_its_bin(self):
         app = core.Application()
-        expected = {"app" : app, "config" : app.config}
-        self.assertEqual(
-            {k : v for k, v in iteritems(app.bin.globals) if k in expected},
-            expected,
+        self.assertSubdict(
+            [
+                ("app", app),
+                ("config", app.config),
+                ("router", app.router),
+            ],
+            app.bin.globals,
         )
 
     def test_it_can_bind_to_other_bins(self):
         app = core.Application()
         bin = resource.Bin()
         app.bind_bin(bin)
-        expected = {"app" : app, "config" : app.config}
-        self.assertEqual(
-            {k : v for k, v in iteritems(bin.globals) if k in expected},
-            expected,
+        self.assertSubdict(
+            [
+                ("app", app),
+                ("config", app.config),
+                ("router", app.router),
+            ],
+            bin.globals,
         )
 
     @skipIf(jinja2 is None, "jinja2 not found")
     def test_it_can_bind_to_jinja_environments(self):
         environment = jinja2.Environment()
-        application = core.Application(jinja=environment)
-        self.assertEqual(application.bin.globals["jinja"], environment)
-        self.assertGreaterEqual(
-            viewitems(environment.globals), {
-                ("app", application),
-                ("router", application.router),
-            },
+        app = core.Application(jinja=environment)
+        self.assertEqual(app.bin.globals["jinja"], environment)
+        self.assertSubdict(
+            [
+                ("app", app),
+                ("config", app.config),
+                ("router", app.router),
+            ],
+            environment.globals,
         )
 
 
