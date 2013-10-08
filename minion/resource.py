@@ -70,3 +70,12 @@ class Bin(object):
 
         self._resources.pop(resource, None)
         self.globals.pop(resource, None)
+
+    def update(self, bin):
+        """
+        Add the given bin into this one.
+
+        """
+
+        self._resources.update(bin._resources)
+        self.globals.update(bin.globals)

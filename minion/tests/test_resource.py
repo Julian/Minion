@@ -124,3 +124,16 @@ class TestResourceBin(TestCase):
         self.bin.globals["iron"] = mock.Mock()
         with self.assertRaises(resource.DuplicateResource):
             self.bin.provides("iron")(mock.Mock())
+
+    def test_update(self):
+        iron, wine = mock.Mock(), mock.Mock()
+
+        self.bin.provides("iron")(iron)
+        self.bin.provides("wine")(wine)
+
+        gold = mock.Mock()
+        bin = resource.Bin(globals={"gold" : gold})
+
+        self.bin.update(bin)
+
+        self.assertEqual(self.bin.resources, {"iron", "wine", "gold"})
