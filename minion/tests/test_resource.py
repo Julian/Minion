@@ -79,8 +79,9 @@ class TestResourceBin(TestCase):
         self.fn.assert_called_once_with(important_thing=important_thing)
 
     def test_it_knows_its_resources(self):
-        for resource in "milk", "honey", "gold":
-            self.bin.provides(resource)(mock.Mock())
+        self.bin.provides("milk")(mock.Mock())
+        self.bin.provides("honey")(mock.Mock())
+        self.bin.globals["gold"] = mock.Mock()
         self.assertEqual(self.bin.resources, set(["milk", "honey", "gold"]))
 
     def test_a_non_existent_resource_raises_an_exception_when_called(self):
@@ -116,5 +117,10 @@ class TestResourceBin(TestCase):
 
     def test_quashing_an_existing_resource_raises_an_exception(self):
         self.bin.provides("iron")(mock.Mock())
+        with self.assertRaises(resource.DuplicateResource):
+            self.bin.provides("iron")(mock.Mock())
+
+    def test_quashing_an_existing_global_raises_an_exception(self):
+        self.bin.globals["iron"] = mock.Mock()
         with self.assertRaises(resource.DuplicateResource):
             self.bin.provides("iron")(mock.Mock())

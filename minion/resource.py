@@ -21,7 +21,7 @@ class Bin(object):
 
     @property
     def resources(self):
-        return viewkeys(self._resources)
+        return viewkeys(self._resources) | viewkeys(self.globals)
 
     def provides(self, resource):
         """
@@ -32,7 +32,7 @@ class Bin(object):
         """
 
         def _provides(fn):
-            if resource in self.resources:
+            if resource in self:
                 raise DuplicateResource(resource)
             self._resources[resource] = fn
             return fn
