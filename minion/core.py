@@ -52,6 +52,13 @@ class Application(object):
         """
         Call the given callable after the given request has its response.
 
+        :argument request: the request to piggyback
+        :argument fn: a callable that takes at least two arguments, the request
+            and the response (in that order), along with any additional
+            positional and keyword arguments passed to this function which will
+            be passed along. If the callable returns something other than
+            ``None``, it will be used as the new response.
+
         """
 
         self._response_callbacks[request].append((fn, fnargs, fnkwargs))
