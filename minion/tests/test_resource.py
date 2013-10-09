@@ -82,7 +82,7 @@ class TestResourceBin(TestCase):
         self.bin.provides("milk")(mock.Mock())
         self.bin.provides("honey")(mock.Mock())
         self.bin.globals["gold"] = mock.Mock()
-        self.assertEqual(self.bin.resources, set(["milk", "honey", "gold"]))
+        self.assertEqual(self.bin.resources, {"milk", "honey", "gold"})
 
     def test_a_non_existent_resource_raises_an_exception_when_called(self):
         fn = self.bin.needs(["iron"])(self.fn)
