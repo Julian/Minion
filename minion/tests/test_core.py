@@ -8,7 +8,7 @@ except ImportError:
 
 from minion import core, resource
 from minion.compat import iteritems
-from minion.request import Request
+from minion.request import Request, Response
 from minion.routers import SimpleRouter
 
 
@@ -75,15 +75,53 @@ class TestApplicationIntegration(TestCase):
     def setUp(self):
         self.router = mock.Mock(spec=SimpleRouter())
         self.application = core.Application(router=self.router)
+        self.request = mock.Mock(spec=Request(path="/"))
 
     def test_it_serves_matched_requests(self):
         view, _ = self.router.match.return_value = mock.Mock(), {"foo" : 12}
-        request = mock.Mock(spec=Request(path="/"))
-        self.application.serve(request)
-        view.assert_called_once_with(request, foo=12)
+        self.application.serve(self.request)
+        view.assert_called_once_with(self.request, foo=12)
 
     def test_it_serves_404s_for_unmatched_requests_by_default(self):
         view, _ = self.router.match.return_value = None, {}
-        request = mock.Mock(spec=Request(path="/"))
-        response = self.application.serve(request)
+        response = self.application.serve(self.request)
         self.assertEqual(response.code, 404)
+
+    def test_after_response(self):
+        thing = mock.Mock(return_value=None)
+        self.application.after_response(self.request, thing, 1, kw="abc")
+
+        view, _ = self.router.match.return_value = None, {}
+        response = self.application.serve(self.request)
+
+        thing.assert_called_once_with(self.request, response, 1, kw="abc")
+
+    def test_after_response_can_modify_the_response(self):
+        def double_text(request, response):
+            return Response(response.content * 2)
+
+        self.application.after_response(self.request, double_text)
+
+        view = mock.Mock(return_value=Response("Hello"))
+        self.router.match.return_value = view, {}
+
+        response = self.application.serve(self.request)
+
+        self.assertEqual(response.content, "HelloHello")
+
+    def test_after_response_chaining(self):
+        def double_text(request, response):
+            return Response(response.content * 2)
+
+        def world(request, response):
+            return Response(response.content + "World")
+
+        self.application.after_response(self.request, double_text)
+        self.application.after_response(self.request, world)
+
+        view = mock.Mock(return_value=Response("Hello"))
+        self.router.match.return_value = view, {}
+
+        response = self.application.serve(self.request)
+
+        self.assertEqual(response.content, "HelloHelloWorld")

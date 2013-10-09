@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from minion import resource
 from minion.compat import items
 from minion.request import Response, WSGIRequest
@@ -12,6 +14,8 @@ class Application(object):
             bin = resource.Bin()
         if router is None:
             router = SimpleRouter()
+
+        self._response_callbacks = defaultdict(list)
 
         self.bin = bin
         self.config = config
@@ -29,9 +33,28 @@ class Application(object):
 
     def serve(self, request):
         view, kwargs = self.router.match(request)
+
         if view is not None:
-            return view(request, **kwargs)
-        return Response(code=404)
+            response = view(request, **kwargs)
+        else:
+            response = Response(code=404)
+
+        callbacks = self._response_callbacks.pop(request, None)
+        if callbacks is not None:
+            for fn, args, kwargs in callbacks:
+                callback_response = fn(request, response, *args, **kwargs)
+                if callback_response is not None:
+                    response = callback_response
+
+        return response
+
+    def after_response(self, request, fn, *fnargs, **fnkwargs):
+        """
+        Call the given callable after the given request has its response.
+
+        """
+
+        self._response_callbacks[request].append((fn, fnargs, fnkwargs))
 
     def bind_bin(self, bin):
         """
