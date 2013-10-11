@@ -12,7 +12,8 @@ class NoSuchResource(LookupError):
 
 
 class Bin(object):
-    def __init__(self, globals=()):
+    def __init__(self, manager, globals=()):
+        self._manager = manager
         self._resources = {}
         self.globals = dict(globals)
 

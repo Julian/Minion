@@ -15,7 +15,7 @@ class Application(object):
         if manager is None:
             manager = Manager()
         if bin is None:
-            bin = resource.Bin()
+            bin = resource.Bin(manager=manager)
         if router is None:
             router = SimpleRouter()
 

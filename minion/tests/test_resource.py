@@ -6,7 +6,8 @@ from minion import resource
 
 class TestResourceBin(TestCase):
     def setUp(self):
-        self.bin = resource.Bin()
+        self.request_manager = mock.Mock()
+        self.bin = resource.Bin(manager=self.request_manager)
         self.fn = mock.Mock(__name__="a_view")
         self.request = mock.Mock()
 
@@ -137,7 +138,7 @@ class TestResourceBin(TestCase):
         self.bin.provides("wine")(wine)
 
         gold = mock.Mock()
-        bin = resource.Bin(globals={"gold" : gold})
+        bin = resource.Bin(self.request_manager, globals={"gold" : gold})
 
         self.bin.update(bin)
 

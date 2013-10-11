@@ -46,7 +46,7 @@ class TestApplication(TestCase):
 
     def test_it_can_bind_to_other_bins(self):
         app = core.Application()
-        bin = resource.Bin()
+        bin = resource.Bin(manager=app.manager)
         app.bind_bin(bin)
         self.assertSubdict(
             [
