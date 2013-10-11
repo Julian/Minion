@@ -9,6 +9,42 @@ HTTP_STATUS_CODES = dict(
 )
 
 
+class Manager(object):
+    """
+    The request manager coordinates state during each active request.
+
+    """
+
+    def __init__(self):
+        self._requests = {}
+
+    def after_response(self, request, fn, *args, **kwargs):
+        """
+        Call the given callable after the given request has its response.
+
+        :argument request: the request to piggyback
+        :argument fn: a callable that takes at least two arguments, the request
+            and the response (in that order), along with any additional
+            positional and keyword arguments passed to this function which will
+            be passed along. If the callable returns something other than
+            ``None``, it will be used as the new response.
+
+        """
+
+        self._requests[request]["callbacks"].append((fn, args, kwargs))
+
+    def request_started(self, request):
+        self._requests[request] = {"callbacks": []}
+
+    def request_served(self, request, response):
+        request_data = self._requests.pop(request)
+        for callback, args, kwargs in request_data["callbacks"]:
+            callback_response = callback(response, *args, **kwargs)
+            if callback_response is not None:
+                response = callback_response
+        return response
+
+
 class Request(object):
     def __init__(self, path, method="GET"):
         self.method = method

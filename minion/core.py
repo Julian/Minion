@@ -2,14 +2,18 @@ from collections import defaultdict
 
 from minion import resource
 from minion.compat import items
-from minion.request import Response, WSGIRequest
+from minion.request import Manager, Response, WSGIRequest
 from minion.routers import SimpleRouter
 
 
 class Application(object):
-    def __init__(self, config=None, bin=None, router=None, jinja=None):
+    def __init__(
+        self, config=None, bin=None, manager=None, router=None, jinja=None,
+    ):
         if config is None:
             config = {}
+        if manager is None:
+            manager = Manager()
         if bin is None:
             bin = resource.Bin()
         if router is None:
@@ -19,6 +23,7 @@ class Application(object):
 
         self.bin = bin
         self.config = config
+        self.manager = manager
         self.router = router
 
         self.bind_bin(bin)
@@ -39,29 +44,7 @@ class Application(object):
         else:
             response = Response(code=404)
 
-        callbacks = self._response_callbacks.pop(request, None)
-        if callbacks is not None:
-            for fn, args, kwargs in callbacks:
-                callback_response = fn(request, response, *args, **kwargs)
-                if callback_response is not None:
-                    response = callback_response
-
         return response
-
-    def after_response(self, request, fn, *fnargs, **fnkwargs):
-        """
-        Call the given callable after the given request has its response.
-
-        :argument request: the request to piggyback
-        :argument fn: a callable that takes at least two arguments, the request
-            and the response (in that order), along with any additional
-            positional and keyword arguments passed to this function which will
-            be passed along. If the callable returns something other than
-            ``None``, it will be used as the new response.
-
-        """
-
-        self._response_callbacks[request].append((fn, fnargs, fnkwargs))
 
     def bind_bin(self, bin):
         """
@@ -74,6 +57,7 @@ class Application(object):
         bin.globals.update([
             ("app", self),
             ("config", self.config),
+            ("manager", self.manager),
             ("router", self.router),
         ])
 

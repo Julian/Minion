@@ -38,6 +38,7 @@ class TestApplication(TestCase):
             [
                 ("app", app),
                 ("config", app.config),
+                ("manager", app.manager),
                 ("router", app.router),
             ],
             app.bin.globals,
@@ -51,6 +52,7 @@ class TestApplication(TestCase):
             [
                 ("app", app),
                 ("config", app.config),
+                ("manager", app.manager),
                 ("router", app.router),
             ],
             bin.globals,
@@ -86,42 +88,3 @@ class TestApplicationIntegration(TestCase):
         view, _ = self.router.match.return_value = None, {}
         response = self.application.serve(self.request)
         self.assertEqual(response.code, 404)
-
-    def test_after_response(self):
-        thing = mock.Mock(return_value=None)
-        self.application.after_response(self.request, thing, 1, kw="abc")
-
-        view, _ = self.router.match.return_value = None, {}
-        response = self.application.serve(self.request)
-
-        thing.assert_called_once_with(self.request, response, 1, kw="abc")
-
-    def test_after_response_can_modify_the_response(self):
-        def double_text(request, response):
-            return Response(response.content * 2)
-
-        self.application.after_response(self.request, double_text)
-
-        view = mock.Mock(return_value=Response("Hello"))
-        self.router.match.return_value = view, {}
-
-        response = self.application.serve(self.request)
-
-        self.assertEqual(response.content, "HelloHello")
-
-    def test_after_response_chaining(self):
-        def double_text(request, response):
-            return Response(response.content * 2)
-
-        def world(request, response):
-            return Response(response.content + "World")
-
-        self.application.after_response(self.request, double_text)
-        self.application.after_response(self.request, world)
-
-        view = mock.Mock(return_value=Response("Hello"))
-        self.router.match.return_value = view, {}
-
-        response = self.application.serve(self.request)
-
-        self.assertEqual(response.content, "HelloHelloWorld")
