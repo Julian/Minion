@@ -48,17 +48,17 @@ class Bin(object):
 
         def _needs(fn):
             @wraps(fn)
-            def wrapped(*args, **kwargs):
+            def wrapped(request, *args, **kwargs):
                 for resource in resources:
                     if resource in kwargs:
                         continue
                     elif resource in self.globals:
                         kwargs[resource] = self.globals[resource]
                     elif resource in self._resources:
-                        kwargs[resource] = self._resources[resource]()
+                        kwargs[resource] = self._resources[resource](request)
                     else:
                         raise NoSuchResource(resource)
-                return fn(*args, **kwargs)
+                return fn(request, *args, **kwargs)
             return wrapped
         return _needs
 
