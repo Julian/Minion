@@ -7,6 +7,26 @@ from minion.routers import SimpleRouter
 
 
 class Application(object):
+    """
+    A Minion application.
+
+    :argument :class:`collections.MutableMapping` config: any app configuration
+    :argument :class:`resource.Bin` bin: a resource bin containing resources
+        used by views. If unprovided, an empty one will be created (until it is
+        populated).
+    :argument :class:`request.Manager` manager: a request manager, which
+        managers state during each request. If unprovided, one will be created
+        and used.
+    :argument router: an object satisfying the router interface (see
+        :mod:`minion.routers`) to use for route addition and generation for
+        this application. If unprovided, a router with simple dictionary lookup
+        will be used.
+    :argument :class:`jinja2.Environment` jinja: a pre-configured jinja2
+        environment, if using jinja2 is desired. (One can be added later, or
+        multiple environments used, by calling :meth:`bind_jinja_environment`.)
+
+    """
+
     def __init__(
         self, config=None, bin=None, manager=None, router=None, jinja=None,
     ):
