@@ -1,15 +1,20 @@
 from unittest import TestCase
 import mock
 
+from minion.request import Manager
 from minion import resource
 
 
 class TestResourceBin(TestCase):
     def setUp(self):
-        self.request_manager = mock.Mock()
-        self.bin = resource.Bin(manager=self.request_manager)
-        self.fn = mock.Mock(__name__="a_view")
         self.request = mock.Mock()
+        self.fn = mock.Mock(__name__="a_view")
+
+        self.request_manager = Manager()
+        self.request_manager.request_started(self.request)
+        self.addCleanup(self.request_manager.requests.clear)
+
+        self.bin = resource.Bin(manager=self.request_manager)
 
     def test_it_contains_resources(self):
         self.assertNotIn("cheese", self.bin)
@@ -35,12 +40,24 @@ class TestResourceBin(TestCase):
         self.assertIs(returned, self.fn.return_value)
         self.fn.assert_called_once_with(self.request, 1, bar=3, iron=12)
 
-    def test_it_provides_a_new_resource_instance_each_time(self):
+    def test_it_provides_the_same_resource_instance_for_the_same_request(self):
         fn = self.bin.needs(["sugar"])(self.fn)
         sugar = mock.Mock()
         self.bin.provides("sugar")(sugar)
         fn(self.request)
         fn(self.request)
+        self.assertEqual(sugar.call_count, 1)
+
+    def test_it_provides_a_new_resource_instance_for_new_requests(self):
+        fn = self.bin.needs(["sugar"])(self.fn)
+        sugar = mock.Mock()
+        self.bin.provides("sugar")(sugar)
+        fn(self.request)
+
+        new_request = mock.Mock()
+        self.request_manager.request_started(new_request)
+        fn(new_request)
+
         self.assertEqual(sugar.call_count, 2)
 
     def test_multiple_needs(self):
