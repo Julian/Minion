@@ -15,6 +15,7 @@ class Bin(object):
     def __init__(self, manager, globals=()):
         self._manager = manager
         self._resources = {}
+        self._needs_request = set()
         self.globals = dict(globals)
 
     def __contains__(self, resource):
@@ -24,11 +25,13 @@ class Bin(object):
     def resources(self):
         return viewkeys(self._resources) | viewkeys(self.globals)
 
-    def provides(self, resource):
+    def provides(self, resource, needs_request=False):
         """
         Declare that the decorated callable provides the given resource.
 
         :argument str resource: the name of the new resource
+        :argument bool needs_request: whether to pass the request in to the
+            given callable when calling it
 
         """
 
@@ -36,6 +39,10 @@ class Bin(object):
             if resource in self:
                 raise DuplicateResource(resource)
             self._resources[resource] = fn
+
+            if needs_request:
+                self._needs_request.add(resource)
+
             return fn
         return _provides
 
@@ -50,23 +57,27 @@ class Bin(object):
         def _needs(fn):
             @wraps(fn)
             def wrapped(request, *args, **kwargs):
-                for resource_name in resources:
-                    if resource_name in kwargs:
+                for name in resources:
+                    if name in kwargs:
                         continue
-                    elif resource_name in self.globals:
-                        kwargs[resource_name] = self.globals[resource_name]
-                    elif resource_name in self._resources:
+                    elif name in self.globals:
+                        kwargs[name] = self.globals[name]
+                    elif name in self._resources:
                         state = self._manager.requests[request]["resources"]
 
-                        if resource_name in state:
-                            resource = state[resource_name]
+                        if name in state:
+                            resource = state[name]
                         else:
-                            provider = self._resources[resource_name]
-                            resource = state[resource_name] = provider(request)
+                            provider = self._resources[name]
 
-                        kwargs[resource_name] = resource
+                            if name in self._needs_request:
+                                resource = state[name] = provider(request)
+                            else:
+                                resource = state[name] = provider()
+
+                        kwargs[name] = resource
                     else:
-                        raise NoSuchResource(resource_name)
+                        raise NoSuchResource(name)
                 return fn(request, *args, **kwargs)
             return wrapped
         return _needs
@@ -77,6 +88,7 @@ class Bin(object):
 
         """
 
+        self._needs_request.discard(resource)
         self._resources.pop(resource, None)
         self.globals.pop(resource, None)
 
@@ -86,5 +98,6 @@ class Bin(object):
 
         """
 
+        self._needs_request.update(bin._needs_request)
         self._resources.update(bin._resources)
         self.globals.update(bin.globals)

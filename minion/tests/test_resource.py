@@ -32,7 +32,7 @@ class TestResourceBin(TestCase):
 
     def test_it_provides_resources_to_things_that_need_them(self):
         @self.bin.provides("iron")
-        def make_iron(request):
+        def make_iron():
             return 12
 
         returned = self.bin.needs(["iron"])(self.fn)(self.request, 1, bar=3)
@@ -62,12 +62,12 @@ class TestResourceBin(TestCase):
 
     def test_multiple_needs(self):
         @self.bin.provides("iron")
-        def make_iron(request):
+        def make_iron():
             return 12
 
         thing = mock.Mock()
         @self.bin.provides("wine")
-        def make_wine(request):
+        def make_wine():
             return thing
 
         self.bin.needs(["wine", "iron"])(self.fn)(self.request)
@@ -81,7 +81,7 @@ class TestResourceBin(TestCase):
         """
 
         @self.bin.provides("iron")
-        def make_iron(request):
+        def make_iron():
             return 12
 
         self.bin.globals["cheese"] = 18
@@ -148,6 +148,12 @@ class TestResourceBin(TestCase):
         with self.assertRaises(resource.DuplicateResource):
             self.bin.provides("iron")(mock.Mock())
 
+    def test_providers_can_ask_for_the_request_when_called(self):
+        provider = mock.Mock()
+        self.bin.provides("iron", needs_request=True)(provider)
+        self.bin.needs(["iron"])(self.fn)(self.request)
+        provider.assert_called_once_with(self.request)
+
     def test_update(self):
         iron, wine = mock.Mock(), mock.Mock()
 
@@ -160,3 +166,13 @@ class TestResourceBin(TestCase):
         self.bin.update(bin)
 
         self.assertEqual(self.bin.resources, {"iron", "wine", "gold"})
+
+    def test_updating_bins_preserves_which_providers_need_the_request(self):
+        bin = resource.Bin(self.request_manager)
+        iron = mock.Mock()
+        bin.provides("iron", needs_request=True)(iron)
+
+        self.bin.update(bin)
+
+        self.bin.needs(["iron"])(self.fn)(self.request)
+        iron.assert_called_once_with(self.request)
