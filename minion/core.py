@@ -61,7 +61,7 @@ class Application(object):
         view, kwargs = self.router.match(request)
 
         if view is not None:
-            response = view(request, **kwargs)
+            response = view(request=request, **kwargs)
         else:
             response = Response(code=404)
 

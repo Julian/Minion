@@ -74,6 +74,38 @@ class TestResourceBin(TestCase):
 
         self.fn.assert_called_once_with(self.request, iron=12, wine=thing)
 
+    def test_globals_do_not_need_a_request(self):
+        """
+        If a thing declares that it needs resources that are all global, we can
+        support calling it both with *and* without a request.
+
+        """
+
+        self.bin.globals["iron"] = 12
+        self.bin.needs(["iron"])(self.fn)()
+        self.fn.assert_called_once_with(iron=12)
+        self.bin.needs(["iron"])(self.fn)(self.request)
+        self.fn.assert_called_with(self.request, iron=12)
+
+    def test_useful_exception_for_missing_request(self):
+        """
+        A non-global that needs a request produces a useful exception if one
+        isn't provided.
+
+        """
+
+        @self.bin.provides("iron")
+        def make_iron():
+            return 12
+
+        with self.assertRaises(TypeError) as e:
+            self.bin.needs(["iron"])(self.fn)()
+
+        self.assertEqual(
+            str(e.exception),
+            "The 'iron' resource needs a request!",
+        )
+
     def test_it_provides_only_unprovided_resources(self):
         """
         It should still be possible to pass in arguments if desired.
@@ -88,11 +120,11 @@ class TestResourceBin(TestCase):
         self.bin.globals["wine"] = 13
 
         self.bin.needs(["wine", "iron", "cheese"])(self.fn)(
-            self.request, iron=24, wine=1,
+            request=self.request, iron=24, wine=1,
         )
 
         self.fn.assert_called_once_with(
-            self.request, cheese=18, iron=24, wine=1,
+            request=self.request, cheese=18, iron=24, wine=1,
         )
 
     def test_it_provides_globals(self):
@@ -123,8 +155,10 @@ class TestResourceBin(TestCase):
         fn = self.bin.needs(["cake"])(self.fn)
         cake = mock.Mock()
         self.bin.provides("cake")(cake)
-        fn(self.request)
-        self.fn.assert_called_once_with(self.request, cake=cake.return_value)
+        fn(request=self.request)
+        self.fn.assert_called_once_with(
+            request=self.request, cake=cake.return_value
+        )
 
     def test_remove(self):
         self.bin.provides("gold")(mock.Mock())

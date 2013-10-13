@@ -93,7 +93,7 @@ class TestApplicationIntegration(TestCase):
     def test_it_serves_matched_requests(self):
         view, _ = self.router.match.return_value = mock.Mock(), {"foo" : 12}
         self.app.serve(self.request)
-        view.assert_called_once_with(self.request, foo=12)
+        view.assert_called_once_with(request=self.request, foo=12)
 
     def test_it_serves_404s_for_unmatched_requests_by_default(self):
         view, _ = self.router.match.return_value = None, {}

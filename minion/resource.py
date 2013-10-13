@@ -56,13 +56,25 @@ class Bin(object):
 
         def _needs(fn):
             @wraps(fn)
-            def wrapped(request, *args, **kwargs):
+            def wrapped(*args, **kwargs):
+                if args:
+                    request = args[0]
+                else:
+                    request = kwargs.get("request")
+
                 for name in resources:
                     if name in kwargs:
                         continue
                     elif name in self.globals:
                         kwargs[name] = self.globals[name]
                     elif name in self._resources:
+                        if request is None:
+                            raise TypeError(
+                                "The {0!r} resource needs a request!".format(
+                                    name,
+                                )
+                            )
+
                         state = self._manager.requests[request]["resources"]
 
                         if name in state:
@@ -78,7 +90,7 @@ class Bin(object):
                         kwargs[name] = resource
                     else:
                         raise NoSuchResource(name)
-                return fn(request, *args, **kwargs)
+                return fn(*args, **kwargs)
             return wrapped
         return _needs
 
