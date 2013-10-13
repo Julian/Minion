@@ -57,6 +57,7 @@ class Application(object):
         return _add_route
 
     def serve(self, request):
+        self.manager.request_started(request)
         view, kwargs = self.router.match(request)
 
         if view is not None:
@@ -64,6 +65,7 @@ class Application(object):
         else:
             response = Response(code=404)
 
+        self.manager.request_served(request, response)
         return response
 
     def bind_bin(self, bin):

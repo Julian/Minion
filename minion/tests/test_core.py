@@ -8,7 +8,7 @@ except ImportError:
 
 from minion import core, resource
 from minion.compat import iteritems
-from minion.request import Request, Response
+from minion.request import Manager, Request, Response
 from minion.routers import SimpleRouter
 
 
@@ -75,16 +75,27 @@ class TestApplication(TestCase):
 
 class TestApplicationIntegration(TestCase):
     def setUp(self):
+        self.manager = mock.Mock(spec=Manager())
         self.router = mock.Mock(spec=SimpleRouter())
-        self.application = core.Application(router=self.router)
+        self.app = core.Application(manager=self.manager, router=self.router)
         self.request = mock.Mock(spec=Request(path="/"))
+
+    def test_it_starts_and_stops_the_request(self):
+        view, _ = self.router.match.return_value = mock.Mock(), {}
+        self.app.serve(self.request)
+        self.assertEqual(
+            self.manager.mock_calls, [
+                mock.call.request_started(self.request),
+                mock.call.request_served(self.request, view.return_value),
+            ],
+        )
 
     def test_it_serves_matched_requests(self):
         view, _ = self.router.match.return_value = mock.Mock(), {"foo" : 12}
-        self.application.serve(self.request)
+        self.app.serve(self.request)
         view.assert_called_once_with(self.request, foo=12)
 
     def test_it_serves_404s_for_unmatched_requests_by_default(self):
         view, _ = self.router.match.return_value = None, {}
-        response = self.application.serve(self.request)
+        response = self.app.serve(self.request)
         self.assertEqual(response.code, 404)
