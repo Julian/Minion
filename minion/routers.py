@@ -15,6 +15,11 @@ except ImportError:
     pass
 else:
     class RoutesRouter(object):
+        """
+        A router that routes with `routes <http://routes.readthedocs.org/>`_.
+
+        """
+
         def __init__(self, mapper=None):
             if mapper is None:
                 mapper = routes.Mapper()
@@ -48,6 +53,11 @@ except ImportError:
     pass
 else:
     class WerkzeugRouter(object):
+        """
+        A router that uses Werkzeug's routing.
+
+        """
+
         def __init__(self, map=None):
             if map is None:
                 map = werkzeug.routing.Map()
@@ -78,6 +88,11 @@ else:
 
 
 class SimpleRouter(object):
+    """
+    Simple dictionary based lookup-routing without parameters.
+
+    """
+
     def __init__(self, routes=None, names=None):
         if routes is None:
             routes = {}
