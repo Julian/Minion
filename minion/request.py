@@ -47,11 +47,15 @@ class Manager(object):
 
 class Request(object):
     def __init__(self, path, method="GET"):
+        self.messages = []
         self.method = method
         self.path = path
 
     def __repr__(self):
         return "<{self.__class__.__name__} {self.path!r}>".format(self=self)
+
+    def flash(self, message):
+        self.messages.append(_Message(content=message))
 
 
 class WSGIRequest(object):
@@ -96,3 +100,26 @@ class Response(object):
     @property
     def status(self):
         return HTTP_STATUS_CODES[self.code]
+
+
+class _Message(object):
+    """
+    A flashed message.
+
+    """
+
+    def __init__(self, content):
+        self.content = content
+
+    def __repr__(self):
+        return "<{self.__class__.__name__} content={self.content!r}>".format(
+            self=self,
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.content == other.content
+
+    def __ne__(self, other):
+        return not self == other

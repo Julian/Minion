@@ -49,3 +49,16 @@ class TestManager(TestCase):
 
         self.assertEqual(response, self.response)
         self.assertEqual(response.thing, 4)
+
+
+class TestRequest(TestCase):
+    def setUp(self):
+        self.path = "/"
+        self.request = request.Request(path=self.path)
+
+    def test_flash(self):
+        self.assertEqual(self.request.messages, [])
+        self.request.flash("Hello World")
+        self.assertEqual(
+            self.request.messages, [request._Message("Hello World")],
+        )
