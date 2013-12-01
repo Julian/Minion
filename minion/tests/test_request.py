@@ -4,6 +4,21 @@ import mock
 from minion import request
 
 
+class TestResponder(TestCase):
+    def setUp(self):
+        self.request = mock.Mock()
+        self.responder = request.Responder(request=self.request)
+
+    def test_it_runs_deferreds_registered_with_after(self):
+        m = mock.Mock()
+        self.responder.after().addCallback(m)
+        self.assertFalse(m.called)
+
+        self.responder.finish()
+
+        m.assert_called_once_with(self.responder)
+
+
 class TestManager(TestCase):
     def setUp(self):
         self.manager = request.Manager()

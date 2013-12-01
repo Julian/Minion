@@ -1,3 +1,4 @@
+from twisted.internet.defer import Deferred
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
 from minion.compat import iteritems
@@ -7,6 +8,34 @@ HTTP_STATUS_CODES = dict(
     (code, "{0} {1}".format(code, phrase))
     for code, phrase in iteritems(HTTP_STATUS_PHRASES)
 )
+
+
+class Responder(object):
+    """
+    A responder represents a pending HTTP response for a corresponding request.
+
+    """
+
+    def __init__(self, request):
+        self._after_deferreds = []
+        self.request = request
+
+    def after(self):
+        """
+        Return a deferred that will fire after the request is finished.
+
+        :returns: a new :class:`twisted.internet.defer.Deferred` for each call
+            to this function.
+
+        """
+
+        d = Deferred()
+        self._after_deferreds.append(d)
+        return d
+
+    def finish(self):
+        for d in self._after_deferreds:
+            d.callback(self)
 
 
 class Manager(object):
