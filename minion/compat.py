@@ -6,12 +6,14 @@ PY3 = sys.version_info[0] >= 3
 
 
 if PY3:
+    from io import StringIO
     from collections.abc import MutableMapping
     from urllib.parse import urlencode
     iteritems = viewitems = methodcaller("items")
     items = lambda d : list(d.items())
     viewkeys = methodcaller("keys")
 else:
+    from StringIO import StringIO
     from collections import MutableMapping
     from urllib import urlencode
     iteritems = methodcaller("iteritems")

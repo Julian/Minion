@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from characteristic import Attribute, attributes
 from twisted.internet.defer import Deferred
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
