@@ -90,19 +90,6 @@ class Request(object):
         self.messages.append(_Message(content=message))
 
 
-class WSGIRequest(object):
-    def __init__(self, environ):
-        self.environ = environ
-
-    @property
-    def method(self):
-        return self.environ["REQUEST_METHOD"]
-
-    @property
-    def path(self):
-        return self.environ["PATH_INFO"]
-
-
 @attributes(
     [
         Attribute(name="content", exclude_from_init=True),

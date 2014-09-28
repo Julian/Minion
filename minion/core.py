@@ -1,8 +1,7 @@
 from collections import defaultdict
 
 from minion import resource
-from minion.compat import items
-from minion.request import Manager, Response, WSGIRequest
+from minion.request import Manager, Response
 from minion.routers import SimpleRouter
 
 
@@ -99,23 +98,3 @@ class Application(object):
             ("config", self.config),
             ("router", self.router),
         ])
-
-
-def wsgi_app(application, request_class=WSGIRequest):
-    """
-    Create a WSGI application out of the given Minion app.
-
-    :argument Application application: a minion app
-    :argument request_class: a class to use for constructing incoming requests
-        out of the WSGI environment. It will be passed a single arg, the
-        environ. By default, this is :class:`minion.request.WSGIRequest` if
-        unprovided.
-
-    """
-
-    def wsgi(environ, start_response):
-        request = request_class(environ)
-        response = application.serve(request)
-        start_response(response.status, items(response.headers))
-        return [response.content]
-    return wsgi
