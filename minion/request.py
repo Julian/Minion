@@ -101,18 +101,12 @@ class WSGIRequest(object):
 
 
 class Response(object):
-
-    default_code = 200
-
-    def __init__(self, content="", code=None, headers=None):
-        self.content = content
-
-        if code is None:
-            code = self.default_code
-        self.code = code
-
+    def __init__(self, content="", code=200, headers=None):
         if headers is None:
             headers = {}
+
+        self.code = code
+        self.content = content
         self.headers = headers
 
     def __eq__(self, other):
