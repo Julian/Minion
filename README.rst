@@ -58,3 +58,21 @@ that what you will.
 
 After ``v1.0.0``, public API (to be defined later) will not be broken in
 backwards incompatible ways without a major version bump.
+
+
+Contributing
+------------
+
+I'm Julian Berman.
+
+``minion`` is on `GitHub <https://github.com/Julian/Minion>`_.
+
+Get in touch, via GitHub or otherwise, if you've got something to contribute,
+it'd be most welcome!
+
+You can also generally find me on Freenode (nick: ``tos9``) in various
+channels, including ``#python``.
+
+If you feel overwhelmingly grateful, you can woo me with beer money on
+`Gittip <https://www.gittip.com/Julian/>`_ or via Google Wallet with the email
+in my GitHub profile.
