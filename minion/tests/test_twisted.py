@@ -15,14 +15,31 @@ class TestMinionResource(SynchronousTestCase):
         self.minion = Application()
         self.resource = MinionResource(self.minion)
 
+    def assertRedirected(self, request, response, url, content=None):
+        result = self.successResultOf(response)
+
+        self.assertEqual(request.code, 302)
+        self.assertEqual(
+            request.responseHeaders.getRawHeaders("Location"), [url],
+        )
+
+        if content is not None:
+            self.assertEqual(result, content)
+
     def test_render(self):
         @self.minion.route("/foo/bar")
         def foo_bar(request):
-            return Response(content=request.path)
+            return Response(
+                code=302,
+                content=request.path,
+                headers={"Location" : "http://example.com"},
+            )
 
         request = FakeRequest(uri="/foo/bar")
         response = render(resource=self.resource, request=request)
-        self.assertEqual(self.successResultOf(response), "/foo/bar")
+        self.assertRedirected(
+            request, response, "http://example.com", content="/foo/bar",
+        )
 
     def test_interface(self):
         verifyObject(IResource, self.resource)

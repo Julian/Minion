@@ -32,4 +32,10 @@ class MinionResource(object):
             path=twisted_request.uri,
         )
         response = self.application.serve(request)
+
+        twisted_request.setResponseCode(response.code)
+
+        for k, v in response.headers.iteritems():  # XXX
+            twisted_request.responseHeaders.setRawHeaders(k, [v])
+
         return response.content
