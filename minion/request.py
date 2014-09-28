@@ -76,15 +76,16 @@ class Manager(object):
         return response
 
 
+@attributes(
+    [
+        Attribute(name="path"),
+        Attribute(name="method", default_value="GET"),
+        Attribute(
+            name="messages", default_factory=list, exclude_from_cmp=True,
+        ),
+    ],
+)
 class Request(object):
-    def __init__(self, path, method="GET"):
-        self.messages = []
-        self.method = method
-        self.path = path
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} {self.path!r}>".format(self=self)
-
     def flash(self, message):
         self.messages.append(_Message(content=message))
 
