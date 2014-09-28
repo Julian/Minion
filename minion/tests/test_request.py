@@ -71,9 +71,15 @@ class TestRequest(TestCase):
         self.path = "/"
         self.request = request.Request(path=self.path)
 
+    def test_init(self):
+        self.assertEqual(request.Response(b"Hello").content, b"Hello")
+
+    def test_init_kwargs(self):
+        self.assertEqual(request.Response(content=b"Hello").content, b"Hello")
+
     def test_flash(self):
         self.assertEqual(self.request.messages, [])
         self.request.flash("Hello World")
         self.assertEqual(
-            self.request.messages, [request._Message("Hello World")],
+            self.request.messages, [request._Message(content="Hello World")],
         )

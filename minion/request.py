@@ -1,3 +1,4 @@
+from characteristic import Attribute, attributes
 from twisted.internet.defer import Deferred
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
@@ -100,49 +101,25 @@ class WSGIRequest(object):
         return self.environ["PATH_INFO"]
 
 
+@attributes(
+    [
+        Attribute(name="content", exclude_from_init=True),
+        Attribute(name="code", default_value=200),
+        Attribute(name="headers", default_factory=dict),
+    ],
+)
 class Response(object):
-    def __init__(self, content="", code=200, headers=None):
-        if headers is None:
-            headers = {}
-
-        self.code = code
+    def __init__(self, content=""):
         self.content = content
-        self.headers = headers
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.content == other.content
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} {self.content!r}>".format(self=self)
 
     @property
     def status(self):
         return HTTP_STATUS_CODES[self.code]
 
 
+@attributes(["content"])
 class _Message(object):
     """
     A flashed message.
 
     """
-
-    def __init__(self, content):
-        self.content = content
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} content={self.content!r}>".format(
-            self=self,
-        )
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.content == other.content
-
-    def __ne__(self, other):
-        return not self == other
