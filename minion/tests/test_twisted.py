@@ -1,10 +1,11 @@
 from minion import Application, Response
 from minion.compat import StringIO
+from minion.http import Headers
 from minion.twisted import MinionResource
 
 from twisted.internet.defer import succeed
 from twisted.trial.unittest import SynchronousTestCase
-from twisted.web import server
+from twisted.web import http_headers, server
 from twisted.web.resource import IResource
 from twisted.web.test.test_web import DummyChannel
 from zope.interface.verify import verifyObject
@@ -29,13 +30,15 @@ class TestMinionResource(SynchronousTestCase):
     def test_render(self):
         @self.minion.route("/foo/bar")
         def foo_bar(request):
+            self.assertEqual(request.headers.get(b"X-Foo"), [b"Hello"])
             return Response(
                 code=302,
                 content=request.path,
-                headers={"Location" : "http://example.com"},
+                headers=Headers([(b"Location", [b"http://example.com"])]),
             )
 
         request = FakeRequest(uri="/foo/bar")
+        request.requestHeaders.setRawHeaders(b"X-Foo", [b"Hello"])
         response = render(resource=self.resource, request=request)
         self.assertRedirected(
             request, response, "http://example.com", content="/foo/bar",

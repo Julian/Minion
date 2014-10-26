@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from twisted.web.resource import IResource
 from zope.interface import implementer
 
+from minion.http import Headers
 from minion.request import Request
 
 
@@ -28,6 +29,7 @@ class MinionResource(object):
 
     def render(self, twisted_request):
         request = Request(
+            headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
             method=twisted_request.method,
             path=twisted_request.uri,
         )
@@ -35,7 +37,7 @@ class MinionResource(object):
 
         twisted_request.setResponseCode(response.code)
 
-        for k, v in response.headers.iteritems():  # XXX
-            twisted_request.responseHeaders.setRawHeaders(k, [v])
+        for k, v in response.headers.canonicalized():
+            twisted_request.responseHeaders.setRawHeaders(k, v)
 
         return response.content

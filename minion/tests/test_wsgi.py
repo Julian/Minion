@@ -3,6 +3,7 @@ from unittest import TestCase
 from webtest import TestApp
 
 from minion import Application, Response
+from minion.http import Headers
 from minion.wsgi import wsgi_app
 
 
@@ -25,7 +26,7 @@ class TestWSGIMinion(TestCase):
         def show(request):
             return Response(
                 b"{}",
-                headers={"Content-Type" : "application/json"}
+                headers=Headers([("Content-Type", ["application/json"])]),
             )
 
         wsgi = TestApp(wsgi_app(minion))

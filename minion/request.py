@@ -4,6 +4,7 @@ from twisted.internet.defer import Deferred
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
 from minion.compat import iteritems
+from minion.http import Headers, MutableHeaders
 
 
 HTTP_STATUS_CODES = dict(
@@ -78,6 +79,7 @@ class Manager(object):
 
 @attributes(
     [
+        Attribute(name="headers", default_factory=Headers),
         Attribute(name="path"),
         Attribute(name="method", default_value="GET"),
         Attribute(
@@ -94,7 +96,7 @@ class Request(object):
     [
         Attribute(name="content", exclude_from_init=True),
         Attribute(name="code", default_value=200),
-        Attribute(name="headers", default_factory=dict),
+        Attribute(name="headers", default_factory=MutableHeaders),
     ],
 )
 class Response(object):
