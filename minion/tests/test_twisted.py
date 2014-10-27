@@ -37,7 +37,7 @@ class TestMinionResource(SynchronousTestCase):
                 headers=Headers([(b"Location", [b"http://example.com"])]),
             )
 
-        request = FakeRequest(uri="/foo/bar")
+        request = FakeRequest(uri="/bla/foo/bar", postpath=["foo", "bar"])
         request.requestHeaders.setRawHeaders(b"X-Foo", [b"Hello"])
         response = render(resource=self.resource, request=request)
         self.assertRedirected(
@@ -67,12 +67,13 @@ def render(resource, request):
 
 
 class FakeRequest(server.Request):
-    def __init__(self, uri, method="GET"):
+    def __init__(self, uri, postpath, method="GET"):
         server.Request.__init__(self, DummyChannel(), False)
         self.written = StringIO()
         self.content = StringIO()
         self.method = method
         self.uri = uri
+        self.postpath = postpath
 
     def write(self, data):
         self.written.write(data)

@@ -31,7 +31,7 @@ class MinionResource(object):
         request = Request(
             headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
             method=twisted_request.method,
-            path=twisted_request.uri,
+            path=b"/" + b"/".join(twisted_request.postpath),
         )
         response = self.application.serve(request)
 
