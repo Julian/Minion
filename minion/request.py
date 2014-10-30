@@ -114,3 +114,12 @@ class _Message(object):
     A flashed message.
 
     """
+
+
+def redirect(to, code=302):
+    """
+    Return a redirect response to the given URL.
+
+    """
+
+    return Response(headers=MutableHeaders([("Location", [to])]), code=code)

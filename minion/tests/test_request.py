@@ -2,6 +2,7 @@ from unittest import TestCase
 import mock
 
 from minion import request
+from minion.tests.utils import ResponseHelpersMixin
 
 
 class TestResponder(TestCase):
@@ -83,3 +84,13 @@ class TestRequest(TestCase):
         self.assertEqual(
             self.request.messages, [request._Message(content="Hello World")],
         )
+
+
+class TestRedirect(ResponseHelpersMixin, TestCase):
+    def test_it_returns_redirect_responses(self):
+        response = request.redirect(to="http://example.com")
+        self.assertRedirected(response, "http://example.com")
+
+    def test_it_allows_specifying_a_status_code(self):
+        response = request.redirect(to="http://example.com", code=304)
+        self.assertRedirected(response, "http://example.com", code=304)
