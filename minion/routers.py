@@ -7,6 +7,7 @@ This module defines (different) implementations of routers -- objects which map
 """
 
 from minion.compat import urlencode
+from minion.request import redirect
 
 
 try:
@@ -74,10 +75,17 @@ else:
             self._map.add(rule)
 
         def match(self, request):
-            method = request.method
-            if not self._adapter.test(request.path, method=method):
+            try:
+                return self._adapter.match(
+                    path_info=request.path, method=request.method,
+                )
+            except werkzeug.routing.RequestRedirect as redirect_exception:
+                return lambda request : redirect(
+                    to=redirect_exception.new_url,
+                    code=redirect_exception.code,
+                ), {}
+            except werkzeug.routing.HTTPException:
                 return None, {}
-            return self._adapter.match(path_info=request.path, method=method)
 
         def url_for(self, route_name, **kwargs):
             try:

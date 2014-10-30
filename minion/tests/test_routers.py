@@ -1,7 +1,7 @@
 from unittest import TestCase, skipIf
 
 from minion import Response, routers
-from minion.request import Request
+from minion.request import Request, redirect
 
 
 def view(request):
@@ -79,6 +79,14 @@ class TestWerkzeugRouter(RouterTestMixin, TestCase):
         self.router.add_route("/<int:year>", view, route_name="year")
         url = self.router.url_for("year", year=2012)
         self.assertEqual(url, "/2012")
+
+    def test_it_handles_routing_redirects(self):
+        self.router.add_route("/<int:year>/", view)
+        request = Request(path="/2013")
+        matched, _ = self.router.match(request)
+        self.assertEqual(
+            matched(request), redirect("http:///2013/", code=301),
+        )
 
 
 class TestSimpleRouter(RouterTestMixin, TestCase):
