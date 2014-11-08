@@ -8,6 +8,7 @@ This module defines (different) implementations of routers -- objects which map
 
 from minion.compat import urlencode
 from minion.request import redirect
+from minion.traversal import traverse
 
 
 try:
@@ -93,6 +94,31 @@ else:
             except werkzeug.routing.BuildError as error:
                 return route_name
 
+
+class TraversalRouter(object):
+    """
+    Object-traversal based router for traversal of resource objects.
+
+    """
+
+    def __init__(self, root, static_router=None):
+        if static_router is None:
+            static_router = SimpleRouter()
+        self.root = root
+        self.static_router = static_router
+
+    def add_route(self, route, fn, **kwargs):
+        self.static_router.add_route(route=route, fn=fn, **kwargs)
+
+    def match(self, request):
+        static_match, static_kwargs = self.static_router.match(request=request)
+        if static_match is not None:
+            return static_match, static_kwargs
+        resource = traverse(request=request, resource=self.root)
+        return resource.render, {}
+
+    def url_for(self, route_name, **kwargs):
+        return self.static_router.url_for(route_name=route_name, **kwargs)
 
 
 class SimpleRouter(object):

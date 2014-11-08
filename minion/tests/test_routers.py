@@ -2,6 +2,7 @@ from unittest import TestCase, skipIf
 
 from minion import Response, routers
 from minion.request import Request, redirect
+from minion.traversal import LeafResource
 
 
 def view(request):
@@ -47,6 +48,25 @@ class RouterTestMixin(object):
         self.router.add_route("/", view, route_name="home")
         url = self.router.url_for("home", thing="yes")
         self.assertEqual(url, "/?thing=yes")
+
+
+class TestTraversalRouter(TestCase):
+    def test_it_traverses_children(self):
+        class Resource(object):
+            def get_child(self, name, request):
+                return LeafResource(
+                    render=lambda request : Response(b"Hello " + name),
+                )
+
+        router = routers.TraversalRouter(root=Resource())
+        request = Request(path="/world")
+        matched, kwargs = router.match(request)
+        self.assertEqual(matched(request), Response(content=b"Hello world"))
+
+
+class TestTraversalRouterStatic(RouterTestMixin, TestCase):
+    def setUp(self):
+        self.router = routers.TraversalRouter(root=LeafResource(render=None))
 
 
 @skipIf(not hasattr(routers, "RoutesRouter"), "routes not found")
