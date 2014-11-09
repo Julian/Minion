@@ -1,6 +1,3 @@
-from minion.compat import items
-
-
 class WSGIRequest(object):
     def __init__(self, environ):
         self.environ = environ

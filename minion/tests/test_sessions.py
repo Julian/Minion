@@ -1,5 +1,4 @@
 from unittest import TestCase
-import mock
 
 from minion import sessions
 

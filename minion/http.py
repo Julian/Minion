@@ -3,8 +3,6 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 """
 
-from characteristic import Attribute, attributes
-
 from minion.compat import iteritems
 
 
@@ -49,7 +47,7 @@ class Headers(object):
         calculated = getattr(self, "_hash", None)
         if calculated is None:
             calculated = 0
-            for name, values in self._contents.iteritems():
+            for name, values in iteritems(self._contents):
                 calculated ^= hash((name, tuple(values)))
             self._hash = calculated
         return calculated
@@ -62,7 +60,7 @@ class Headers(object):
         return "<{0.__class__.__name__} {1}>".format(self, contents)
 
     def canonicalized(self):
-        for name, values in self._contents.iteritems():
+        for name, values in iteritems(self._contents):
             canonical_name = _CANONICAL_NAMES.get(name)
             if canonical_name is None:
                 canonical_name = b"-".join(

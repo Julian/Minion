@@ -8,7 +8,7 @@ except ImportError:
 
 from minion import core, resource
 from minion.compat import iteritems
-from minion.request import Manager, Request, Response
+from minion.request import Manager, Request
 from minion.routers import SimpleRouter
 
 

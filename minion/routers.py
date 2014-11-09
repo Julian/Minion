@@ -91,7 +91,7 @@ else:
         def url_for(self, route_name, **kwargs):
             try:
                 return self._adapter.build(route_name, kwargs)
-            except werkzeug.routing.BuildError as error:
+            except werkzeug.routing.BuildError:
                 return route_name
 
 

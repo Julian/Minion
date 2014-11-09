@@ -5,7 +5,7 @@ from minion.twisted import MinionResource
 
 from twisted.internet.defer import succeed
 from twisted.trial.unittest import SynchronousTestCase
-from twisted.web import http_headers, server
+from twisted.web import server
 from twisted.web.resource import IResource
 from twisted.web.test.test_web import DummyChannel
 from zope.interface.verify import verifyObject
