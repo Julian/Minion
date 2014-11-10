@@ -3,6 +3,23 @@ Helpers for applications that use object traversal routing.
 
 """
 
+class TreeResource(object):
+    """
+    A tree resource that supports adding children via :meth:`put_child`\ .
+
+    """
+
+    def __init__(self, render):
+        self.children = {}
+        self.render = render
+
+    def get_child(self, name):
+        return self.children[name]
+
+    def set_child(self, name, child):
+        self.children[name] = child
+
+
 class LeafResource(object):
     """
     A leaf resource that simply renders via a provided view.

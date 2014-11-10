@@ -4,6 +4,30 @@ from minion import traversal
 from minion.request import Request, Response
 
 
+def path_view(request):
+    """
+    A renderer (view) that returns a response with the request path.
+
+    Optionally adds a prefix to the front.
+
+    """
+
+    return Response(content=request.path)
+
+
+class TestTreeResource(TestCase):
+    def test_it_renders_what_its_told(self):
+        resource = traversal.TreeResource(render=path_view)
+        request = Request(path=b"/bar")
+        self.assertEqual(resource.render(request), Response(content=b"/bar"))
+
+    def test_it_supports_adding_children(self):
+        resource = traversal.TreeResource(render=path_view)
+        child = traversal.LeafResource(render=path_view)
+        resource.set_child("foo", child)
+        self.assertEqual(resource.get_child("foo"), child)
+
+
 class TestLeafResource(TestCase):
     def test_it_renders_what_its_told(self):
         resource = traversal.LeafResource(
