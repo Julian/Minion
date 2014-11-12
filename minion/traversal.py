@@ -13,7 +13,7 @@ class TreeResource(object):
         self.children = {}
         self.render = render
 
-    def get_child(self, name):
+    def get_child(self, name, request):
         return self.children[name]
 
     def set_child(self, name, child):

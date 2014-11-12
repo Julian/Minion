@@ -25,7 +25,8 @@ class TestTreeResource(TestCase):
         resource = traversal.TreeResource(render=path_view)
         child = traversal.LeafResource(render=path_view)
         resource.set_child("foo", child)
-        self.assertEqual(resource.get_child("foo"), child)
+        request = Request(path=b"/bar")
+        self.assertEqual(resource.get_child("foo", request=request), child)
 
 
 class TestLeafResource(TestCase):
