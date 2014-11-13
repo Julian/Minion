@@ -61,38 +61,46 @@ class Bin(object):
                     request = args[0]
                 else:
                     request = kwargs.get("request")
-
-                for name in resources:
-                    if name in kwargs:
-                        continue
-                    elif name in self.globals:
-                        kwargs[name] = self.globals[name]
-                    elif name in self._resources:
-                        if request is None:
-                            raise TypeError(
-                                "The {0!r} resource needs a request!".format(
-                                    name,
-                                )
-                            )
-
-                        state = self._manager.requests[request]["resources"]
-
-                        if name in state:
-                            resource = state[name]
-                        else:
-                            provider = self._resources[name]
-
-                            if name in self._needs_request:
-                                resource = state[name] = provider(request)
-                            else:
-                                resource = state[name] = provider()
-
-                        kwargs[name] = resource
-                    else:
-                        raise NoSuchResource(name)
+                kwargs.update(
+                    (name, self.provide(name, request=request))
+                    for name in resources
+                    if name not in kwargs
+                )
                 return fn(*args, **kwargs)
             return wrapped
         return _needs
+
+    def provide(self, name, request=None):
+        """
+        Provide the given resource.
+
+        """
+
+        resource = self.globals.get(name)
+        if resource is not None:
+            return resource
+
+        if name not in self._resources:
+            raise NoSuchResource(name)
+
+        if request is None:
+            raise TypeError(
+                "The {0!r} resource needs a request!".format(name)
+            )
+
+        state = self._manager.requests[request]["resources"]
+
+        if name in state:
+            resource = state[name]
+        else:
+            provider = self._resources[name]
+
+            if name in self._needs_request:
+                resource = state[name] = provider(request)
+            else:
+                resource = state[name] = provider()
+
+        return resource
 
     def remove(self, resource):
         """

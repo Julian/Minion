@@ -133,6 +133,12 @@ class TestResourceBin(TestCase):
         self.bin.needs(["important"])(self.fn)(self.request)
         self.fn.assert_called_once_with(self.request, important=important)
 
+    def test_direct_provision(self):
+        @self.bin.provides("iron")
+        def make_iron():
+            return 12
+        self.assertEqual(self.bin.provide("iron", request=self.request), 12)
+
     def test_it_knows_its_resources(self):
         self.bin.provides("milk")(mock.Mock())
         self.bin.provides("honey")(mock.Mock())
