@@ -16,8 +16,8 @@ class TreeResource(object):
     def get_child(self, name, request):
         return self.children[name]
 
-    def set_child(self, name, child):
-        self.children[name] = child
+    def set_child(self, name, resource):
+        self.children[name] = resource
 
 
 class LeafResource(object):
