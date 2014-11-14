@@ -1,3 +1,3 @@
 from minion.core import Application
 from minion.request import Response
-__version__ = "0.2.0"
+__version__ = "0.3.0"
