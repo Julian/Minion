@@ -1,8 +1,9 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from webtest import TestApp
 
 from minion import Application, Response
+from minion.compat import PY3
 from minion.http import Headers
 from minion.wsgi import wsgi_app
 
@@ -19,16 +20,20 @@ class TestWSGIMinion(TestCase):
         response = wsgi.get("/respond", status=200)
         self.assertEqual(response.body, b"Yep!")
 
+    @skipIf(PY3, "WSGI is pure insanity on Py3")
     def test_it_sets_headers(self):
         minion = Application()
 
-        @minion.route("/respond")
+        @minion.route(b"/respond")
         def show(request):
             return Response(
                 b"{}",
-                headers=Headers([("Content-Type", ["application/json"])]),
+                headers=Headers([(b"Content-Type", [b"application/json"])]),
             )
 
         wsgi = TestApp(wsgi_app(minion))
-        response = wsgi.get("/respond", status=200)
-        self.assertEqual(response.headers["Content-Type"], "application/json")
+        response = wsgi.get(b"/respond", status=200)
+        self.assertEqual(
+            response.headers[b"Content-Type"],
+            b"application/json",
+        )

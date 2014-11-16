@@ -65,7 +65,7 @@ else:
                 map = werkzeug.routing.Map()
             self._endpoints = {}
             self._map = map
-            self._adapter = self._map.bind("")  # XXX: server_name
+            self._adapter = self._map.bind(b"")  # XXX: server_name
 
         def add_route(self, route, fn, route_name=None, methods=None, **kwargs):
             if methods is not None:
@@ -135,7 +135,7 @@ class SimpleRouter(object):
         self.routes = routes
         self._names = names
 
-    def add_route(self, route, fn, route_name=None, methods=("GET", "HEAD")):
+    def add_route(self, route, fn, route_name=None, methods=(b"GET", b"HEAD")):
         self.routes[route] = fn, methods
         if route_name is not None:
             self._names[route_name] = route
@@ -149,5 +149,5 @@ class SimpleRouter(object):
     def url_for(self, route_name, **kwargs):
         url = self._names.get(route_name, route_name)
         if kwargs:
-            url += "?" + urlencode(kwargs)
+            url += b"?" + urlencode(kwargs)
         return url

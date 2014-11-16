@@ -24,9 +24,9 @@ class TestTreeResource(TestCase):
     def test_it_supports_adding_children(self):
         resource = traversal.TreeResource(render=path_view)
         child = traversal.LeafResource(render=path_view)
-        resource.set_child("foo", child)
+        resource.set_child(b"foo", child)
         request = Request(path=b"/bar")
-        self.assertEqual(resource.get_child("foo", request=request), child)
+        self.assertEqual(resource.get_child(b"foo", request=request), child)
 
 
 class TestLeafResource(TestCase):
@@ -63,19 +63,19 @@ class LineDelimiterResource(object):
 class TestTraverse(TestCase):
     def test_it_traverses_resources(self):
         root = LineDelimiterResource()
-        request = Request(path="/foo/bar/baz")
+        request = Request(path=b"/foo/bar/baz")
         renderer = traversal.traverse(resource=root, request=request)
-        self.assertEqual(renderer.render(request), "foo\nbar\nbaz")
+        self.assertEqual(renderer.render(request), b"foo\nbar\nbaz")
 
     def test_single_level(self):
         root = LineDelimiterResource()
-        request = Request(path="/foo")
+        request = Request(path=b"/foo")
         renderer = traversal.traverse(resource=root, request=request)
-        self.assertEqual(renderer.render(request), "foo")
+        self.assertEqual(renderer.render(request), b"foo")
 
     def test_zero_levels(self):
         root = LineDelimiterResource()
-        request = Request(path="/")
+        request = Request(path=b"/")
         renderer = traversal.traverse(resource=root, request=request)
         self.assertIs(renderer, root)
 
@@ -94,6 +94,6 @@ class TestTraverse(TestCase):
                 return self.name
 
         root = Resource()
-        request = Request(path="/0/1/2/3/4/5")
+        request = Request(path=b"/0/1/2/3/4/5")
         renderer = traversal.traverse(resource=root, request=request)
-        self.assertEqual(renderer.render(request), "2")
+        self.assertEqual(renderer.render(request), b"2")

@@ -28,7 +28,7 @@ def wsgi_app(application, request_class=WSGIRequest):
         response = application.serve(request)
         start_response(
             response.status, [
-                (name, ",".join(values))
+                (name, b",".join(values))
                 for name, values in response.headers.canonicalized()
             ],
         )

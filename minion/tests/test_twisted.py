@@ -28,7 +28,7 @@ class TestMinionResource(SynchronousTestCase):
             self.assertEqual(result, content)
 
     def test_render(self):
-        @self.minion.route("/foo/bar")
+        @self.minion.route(b"/foo/bar")
         def foo_bar(request):
             self.assertEqual(request.headers.get(b"X-Foo"), [b"Hello"])
             return Response(
@@ -37,11 +37,11 @@ class TestMinionResource(SynchronousTestCase):
                 headers=Headers([(b"Location", [b"http://example.com"])]),
             )
 
-        request = FakeRequest(uri="/bla/foo/bar", postpath=["foo", "bar"])
+        request = FakeRequest(uri=b"/bla/foo/bar", postpath=[b"foo", b"bar"])
         request.requestHeaders.setRawHeaders(b"X-Foo", [b"Hello"])
         response = render(resource=self.resource, request=request)
         self.assertRedirected(
-            request, response, "http://example.com", content="/foo/bar",
+            request, response, b"http://example.com", content=b"/foo/bar",
         )
 
     def test_interface(self):
