@@ -80,7 +80,7 @@ class Manager(object):
     [
         Attribute(name="headers", default_factory=Headers),
         Attribute(name="path"),
-        Attribute(name="method", default_value="GET"),
+        Attribute(name="method", default_value=b"GET"),
         Attribute(
             name="messages", default_factory=list, exclude_from_cmp=True,
         ),

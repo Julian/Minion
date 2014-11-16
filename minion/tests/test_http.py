@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from minion import http
+from minion.compat import PY3
 
 
 class HeaderRetrievalTestsMixin(object):
@@ -91,10 +92,13 @@ class HeaderRetrievalTestsMixin(object):
         headers = self.Headers(
             [(b"foo", [b"bar"]), (b"thing", [b"baz", b"quux"])]
         )
-        self.assertEqual(
-            repr(headers),
-            "<" + self.Headers.__name__ + " Foo=['bar'] Thing=['baz', 'quux']>"
-        )
+
+        if PY3:
+            fields = " b'Foo'=[b'bar'] b'Thing'=[b'baz', b'quux']>"
+        else:
+            fields = " Foo=['bar'] Thing=['baz', 'quux']>"
+
+        self.assertEqual(repr(headers), "<" + self.Headers.__name__ + fields)
 
 
 class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):
@@ -152,10 +156,10 @@ class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):
         first = self.Headers([(b"foo", [b"bar"])])
         second = self.Headers()
 
-        second.add_value(b"foo", "bar")
+        second.add_value(b"foo", b"bar")
         self.assertEqual(first, second)
 
-        second.add_value(b"foo", "baz")
+        second.add_value(b"foo", b"baz")
         self.assertNotEqual(first, second)
 
 
