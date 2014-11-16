@@ -12,7 +12,7 @@ class TestResponder(TestCase):
 
     def test_it_runs_deferreds_registered_with_after(self):
         m = mock.Mock()
-        self.responder.after().addCallback(m)
+        self.responder.after().on_success(m)
         self.assertFalse(m.called)
 
         self.responder.finish()

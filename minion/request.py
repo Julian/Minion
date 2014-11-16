@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 from characteristic import Attribute, attributes
-from twisted.internet.defer import Deferred
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
 from minion.compat import iteritems
+from minion.deferred import Deferred
 from minion.http import Headers, MutableHeaders
 
 
@@ -27,18 +27,17 @@ class Responder(object):
         """
         Return a deferred that will fire after the request is finished.
 
-        :returns: a new :class:`twisted.internet.defer.Deferred` for each call
-            to this function.
+        :returns: a new :class:`Deferred` for each call to this function.
 
         """
 
         d = Deferred()
         self._after_deferreds.append(d)
-        return d
+        return d.chain
 
     def finish(self):
         for d in self._after_deferreds:
-            d.callback(self)
+            d.succeed(self)
 
 
 class Manager(object):
