@@ -1,4 +1,5 @@
-from minion import Application, Response, wsgi_app
+from minion import Application, Response
+from minion.wsgi import wsgi_app
 
 
 app = Application()
