@@ -20,6 +20,17 @@ class TestWSGIMinion(TestCase):
         response = wsgi.get("/respond", status=200)
         self.assertEqual(response.body, b"Yep!")
 
+    def test_it_parses_headers(self):
+        minion = Application()
+
+        @minion.route("/respond")
+        def show(request):
+            return Response(request.headers.get("Accept")[0])
+
+        wsgi = TestApp(wsgi_app(minion))
+        response = wsgi.get("/respond", status=200, headers={b"Accept" : b"2"})
+        self.assertEqual(response.body, b"2")
+
     @skipIf(PY3, "WSGI is pure insanity on Py3")
     def test_it_sets_headers(self):
         minion = Application()

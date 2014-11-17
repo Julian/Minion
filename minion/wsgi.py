@@ -1,6 +1,14 @@
+from minion.http import Headers
+
+
 class WSGIRequest(object):
     def __init__(self, environ):
         self.environ = environ
+        self.headers = Headers(
+            (name[5:].replace("_", "-"), [value])
+            for name, value in environ.iteritems()
+            if name.startswith("HTTP_")
+        )
 
     @property
     def method(self):
