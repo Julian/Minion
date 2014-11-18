@@ -1,5 +1,5 @@
 from minion import Application, Response
-from minion.compat import StringIO
+from minion.compat import BytesIO
 from minion.http import Headers
 from minion.twisted import MinionResource
 
@@ -80,8 +80,8 @@ def render(resource, request):
 class FakeRequest(server.Request):
     def __init__(self, uri, postpath=(), method=b"GET", content=b""):
         server.Request.__init__(self, DummyChannel(), False)
-        self.written = StringIO()
-        self.content = StringIO(content)
+        self.written = BytesIO()
+        self.content = BytesIO(content)
         self.method = method
         self.uri = uri
         self.postpath = list(postpath)

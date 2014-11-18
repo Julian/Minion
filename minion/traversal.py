@@ -3,6 +3,7 @@ Helpers for applications that use object traversal routing.
 
 """
 
+from minion.compat import iteritems
 from minion.request import Response
 
 class TreeResource(object):
@@ -40,7 +41,7 @@ def method_delegate(**methods):
 
     """
 
-    methods = {k.upper() : v for k, v in methods.iteritems()}
+    methods = {k.upper() : v for k, v in iteritems(methods)}
 
     def render(request):
         renderer = methods.get(request.method)

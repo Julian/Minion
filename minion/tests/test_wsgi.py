@@ -8,6 +8,7 @@ from minion.http import Headers
 from minion.wsgi import wsgi_app
 
 
+@skipIf(PY3, "WSGI is pure insanity on Py3")
 class TestWSGIMinion(TestCase):
     def setUp(self):
         self.minion = Application()
@@ -44,7 +45,6 @@ class TestWSGIMinion(TestCase):
         self.assertEqual(response.body, b"Check out this body.")
 
 
-    @skipIf(PY3, "WSGI is pure insanity on Py3")
     def test_it_sets_headers(self):
         @self.minion.route(b"/respond")
         def respond(request):

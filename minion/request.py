@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from characteristic import Attribute, attributes
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
-from minion.compat import StringIO, iteritems
+from minion.compat import BytesIO, iteritems
 from minion.deferred import Deferred
 from minion.http import Headers, MutableHeaders
 
@@ -78,7 +78,7 @@ class Manager(object):
 
 @attributes(
     [
-        Attribute(name="content", default_factory=StringIO),
+        Attribute(name="content", default_factory=BytesIO),
         Attribute(name="headers", default_factory=Headers),
         Attribute(name="path"),
         Attribute(name="method", default_value=b"GET"),

@@ -1,3 +1,4 @@
+from minion.compat import iteritems
 from minion.http import Headers
 
 
@@ -6,7 +7,7 @@ class WSGIRequest(object):
         self.environ = environ
         self.headers = Headers(
             (name[5:].replace("_", "-"), [value])
-            for name, value in environ.iteritems()
+            for name, value in iteritems(environ)
             if name.startswith("HTTP_")
         )
 
