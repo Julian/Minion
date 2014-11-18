@@ -11,6 +11,10 @@ class WSGIRequest(object):
         )
 
     @property
+    def content(self):
+        return self.environ["wsgi.input"]
+
+    @property
     def method(self):
         return self.environ["REQUEST_METHOD"]
 

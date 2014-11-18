@@ -27,9 +27,22 @@ class TestWSGIMinion(TestCase):
             return Response(request.headers.get("Accept")[0])
 
         response = self.wsgi.get(
-            "/respond", status=200, headers={b"Accept" : b"2"},
+            b"/respond", status=200, headers={b"Accept" : b"2"},
         )
         self.assertEqual(response.body, b"2")
+
+    def test_it_parses_response_bodies(self):
+        @self.minion.route(b"/respond", methods=["POST"])
+        def respond(request):
+            return Response(request.content.read())
+
+        response = self.wsgi.post(
+            b"/respond",
+            params=b"Check out this body.",
+            status=200,
+        )
+        self.assertEqual(response.body, b"Check out this body.")
+
 
     @skipIf(PY3, "WSGI is pure insanity on Py3")
     def test_it_sets_headers(self):

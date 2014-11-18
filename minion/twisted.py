@@ -29,6 +29,7 @@ class MinionResource(object):
 
     def render(self, twisted_request):
         request = Request(
+            content=twisted_request.content,
             headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
             method=twisted_request.method,
             path=b"/" + b"/".join(twisted_request.postpath),

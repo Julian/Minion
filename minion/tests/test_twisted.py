@@ -44,6 +44,17 @@ class TestMinionResource(SynchronousTestCase):
             request, response, b"http://example.com", content=b"/foo/bar",
         )
 
+    def test_request_body(self):
+        @self.minion.route(b"/")
+        def respond(request):
+            return Response(content=request.content.read())
+
+        request = FakeRequest(uri=b"/", content=b"Hello world")
+        response = self.successResultOf(
+            render(resource=self.resource, request=request),
+        )
+        self.assertEqual(response, b"Hello world")
+
     def test_interface(self):
         verifyObject(IResource, self.resource)
 
@@ -67,13 +78,13 @@ def render(resource, request):
 
 
 class FakeRequest(server.Request):
-    def __init__(self, uri, postpath, method="GET"):
+    def __init__(self, uri, postpath=(), method=b"GET", content=b""):
         server.Request.__init__(self, DummyChannel(), False)
         self.written = StringIO()
-        self.content = StringIO()
+        self.content = StringIO(content)
         self.method = method
         self.uri = uri
-        self.postpath = postpath
+        self.postpath = list(postpath)
 
     def write(self, data):
         self.written.write(data)
