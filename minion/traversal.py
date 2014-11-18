@@ -3,6 +3,8 @@ Helpers for applications that use object traversal routing.
 
 """
 
+from minion.request import Response
+
 class TreeResource(object):
     """
     A tree resource that supports adding children via :meth:`put_child`\ .
@@ -30,6 +32,22 @@ class LeafResource(object):
 
     def __init__(self, render):
         self.render = render
+
+
+def method_delegate(**methods):
+    """
+    Construct a renderer that delegates based on the request's HTTP method.
+
+    """
+
+    methods = {k.upper() : v for k, v in methods.iteritems()}
+
+    def render(request):
+        renderer = methods.get(request.method)
+        if renderer is None:
+            return Response(code=405)
+        return renderer(request)
+    return render
 
 
 def traverse(request, resource):
