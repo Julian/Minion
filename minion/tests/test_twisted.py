@@ -62,7 +62,7 @@ class TestMinionResource(SynchronousTestCase):
 # Copied from https://tm.tl/5527
 def render(resource, request):
     result = resource.render(request)
-    if isinstance(result, str):
+    if isinstance(result, bytes):
         request.write(result)
         request.finish()
         return succeed(request.written.getvalue())
