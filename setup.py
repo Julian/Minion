@@ -27,6 +27,11 @@ setup(
     name="minion",
     version=__version__,
     packages=find_packages(),
+    install_requires=[
+        "characteristic>=14.2.0",
+        "itsdangerous",
+        "Werkzeug",
+    ],
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
     classifiers=classifiers,
