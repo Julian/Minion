@@ -68,22 +68,21 @@ class TestManager(TestCase):
 
 
 class TestRequest(TestCase):
-    def setUp(self):
-        self.path = "/"
-        self.request = request.Request(path=self.path)
+    def test_flash(self):
+        self.request = request.Request(path=b"/")
+        self.assertEqual(self.request.messages, [])
+        self.request.flash(b"Hello World")
+        self.assertEqual(
+            self.request.messages, [request._Message(content=b"Hello World")],
+        )
 
+
+class TestResponse(TestCase):
     def test_init(self):
         self.assertEqual(request.Response(b"Hello").content, b"Hello")
 
     def test_init_kwargs(self):
         self.assertEqual(request.Response(content=b"Hello").content, b"Hello")
-
-    def test_flash(self):
-        self.assertEqual(self.request.messages, [])
-        self.request.flash("Hello World")
-        self.assertEqual(
-            self.request.messages, [request._Message(content="Hello World")],
-        )
 
 
 class TestRedirect(ResponseHelpersMixin, TestCase):
