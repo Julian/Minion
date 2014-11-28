@@ -1,3 +1,4 @@
+cached-property
 characteristic>=14.2.0
 itsdangerous
 Werkzeug

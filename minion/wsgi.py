@@ -1,3 +1,5 @@
+from cached_property import cached_property as calculated_once
+
 from minion.compat import iteritems
 from minion.http import Headers
 
@@ -5,21 +7,24 @@ from minion.http import Headers
 class WSGIRequest(object):
     def __init__(self, environ):
         self.environ = environ
-        self.headers = Headers(
+
+    @calculated_once
+    def headers(self):
+        return Headers(
             (name[5:].replace("_", "-"), [value])
-            for name, value in iteritems(environ)
+            for name, value in iteritems(self.environ)
             if name.startswith("HTTP_")
         )
 
-    @property
+    @calculated_once
     def content(self):
         return self.environ["wsgi.input"]
 
-    @property
+    @calculated_once
     def method(self):
         return self.environ["REQUEST_METHOD"]
 
-    @property
+    @calculated_once
     def path(self):
         return self.environ["PATH_INFO"]
 
