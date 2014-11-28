@@ -3,6 +3,10 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 """
 
+from bisect import insort
+
+from characteristic import Attribute, attributes
+
 from minion.compat import iteritems
 
 
@@ -94,3 +98,133 @@ class MutableHeaders(Headers):
             del self._contents[name.lower()]
         except KeyError:
             raise NoSuchHeader(name)
+
+
+@attributes(
+    [
+        Attribute(name="media_types"),
+    ],
+)
+class Accept(object):
+    """
+    A parsed representation of an HTTP Accept header (see :rfc:`7231#5.3.2`\ ).
+
+    """
+
+    @classmethod
+    def from_header(cls, header):
+        """
+        Parse out an Accept header.
+
+        """
+
+        if header is None:
+            return cls.ALL
+
+        media_types = []
+        for range_and_parameters in header.split(","):
+            raw_range, _, raw_parameters = range_and_parameters.partition(";")
+
+            quality = 1.0
+            media_parameters = {}
+            if raw_parameters:
+                for raw_parameter in raw_parameters.split(";"):
+                    key, _, value = raw_parameter.partition("=")
+                    key = key.strip()
+                    value = value.strip()
+                    if key == "q":
+                        quality = float(value)
+                    else:
+                        media_parameters[key] = value
+
+            raw_type, _, raw_subtype = raw_range.partition("/")
+
+            type = raw_type.strip()
+            subtype = raw_subtype.strip()
+
+            insort(
+                media_types,
+                MediaRange(
+                    type=type if type != "*" else STAR,
+                    subtype=subtype if subtype != "*" else STAR,
+                    quality=quality,
+                    parameters=media_parameters,
+                ),
+            )
+        return cls(media_types=tuple(media_types))
+
+
+class _Star(object):
+    """
+    An open media range value.
+
+    """
+
+    def __lt__(self, other):
+        return True
+
+    def __repr__(self):
+        return "*"
+
+
+STAR = _Star()
+
+
+@attributes(
+    [
+        Attribute(name="type", default_value=STAR),
+        Attribute(name="subtype", default_value=STAR),
+        Attribute(name="parameters", default_factory=dict),
+        Attribute(name="quality", default_value=1.0),
+    ],
+    apply_with_cmp=False,
+)
+class MediaRange(object):
+    """
+    A media range.
+
+    Open ranges (e.g. ``text/*`` or ``*/*``\ ) are represented by
+    :attr:`type` and / or :attr:`subtype` being ``None``\ .
+
+    """
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return all(
+            getattr(self, attribute.name) == getattr(other, attribute.name)
+            for attribute in self.characteristic_attributes
+        )
+
+    def __ne__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return not self == other
+
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        if self.quality < other.quality:
+            return True
+        elif self.quality > other.quality:
+            return False
+
+        if self.type != other.type:
+            return self.type is STAR
+
+        if self.subtype != other.subtype:
+            return self.subtype is STAR
+
+        return self.parameters < other.parameters
+
+    def __hash__(self):
+        values = tuple(
+            getattr(self, attr.name)
+            for attr in self.characteristic_attributes
+            if attr.name != "parameters"
+        )
+        return hash(values + tuple(self.parameters.items()))
+
+
+Accept.ALL = Accept(media_types=(MediaRange(),))

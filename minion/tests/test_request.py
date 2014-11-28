@@ -2,6 +2,7 @@ from unittest import TestCase
 import mock
 
 from minion import request
+from minion.http import Accept, Headers
 from minion.tests.utils import ResponseHelpersMixin
 
 
@@ -68,6 +69,18 @@ class TestManager(TestCase):
 
 
 class TestRequest(TestCase):
+    def test_accept(self):
+        accept = "application/json"
+        headers = Headers([("accept", [accept])])
+        self.request = request.Request(path=b"/", headers=headers)
+        self.assertEqual(self.request.accept, Accept.from_header(accept))
+
+    def test_accept_is_calculated_once(self):
+        accept = "application/json"
+        headers = Headers([("accept", [accept])])
+        self.request = request.Request(path=b"/", headers=headers)
+        self.assertIs(self.request.accept, self.request.accept)
+
     def test_flash(self):
         self.request = request.Request(path=b"/")
         self.assertEqual(self.request.messages, [])

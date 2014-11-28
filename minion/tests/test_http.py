@@ -176,3 +176,243 @@ class TestImmutableHeaders(HeaderRetrievalTestsMixin, TestCase):
     def test_empty_hash(self):
         some_headers = set([self.Headers(), self.Headers()])
         self.assertEqual(some_headers, set([self.Headers()]))
+
+
+class TestAccept(TestCase):
+    def test_basic(self):
+        accept = http.Accept.from_header(header="application/json")
+        media_range = http.MediaRange(
+            type="application", subtype="json", quality=1.0,
+        )
+        self.assertEqual(accept, http.Accept(media_types=(media_range,)))
+
+    def test_multiple(self):
+        accept = http.Accept.from_header(header="audio/*; q=0.2, audio/basic")
+        media_types = (
+            http.MediaRange(type="audio", quality=0.2),
+            http.MediaRange(type="audio", subtype="basic", quality=1.0),
+        )
+        self.assertEqual(accept, http.Accept(media_types=media_types))
+
+    def test_strips_spaces(self):
+        accept = http.Accept.from_header(header=" text/* ; q=0.2 ,  text/foo")
+        media_types = (
+            http.MediaRange(type="text", quality=0.2),
+            http.MediaRange(type="text", subtype="foo", quality=1.0),
+        )
+        self.assertEqual(accept, http.Accept(media_types=media_types))
+
+    def test_more_elaborate(self):
+        accept = http.Accept.from_header(
+            header="text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c",
+        )
+        media_types = (
+            http.MediaRange(type="text", subtype="plain", quality=0.5),
+            http.MediaRange(type="text", subtype="x-dvi", quality=0.8),
+            http.MediaRange(type="text", subtype="html"),
+            http.MediaRange(type="text", subtype="x-c"),
+        )
+        self.assertEqual(accept, http.Accept(media_types=media_types))
+
+    def test_override_with_more_specific_type(self):
+        accept = http.Accept.from_header(
+            header="text/*, text/plain, text/plain;format=flowed, */*",
+        )
+        media_types = (
+            http.MediaRange(),
+            http.MediaRange(type="text"),
+            http.MediaRange(type="text", subtype="plain"),
+            http.MediaRange(
+                type="text", subtype="plain", parameters=dict(format="flowed"),
+            ),
+        )
+        self.assertEqual(accept, http.Accept(media_types=media_types))
+
+    def test_quality_factors(self):
+        accept = http.Accept.from_header(
+            header="text/*;q=0.3, text/html;q=0.7, text/html;level=1, "
+                   "text/html;level=2;q=0.4, */*;q=0.5",
+        )
+        media_types = (
+            http.MediaRange(type="text", quality=0.3),
+            http.MediaRange(
+                type="text",
+                subtype="html",
+                quality=0.4,
+                parameters=dict(level="2"),
+            ),
+            http.MediaRange(quality=0.5),
+            http.MediaRange(type="text", subtype="html", quality=0.7),
+            http.MediaRange(
+                type="text", subtype="html", parameters=dict(level="1"),
+            ),
+        )
+        self.assertEqual(accept, http.Accept(media_types=media_types))
+
+    def test_no_header(self):
+        accept = http.Accept.from_header(header=None)
+        self.assertEqual(accept, http.Accept.ALL)
+
+
+class TestMediaRange(TestCase):
+    def test_eq(self):
+        self.assertTrue(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) ==
+            http.MediaRange(type="text", subtype="plain", quality=0.5),
+        )
+
+    def test_eq_type(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) ==
+            http.MediaRange(type="foo", subtype="plain", quality=0.5),
+        )
+
+    def test_eq_subtype(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) ==
+            http.MediaRange(type="text", subtype="other", quality=0.5),
+        )
+
+    def test_eq_quality(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) ==
+            http.MediaRange(type="text", subtype="plain", quality=0.8),
+        )
+
+    def test_eq_parameters(self):
+        self.assertFalse(
+            http.MediaRange(type="text", parameters={"a": "b"}) ==
+            http.MediaRange(type="text", parameters={"a": "c"}),
+        )
+
+    def test_ne(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) !=
+            http.MediaRange(type="text", subtype="plain", quality=0.5),
+        )
+
+    def test_ne_type(self):
+        self.assertTrue(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) !=
+            http.MediaRange(type="foo", subtype="plain", quality=0.5),
+        )
+
+    def test_ne_subtype(self):
+        self.assertTrue(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) !=
+            http.MediaRange(type="text", subtype="other", quality=0.5),
+        )
+
+    def test_ne_quality(self):
+        self.assertTrue(
+            http.MediaRange(type="text", subtype="plain", quality=0.5) !=
+            http.MediaRange(type="text", subtype="plain", quality=0.8),
+        )
+
+    def test_ne_parameters(self):
+        self.assertTrue(
+            http.MediaRange(type="text", parameters={"a": "b"}) !=
+            http.MediaRange(type="text", parameters={"a": "c"}),
+        )
+
+    def test_lt_same_type_and_subtype(self):
+        self.assertLess(
+            http.MediaRange(type="text", subtype="plain", quality=0.5),
+            http.MediaRange(type="text", subtype="plain", quality=0.8),
+        )
+
+    def test_lt_ranged_subtype(self):
+        self.assertLess(
+            http.MediaRange(type="text"),
+            http.MediaRange(type="text", subtype="plain"),
+        )
+
+    def test_lt_ranged_type_and_subtype(self):
+        self.assertLess(http.MediaRange(), http.MediaRange(type="text"))
+
+    def test_lt_ranged_lower_quality(self):
+        self.assertLess(
+            http.MediaRange(type="text", quality=0.3),
+            http.MediaRange(quality=0.5),
+        )
+
+    def test_lt_different_type_and_subtype(self):
+        self.assertLess(
+            http.MediaRange(type="application", subtype="json", quality=0.5),
+            http.MediaRange(type="text", subtype="plain", quality=0.8),
+        )
+
+    def test_lt_parameters_same_type_and_subtype(self):
+        self.assertLess(
+            http.MediaRange(type="bar", subtype="foo"),
+            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}),
+        )
+
+    def test_not_lt_same_type_and_subtype(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain", quality=0.8) <
+            http.MediaRange(type="text", subtype="plain", quality=0.5),
+        )
+
+    def test_not_lt_different_type_and_subtype(self):
+        self.assertFalse(
+            http.MediaRange(type="application", subtype="json") <
+            http.MediaRange(type="text", subtype="plain"),
+        )
+
+    def test_not_lt_parameters(self):
+        self.assertFalse(
+            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}) <
+            http.MediaRange(type="bar", subtype="foo"),
+        )
+
+    def test_not_lt_parameters_different_type(self):
+        self.assertFalse(
+            http.MediaRange(type="foo", subtype="foo") <
+            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}),
+        )
+
+    def test_not_lt_parameters_different_subtype(self):
+        self.assertFalse(
+            http.MediaRange(type="bar", subtype="foo") <
+            http.MediaRange(type="bar", subtype="baz", parameters={"a": "b"}),
+        )
+
+    def test_not_lt_ranged_subtype(self):
+        self.assertFalse(
+            http.MediaRange(type="text", subtype="plain") <
+            http.MediaRange(type="text"),
+        )
+
+    def test_not_lt_ranged_lower_quality(self):
+        self.assertFalse(
+            http.MediaRange(quality=0.5) <
+            http.MediaRange(type="text", quality=0.3),
+        )
+
+    def test_lt_equal_range(self):
+        self.assertFalse(http.MediaRange() < http.MediaRange())
+
+    def test_hash(self):
+        self.assertEqual(
+            {
+                http.MediaRange(type="text", subtype="plain", quality=0.8),
+                http.MediaRange(type="text", subtype="plain", quality=0.8),
+            },
+            {http.MediaRange(type="text", subtype="plain", quality=0.8)},
+        )
+
+    def test_hash_parameters(self):
+        self.assertEqual(
+            {
+                http.MediaRange(type="a", parameters={"a": "b"}),
+                http.MediaRange(type="a", parameters={"a": "b"}),
+            },
+            {http.MediaRange(type="a", parameters={"a": "b"})},
+        )
+
+    def test_hash_different_parameters(self):
+        self.assertNotEqual(
+            hash(http.MediaRange(type="a", parameters={"a": "b"})),
+            hash(http.MediaRange(type="a", parameters={"a": "c"})),
+        ),

@@ -1,10 +1,12 @@
 from __future__ import absolute_import
+
 from characteristic import Attribute, attributes
+from cached_property import cached_property as calculated_once
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
 from minion.compat import BytesIO, iteritems
 from minion.deferred import Deferred
-from minion.http import Headers, MutableHeaders
+from minion.http import Accept, Headers, MutableHeaders
 
 
 HTTP_STATUS_CODES = dict(
@@ -88,6 +90,11 @@ class Manager(object):
     ],
 )
 class Request(object):
+    @calculated_once
+    def accept(self):
+        header = ",".join(self.headers.get("Accept"))
+        return Accept.from_header(header=header)
+
     def flash(self, message):
         self.messages.append(_Message(content=message))
 
