@@ -1,5 +1,5 @@
 from minion import Application, Response, wsgi_app
-from minion.routers import RoutesRouter
+from minion.routing import RoutesRouter
 
 
 app = Application(router=RoutesRouter())

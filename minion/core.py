@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from minion import resource
 from minion.request import Manager, Response
-from minion.routers import SimpleRouter
+from minion.routing import SimpleRouter
 
 
 class Application(object):
@@ -17,7 +17,7 @@ class Application(object):
         managers state during each request. If unprovided, one will be created
         and used.
     :argument router: an object satisfying the router interface (see
-        :mod:`minion.routers`) to use for route addition and generation for
+        :mod:`minion.routing`) to use for route addition and generation for
         this application. If unprovided, a router with simple dictionary lookup
         will be used.
     :argument :class:`jinja2.Environment` jinja: a pre-configured jinja2

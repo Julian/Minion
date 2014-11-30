@@ -12,7 +12,7 @@ import jinja2
 import werkzeug.wrappers
 
 from minion import Application, Response, resource, wsgi_app
-from minion.routers import WerkzeugRouter
+from minion.routing import WerkzeugRouter
 import examples.static
 
 

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from minion import Application, Response
 from minion.request import Request
-from minion.routers import SimpleRouter
+from minion.routing import SimpleRouter
 
 
 class TestMinion(TestCase):

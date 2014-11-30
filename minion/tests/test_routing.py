@@ -1,6 +1,6 @@
 from unittest import TestCase, skipIf
 
-from minion import Response, routers
+from minion import Response, routing
 from minion.request import Request, redirect
 from minion.traversal import LeafResource
 
@@ -58,7 +58,7 @@ class TestTraversalRouter(TestCase):
                     render=lambda request : Response(b"Hello " + name),
                 )
 
-        router = routers.TraversalRouter(root=Resource())
+        router = routing.TraversalRouter(root=Resource())
         request = Request(path=b"/world")
         matched, kwargs = router.match(request)
         self.assertEqual(matched(request), Response(content=b"Hello world"))
@@ -66,13 +66,13 @@ class TestTraversalRouter(TestCase):
 
 class TestTraversalRouterStatic(RouterTestMixin, TestCase):
     def setUp(self):
-        self.router = routers.TraversalRouter(root=LeafResource(render=None))
+        self.router = routing.TraversalRouter(root=LeafResource(render=None))
 
 
-@skipIf(not hasattr(routers, "RoutesRouter"), "routes not found")
+@skipIf(not hasattr(routing, "RoutesRouter"), "routes not found")
 class TestRoutesRouter(RouterTestMixin, TestCase):
     def setUp(self):
-        self.router = routers.RoutesRouter()
+        self.router = routing.RoutesRouter()
 
     def test_it_routes_routes_with_arguments(self):
         self.router.add_route(b"/route/{year}", view, stuff=b"12")
@@ -87,10 +87,10 @@ class TestRoutesRouter(RouterTestMixin, TestCase):
         self.assertEqual(url, b"/2012")
 
 
-@skipIf(not hasattr(routers, "WerkzeugRouter"), "werkzeug not found")
+@skipIf(not hasattr(routing, "WerkzeugRouter"), "werkzeug not found")
 class TestWerkzeugRouter(RouterTestMixin, TestCase):
     def setUp(self):
-        self.router = routers.WerkzeugRouter()
+        self.router = routing.WerkzeugRouter()
 
     def test_it_routes_routes_with_arguments(self):
         self.router.add_route(b"/route/<int:year>", view)
@@ -113,4 +113,4 @@ class TestWerkzeugRouter(RouterTestMixin, TestCase):
 
 class TestSimpleRouter(RouterTestMixin, TestCase):
     def setUp(self):
-        self.router = routers.SimpleRouter()
+        self.router = routing.SimpleRouter()

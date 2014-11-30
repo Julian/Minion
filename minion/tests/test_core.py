@@ -9,7 +9,7 @@ except ImportError:
 from minion import core, resource
 from minion.compat import iteritems
 from minion.request import Manager, Request
-from minion.routers import SimpleRouter
+from minion.routing import SimpleRouter
 
 
 class TestApplication(TestCase):
