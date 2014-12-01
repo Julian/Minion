@@ -7,7 +7,7 @@ from bisect import insort
 
 from characteristic import Attribute, attributes
 
-from minion.compat import iteritems
+from minion.compat import iteritems, viewkeys
 
 
 _CANONICAL_NAMES = {
@@ -216,7 +216,7 @@ class MediaRange(object):
         if self.subtype != other.subtype:
             return self.subtype is STAR
 
-        return self.parameters < other.parameters
+        return viewkeys(self.parameters) < viewkeys(other.parameters)
 
     def __hash__(self):
         values = tuple(
