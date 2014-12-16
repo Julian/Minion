@@ -11,7 +11,7 @@ import textwrap
 import jinja2
 import werkzeug.wrappers
 
-from minion import Application, Response, resource, wsgi_app
+from minion import Application, Response, wsgi_app
 from minion.routing import WerkzeugRouter
 import examples.static
 

@@ -2,10 +2,10 @@ from unittest import TestCase
 import mock
 
 from minion.request import Manager
-from minion import resource
+from minion import assets
 
 
-class TestResourceBin(TestCase):
+class TestAssetBin(TestCase):
     def setUp(self):
         self.request = mock.Mock()
         self.fn = mock.Mock(__name__="a_view")
@@ -14,9 +14,9 @@ class TestResourceBin(TestCase):
         self.request_manager.request_started(self.request)
         self.addCleanup(self.request_manager.requests.clear)
 
-        self.bin = resource.Bin(manager=self.request_manager)
+        self.bin = assets.Bin(manager=self.request_manager)
 
-    def test_it_contains_resources(self):
+    def test_it_contains_assets(self):
         self.assertNotIn("cheese", self.bin)
 
         @self.bin.provides("cheese")
@@ -30,7 +30,7 @@ class TestResourceBin(TestCase):
         self.bin.globals["cheese"] = 12
         self.assertIn("cheese", self.bin)
 
-    def test_it_provides_resources_to_things_that_need_them(self):
+    def test_it_provides_assets_to_things_that_need_them(self):
         @self.bin.provides("iron")
         def make_iron():
             return 12
@@ -40,7 +40,7 @@ class TestResourceBin(TestCase):
         self.assertIs(returned, self.fn.return_value)
         self.fn.assert_called_once_with(self.request, 1, bar=3, iron=12)
 
-    def test_it_provides_the_same_resource_instance_for_the_same_request(self):
+    def test_it_provides_the_same_asset_instance_for_the_same_request(self):
         fn = self.bin.needs(["sugar"])(self.fn)
         sugar = mock.Mock()
         self.bin.provides("sugar")(sugar)
@@ -48,7 +48,7 @@ class TestResourceBin(TestCase):
         fn(self.request)
         self.assertEqual(sugar.call_count, 1)
 
-    def test_it_provides_a_new_resource_instance_for_new_requests(self):
+    def test_it_provides_a_new_asset_instance_for_new_requests(self):
         fn = self.bin.needs(["sugar"])(self.fn)
         sugar = mock.Mock()
         self.bin.provides("sugar")(sugar)
@@ -76,7 +76,7 @@ class TestResourceBin(TestCase):
 
     def test_globals_do_not_need_a_request(self):
         """
-        If a thing declares that it needs resources that are all global, we can
+        If a thing declares that it needs assets that are all global, we can
         support calling it both with *and* without a request.
 
         """
@@ -103,10 +103,10 @@ class TestResourceBin(TestCase):
 
         self.assertEqual(
             str(e.exception),
-            "The 'iron' resource needs a request!",
+            "The 'iron' asset needs a request!",
         )
 
-    def test_it_provides_only_unprovided_resources(self):
+    def test_it_provides_only_unprovided_assets(self):
         """
         It should still be possible to pass in arguments if desired.
 
@@ -139,22 +139,22 @@ class TestResourceBin(TestCase):
             return 12
         self.assertEqual(self.bin.provide("iron", request=self.request), 12)
 
-    def test_it_knows_its_resources(self):
+    def test_it_knows_its_assets(self):
         self.bin.provides("milk")(mock.Mock())
         self.bin.provides("honey")(mock.Mock())
         self.bin.globals["gold"] = mock.Mock()
-        self.assertEqual(self.bin.resources, {"milk", "honey", "gold"})
+        self.assertEqual(self.bin.assets, {"milk", "honey", "gold"})
 
-    def test_a_non_existent_resource_raises_an_exception_when_called(self):
+    def test_a_non_existent_asset_raises_an_exception_when_called(self):
         fn = self.bin.needs(["iron"])(self.fn)
 
-        with self.assertRaises(resource.NoSuchResource) as e:
+        with self.assertRaises(assets.NoSuchAsset) as e:
             fn(self.request)
         self.assertEqual(e.exception.args, ("iron",))
 
-    def test_resources_can_be_created_right_before_call_time(self):
+    def test_assets_can_be_created_right_before_call_time(self):
         """
-        A resource provision can be done after declaring something needs it.
+        An asset provision can be done after declaring something needs it.
 
         """
 
@@ -178,14 +178,14 @@ class TestResourceBin(TestCase):
         self.bin.remove("silver")
         self.assertNotIn("silver", self.bin)
 
-    def test_quashing_an_existing_resource_raises_an_exception(self):
+    def test_quashing_an_existing_asset_raises_an_exception(self):
         self.bin.provides("iron")(mock.Mock())
-        with self.assertRaises(resource.DuplicateResource):
+        with self.assertRaises(assets.DuplicateAsset):
             self.bin.provides("iron")(mock.Mock())
 
     def test_quashing_an_existing_global_raises_an_exception(self):
         self.bin.globals["iron"] = mock.Mock()
-        with self.assertRaises(resource.DuplicateResource):
+        with self.assertRaises(assets.DuplicateAsset):
             self.bin.provides("iron")(mock.Mock())
 
     def test_providers_can_ask_for_the_request_when_called(self):
@@ -201,14 +201,14 @@ class TestResourceBin(TestCase):
         self.bin.provides("wine")(wine)
 
         gold = mock.Mock()
-        bin = resource.Bin(self.request_manager, globals={"gold" : gold})
+        bin = assets.Bin(self.request_manager, globals={"gold" : gold})
 
         self.bin.update(bin)
 
-        self.assertEqual(self.bin.resources, {"iron", "wine", "gold"})
+        self.assertEqual(self.bin.assets, {"iron", "wine", "gold"})
 
     def test_updating_bins_preserves_which_providers_need_the_request(self):
-        bin = resource.Bin(self.request_manager)
+        bin = assets.Bin(self.request_manager)
         iron = mock.Mock()
         bin.provides("iron", needs_request=True)(iron)
 

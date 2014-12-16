@@ -67,7 +67,7 @@ class Manager(object):
         self.requests[request]["callbacks"].append((fn, args, kwargs))
 
     def request_started(self, request):
-        self.requests[request] = {"callbacks": [], "resources": {}}
+        self.requests[request] = {"callbacks": [], "assets": {}}
 
     def request_served(self, request, response):
         request_data = self.requests.pop(request)

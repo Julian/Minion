@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from minion import resource
+from minion import assets
 from minion.request import Manager, Response
 from minion.routing import SimpleRouter
 
@@ -10,9 +10,9 @@ class Application(object):
     A Minion application.
 
     :argument :class:`collections.MutableMapping` config: any app configuration
-    :argument :class:`resource.Bin` bin: a resource bin containing resources
-        used by views. If unprovided, an empty one will be created (until it is
-        populated).
+    :argument :class:`assets.Bin` bin: an asset bin containing assets
+        used by views. If unprovided, an empty one will be created (until it
+        is populated).
     :argument :class:`request.Manager` manager: a request manager, which
         managers state during each request. If unprovided, one will be created
         and used.
@@ -34,7 +34,7 @@ class Application(object):
         if manager is None:
             manager = Manager()
         if bin is None:
-            bin = resource.Bin(manager=manager)
+            bin = assets.Bin(manager=manager)
         if router is None:
             router = SimpleRouter()
 
@@ -69,7 +69,7 @@ class Application(object):
 
     def bind_bin(self, bin):
         """
-        Bind a resource bin to this application.
+        Bind an asset bin to this application.
 
         Simply adds the application to the bin globals.
 
@@ -82,17 +82,17 @@ class Application(object):
             ("router", self.router),
         ])
 
-    def bind_jinja_environment(self, environment, resource_name="jinja"):
+    def bind_jinja_environment(self, environment, asset_name="jinja"):
         """
         Bind useful pieces of the application to the given Jinja2 environment.
 
         :type environment: :class:`jinja2.Environment`
-        :argument str resource_name: the name to bind the environment in the
-            application's resource bin. The default is ``'jinja'``.
+        :argument str asset_name: the name to bind the environment in
+            the application's asset bin. The default is ``'jinja'``.
 
         """
 
-        self.bin.globals[resource_name] = environment
+        self.bin.globals[asset_name] = environment
         environment.globals.update([
             ("app", self),
             ("config", self.config),
