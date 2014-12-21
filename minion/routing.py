@@ -1,8 +1,16 @@
 """
-Fundamental routing building blocks.
+Routing building blocks.
 
-This module defines (different) implementations of routers -- objects which map
-(URL) paths to views and view arguments.
+There are two fundamental objects responsible for routing:
+
+    * Mappers map a URL (an instance of :class:`bytes`) to a view (a
+        callable) with some optional additional arguments
+    * Routers coordinate the entire routing process, taking a request
+        and returning a response, typically by composing with and invoking
+        one or more Mappers.
+
+This module defines (different) implementations which can be combined to
+perform these operations in various ways.
 
 """
 
