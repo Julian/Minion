@@ -1,11 +1,7 @@
 language: python
 python:
-  - "pypy"
   - "2.7"
-  - "3.3"
 install:
-    - pip install pytest -r test-requirements.txt
-    - python setup.py --quiet install
+    - pip install tox
 script:
-    - py.test -s minion
-    - python -m doctest README.rst
+    - tox
