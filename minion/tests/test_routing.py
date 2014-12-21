@@ -71,6 +71,7 @@ class TestTraversalMapperStatic(MapperTestMixin, TestCase):
 
 
 @skipIf(not hasattr(routing, "RoutesMapper"), "Routes not found")
+@skipIf(PY3, "WSGI on Py3 is insanity")
 class TestRoutesMapper(MapperTestMixin, TestCase):
     def setUp(self):
         self.mapper = routing.RoutesMapper()
