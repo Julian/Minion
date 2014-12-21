@@ -16,7 +16,7 @@ try:
 except ImportError:
     pass
 else:
-    class RoutesRouter(object):
+    class RoutesMapper(object):
         """
         A router that routes with `routes <http://routes.readthedocs.org/>`_.
 
@@ -28,12 +28,12 @@ else:
             self._generator = routes.URLGenerator(mapper, {})  # XXX: environ
             self._mapper = mapper
 
-        def add_route(self, route, fn, route_name=None, methods=None, **kwargs):
+        def add(self, route, fn, route_name=None, methods=None, **kwargs):
             if methods is not None:
                 kwargs.setdefault("conditions", {})["method"] = methods
             self._mapper.connect(route_name, route, minion_target=fn, **kwargs)
 
-        def match(self, request):
+        def map(self, request):
             match = self._mapper.match(
                 request.path,
                 # Yes seriously. This seems to be the only way to do this.
@@ -45,7 +45,7 @@ else:
             fn = match.pop("minion_target")
             return fn, match
 
-        def url_for(self, route_name, **kwargs):
+        def lookup(self, route_name, **kwargs):
             return self._generator(route_name, **kwargs)
 
 
@@ -54,7 +54,7 @@ try:
 except ImportError:
     pass
 else:
-    class WerkzeugRouter(object):
+    class WerkzeugMapper(object):
         """
         A router that uses Werkzeug's routing.
 
@@ -67,7 +67,7 @@ else:
             self._map = map
             self._adapter = self._map.bind(b"")  # XXX: server_name
 
-        def add_route(self, route, fn, route_name=None, methods=None, **kwargs):
+        def add(self, route, fn, route_name=None, methods=None, **kwargs):
             if methods is not None:
                 kwargs["methods"] = methods
             endpoint = route_name or fn
@@ -75,7 +75,7 @@ else:
             rule = werkzeug.routing.Rule(route, endpoint=endpoint, **kwargs)
             self._map.add(rule)
 
-        def match(self, request):
+        def map(self, request):
             try:
                 return self._adapter.match(
                     path_info=request.path, method=request.method,
@@ -88,14 +88,14 @@ else:
             except werkzeug.routing.HTTPException:
                 return None, {}
 
-        def url_for(self, route_name, **kwargs):
+        def lookup(self, route_name, **kwargs):
             try:
                 return self._adapter.build(route_name, kwargs)
             except werkzeug.routing.BuildError:
                 return route_name
 
 
-class TraversalRouter(object):
+class TraversalMapper(object):
     """
     Object-traversal based router for traversal of resource objects.
 
@@ -103,25 +103,25 @@ class TraversalRouter(object):
 
     def __init__(self, root, static_router=None):
         if static_router is None:
-            static_router = SimpleRouter()
+            static_router = SimpleMapper()
         self.root = root
         self.static_router = static_router
 
-    def add_route(self, route, fn, **kwargs):
-        self.static_router.add_route(route=route, fn=fn, **kwargs)
+    def add(self, route, fn, **kwargs):
+        self.static_router.add(route=route, fn=fn, **kwargs)
 
-    def match(self, request):
-        static_match, static_kwargs = self.static_router.match(request=request)
-        if static_match is not None:
-            return static_match, static_kwargs
+    def map(self, request):
+        static_map, static_kwargs = self.static_router.map(request=request)
+        if static_map is not None:
+            return static_map, static_kwargs
         resource = traverse(request=request, resource=self.root)
         return resource.render, {}
 
-    def url_for(self, route_name, **kwargs):
-        return self.static_router.url_for(route_name=route_name, **kwargs)
+    def lookup(self, route_name, **kwargs):
+        return self.static_router.lookup(route_name=route_name, **kwargs)
 
 
-class SimpleRouter(object):
+class SimpleMapper(object):
     """
     Simple dictionary based lookup-routing without parameters.
 
@@ -135,18 +135,18 @@ class SimpleRouter(object):
         self.routes = routes
         self._names = names
 
-    def add_route(self, route, fn, route_name=None, methods=(b"GET", b"HEAD")):
+    def add(self, route, fn, route_name=None, methods=(b"GET", b"HEAD")):
         self.routes[route] = fn, methods
         if route_name is not None:
             self._names[route_name] = route
 
-    def match(self, request):
+    def map(self, request):
         fn, methods = self.routes.get(request.path, (None, None))
         if methods is not None and request.method not in methods:
             return None, {}
         return fn, {}
 
-    def url_for(self, route_name, **kwargs):
+    def lookup(self, route_name, **kwargs):
         url = self._names.get(route_name, route_name)
         if kwargs:
             url += b"?" + urlencode(kwargs)

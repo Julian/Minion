@@ -9,48 +9,48 @@ def view(request):
     return Response("Is anybody out there?")
 
 
-class RouterTestMixin(object):
+class MapperTestMixin(object):
     """
-    Test basic functionality common to all routers.
+    Test basic functionality common to all mappers.
 
-    Expects a router to be present and instantiated at the `router` attribute
+    Expects a mapper to be present and instantiated at the `mapper` attribute
     of the test case.
 
     """
 
-    def test_it_routes_routes(self):
-        self.router.add_route(b"/route", view)
-        matched = self.router.match(Request(path=b"/route"))
-        self.assertEqual(matched, (view, {}))
+    def test_it_maps_routes(self):
+        self.mapper.add(b"/route", view)
+        mapped = self.mapper.map(Request(path=b"/route"))
+        self.assertEqual(mapped, (view, {}))
 
-    def test_it_routes_routes_for_specified_methods(self):
-        self.router.add_route(b"/route", view, methods=[b"POST"])
-        matched = self.router.match(Request(path=b"/route", method=b"POST"))
-        self.assertEqual(matched, (view, {}))
+    def test_it_maps_routes_for_specified_methods(self):
+        self.mapper.add(b"/route", view, methods=[b"POST"])
+        mapped = self.mapper.map(Request(path=b"/route", method=b"POST"))
+        self.assertEqual(mapped, (view, {}))
 
-    def test_it_does_not_route_routes_for_unspecified_methods(self):
-        self.router.add_route(b"/route", view, methods=[b"POST"])
-        matched = self.router.match(Request(path=b"/route", method=b"GET"))
-        self.assertEqual(matched, (None, {}))
+    def test_it_does_not_map_routes_for_unspecified_methods(self):
+        self.mapper.add(b"/route", view, methods=[b"POST"])
+        mapped = self.mapper.map(Request(path=b"/route", method=b"GET"))
+        self.assertEqual(mapped, (None, {}))
 
     def test_it_can_build_named_routes(self):
-        self.router.add_route(b"/", view, route_name=u"home")
-        self.assertEqual(self.router.url_for(u"home"), b"/")
+        self.mapper.add(b"/", view, route_name=u"home")
+        self.assertEqual(self.mapper.lookup(u"home"), b"/")
 
     def test_unknown_route_names_become_literal_paths(self):
-        self.assertEqual(self.router.url_for(b"/work"), b"/work")
+        self.assertEqual(self.mapper.lookup(b"/work"), b"/work")
 
-    def test_it_does_not_route_unknown_paths(self):
-        matched = self.router.match(Request(path=b"/route"))
-        self.assertEqual(matched, (None, {}))
+    def test_it_does_not_map_unknown_paths(self):
+        mapped = self.mapper.map(Request(path=b"/route"))
+        self.assertEqual(mapped, (None, {}))
 
     def test_extra_build_arguments_become_query_strings(self):
-        self.router.add_route(b"/", view, route_name=u"home")
-        url = self.router.url_for(u"home", thing=b"yes")
+        self.mapper.add(b"/", view, route_name=u"home")
+        url = self.mapper.lookup(u"home", thing=b"yes")
         self.assertEqual(url, b"/?thing=yes")
 
 
-class TestTraversalRouter(TestCase):
+class TestTraversalMapper(TestCase):
     def test_it_traverses_children(self):
         class Resource(object):
             def get_child(self, name, request):
@@ -58,59 +58,59 @@ class TestTraversalRouter(TestCase):
                     render=lambda request : Response(b"Hello " + name),
                 )
 
-        router = routing.TraversalRouter(root=Resource())
+        mapper = routing.TraversalMapper(root=Resource())
         request = Request(path=b"/world")
-        matched, kwargs = router.match(request)
-        self.assertEqual(matched(request), Response(content=b"Hello world"))
+        mapped, kwargs = mapper.map(request)
+        self.assertEqual(mapped(request), Response(content=b"Hello world"))
 
 
-class TestTraversalRouterStatic(RouterTestMixin, TestCase):
+class TestTraversalMapperStatic(MapperTestMixin, TestCase):
     def setUp(self):
-        self.router = routing.TraversalRouter(root=LeafResource(render=None))
+        self.mapper = routing.TraversalMapper(root=LeafResource(render=None))
 
 
-@skipIf(not hasattr(routing, "RoutesRouter"), "routes not found")
-class TestRoutesRouter(RouterTestMixin, TestCase):
+@skipIf(not hasattr(routing, "RoutesMapper"), "routes not found")
+class TestRoutesMapper(MapperTestMixin, TestCase):
     def setUp(self):
-        self.router = routing.RoutesRouter()
+        self.mapper = routing.RoutesMapper()
 
-    def test_it_routes_routes_with_arguments(self):
-        self.router.add_route(b"/route/{year}", view, stuff=b"12")
-        matched = self.router.match(Request(path=b"/route/2013"))
+    def test_it_maps_routes_with_arguments(self):
+        self.mapper.add(b"/route/{year}", view, stuff=b"12")
+        mapped = self.mapper.map(Request(path=b"/route/2013"))
         self.assertEqual(
-            matched, (view, {b"year" : b"2013", b"stuff" : b"12"}),
+            mapped, (view, {b"year" : b"2013", b"stuff" : b"12"}),
         )
 
     def test_it_builds_routes_with_arguments(self):
-        self.router.add_route(b"/{year}", view, route_name=u"year")
-        url = self.router.url_for(b"year", year=2012)
+        self.mapper.add(b"/{year}", view, route_name=u"year")
+        url = self.mapper.lookup(b"year", year=2012)
         self.assertEqual(url, b"/2012")
 
 
-@skipIf(not hasattr(routing, "WerkzeugRouter"), "werkzeug not found")
-class TestWerkzeugRouter(RouterTestMixin, TestCase):
+@skipIf(not hasattr(routing, "WerkzeugMapper"), "werkzeug not found")
+class TestWerkzeugMapper(MapperTestMixin, TestCase):
     def setUp(self):
-        self.router = routing.WerkzeugRouter()
+        self.mapper = routing.WerkzeugMapper()
 
-    def test_it_routes_routes_with_arguments(self):
-        self.router.add_route(b"/route/<int:year>", view)
-        matched = self.router.match(Request(path=b"/route/2013"))
-        self.assertEqual(matched, (view, {b"year" : 2013}))
+    def test_it_maps_routes_with_arguments(self):
+        self.mapper.add(b"/route/<int:year>", view)
+        mapped = self.mapper.map(Request(path=b"/route/2013"))
+        self.assertEqual(mapped, (view, {b"year" : 2013}))
 
     def test_it_builds_routes_with_arguments(self):
-        self.router.add_route(b"/<int:year>", view, route_name=u"year")
-        url = self.router.url_for(u"year", year=2012)
+        self.mapper.add(b"/<int:year>", view, route_name=u"year")
+        url = self.mapper.lookup(u"year", year=2012)
         self.assertEqual(url, b"/2012")
 
     def test_it_handles_routing_redirects(self):
-        self.router.add_route(b"/<int:year>/", view)
+        self.mapper.add(b"/<int:year>/", view)
         request = Request(path=b"/2013")
-        matched, _ = self.router.match(request)
+        mapped, _ = self.mapper.map(request)
         self.assertEqual(
-            matched(request), redirect(b"http:///2013/", code=301),
+            mapped(request), redirect(b"http:///2013/", code=301),
         )
 
 
-class TestSimpleRouter(RouterTestMixin, TestCase):
+class TestSimpleMapper(MapperTestMixin, TestCase):
     def setUp(self):
-        self.router = routing.SimpleRouter()
+        self.mapper = routing.SimpleMapper()

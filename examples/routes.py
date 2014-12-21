@@ -1,8 +1,8 @@
 from minion import Application, Response, wsgi_app
-from minion.routing import RoutesRouter
+from minion.routing import RoutesMapper
 
 
-app = Application(router=RoutesRouter())
+app = Application(router=RoutesMapper())
 
 
 @app.route("/greet/{user}", greeting="Hey")

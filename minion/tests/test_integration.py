@@ -2,12 +2,12 @@ from unittest import TestCase
 
 from minion import Application, Response
 from minion.request import Request
-from minion.routing import SimpleRouter
+from minion.routing import SimpleMapper
 
 
 class TestMinion(TestCase):
     def test_it_routes_simple_views(self):
-        minion = Application(router=SimpleRouter())
+        minion = Application(router=SimpleMapper())
 
         @minion.route(b"/show")
         def show(request):

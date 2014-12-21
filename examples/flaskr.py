@@ -12,7 +12,7 @@ import jinja2
 import werkzeug.wrappers
 
 from minion import Application, Response, wsgi_app
-from minion.routing import WerkzeugRouter
+from minion.routing import WerkzeugMapper
 import examples.static
 
 
@@ -22,7 +22,7 @@ loader = jinja2.FileSystemLoader(
 )
 app = Application(
     jinja=jinja2.Environment(loader=loader),
-    router=WerkzeugRouter(),
+    router=WerkzeugMapper(),
     config = {
         "credentials" : {"user" : "admin", "password" : "default"},
         "database" : {"uri" : "/tmp/flaskr.db"},
