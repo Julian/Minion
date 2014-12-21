@@ -10,6 +10,22 @@ def view(request):
     return Response("Is anybody out there?")
 
 
+class TestRouter(TestCase):
+    def setUp(self):
+        self.router = routing.Router(mapper=routing.SimpleMapper())
+
+    def test_route(self):
+        self.router.add(b"/", view)
+        request = Request(path=b"/")
+        response = self.router.route(request)
+        self.assertEqual(response, view(request))
+
+    def test_unknown_route(self):
+        request = Request(path=b"/404")
+        response = self.router.route(request)
+        self.assertEqual(response, Response(code=404))
+
+
 class MapperTestMixin(object):
     """
     Test basic functionality common to all mappers.

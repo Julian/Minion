@@ -1,8 +1,8 @@
 from collections import defaultdict
 
 from minion import assets
-from minion.request import Manager, Response
-from minion.routing import SimpleMapper
+from minion.request import Manager
+from minion.routing import Router, SimpleMapper
 
 
 class Application(object):
@@ -36,7 +36,7 @@ class Application(object):
         if bin is None:
             bin = assets.Bin(manager=manager)
         if router is None:
-            router = SimpleMapper()
+            router = Router(mapper=SimpleMapper())
 
         self._response_callbacks = defaultdict(list)
 
@@ -57,13 +57,7 @@ class Application(object):
 
     def serve(self, request):
         self.manager.request_started(request)
-        view, kwargs = self.router.map(request)
-
-        if view is not None:
-            response = view(request=request, **kwargs)
-        else:
-            response = Response(code=404)
-
+        response = self.router.route(request)
         self.manager.request_served(request, response)
         return response
 

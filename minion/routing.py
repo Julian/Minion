@@ -6,9 +6,27 @@ This module defines (different) implementations of routers -- objects which map
 
 """
 
+from characteristic import Attribute, attributes
+
 from minion.compat import items, urlencode
-from minion.request import redirect
+from minion.request import Response, redirect
 from minion.traversal import traverse
+
+
+@attributes([Attribute(name="mapper")])
+class Router(object):
+    def add(self, route, fn, route_name=None, methods=(b"GET", b"HEAD"), **kw):
+        self.mapper.add(
+            route, fn, route_name=route_name, methods=methods, **kw
+        )
+
+    def route(self, request):
+        view, kwargs = self.mapper.map(request)
+        if view is not None:
+            response = view(request=request, **kwargs)
+        else:
+            response = Response(code=404)
+        return response
 
 
 try:

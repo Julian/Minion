@@ -8,8 +8,8 @@ except ImportError:
 
 from minion import core, assets
 from minion.compat import iteritems
-from minion.request import Manager, Request
-from minion.routing import SimpleMapper
+from minion.request import Manager, Request, Response
+from minion.routing import Router, SimpleMapper
 
 
 class TestApplication(TestCase):
@@ -76,26 +76,23 @@ class TestApplication(TestCase):
 class TestApplicationIntegration(TestCase):
     def setUp(self):
         self.manager = mock.Mock(spec=Manager())
-        self.router = mock.Mock(spec=SimpleMapper())
+        self.router = Router(mapper=SimpleMapper())
         self.app = core.Application(manager=self.manager, router=self.router)
-        self.request = mock.Mock(spec=Request(path="/"))
+        self.request = Request(path="/")
 
     def test_it_starts_and_stops_the_request(self):
-        view, _ = self.router.map.return_value = mock.Mock(), {}
+        self.router.add(self.request.path, lambda request : Response(b"Hello"))
         self.app.serve(self.request)
         self.assertEqual(
             self.manager.mock_calls, [
                 mock.call.request_started(self.request),
-                mock.call.request_served(self.request, view.return_value),
+                mock.call.request_served(self.request, Response(b"Hello")),
             ],
         )
 
     def test_it_serves_mapped_requests(self):
-        view, _ = self.router.map.return_value = mock.Mock(), {"foo" : 12}
-        self.app.serve(self.request)
-        view.assert_called_once_with(request=self.request, foo=12)
+        self.router.add(self.request.path, lambda request : Response(b"Hello"))
+        self.assertEqual(self.app.serve(self.request), Response(b"Hello"))
 
     def test_it_serves_404s_for_unmapped_requests_by_default(self):
-        view, _ = self.router.map.return_value = None, {}
-        response = self.app.serve(self.request)
-        self.assertEqual(response.code, 404)
+        self.assertEqual(self.app.serve(self.request).code, 404)
