@@ -36,7 +36,7 @@ except ImportError:
 else:
     class RoutesMapper(object):
         """
-        A router that routes with `routes <http://routes.readthedocs.org/>`_.
+        A mapper that maps via `routes <http://routes.readthedocs.org/>`_.
 
         """
 
@@ -74,7 +74,7 @@ except ImportError:
 else:
     class WerkzeugMapper(object):
         """
-        A router that uses Werkzeug's routing.
+        A mapper that uses Werkzeug's routing.
 
         """
 
@@ -115,21 +115,21 @@ else:
 
 class TraversalMapper(object):
     """
-    Object-traversal based router for traversal of resource objects.
+    Object-traversal based mapper for traversal of resource objects.
 
     """
 
-    def __init__(self, root, static_router=None):
-        if static_router is None:
-            static_router = SimpleMapper()
+    def __init__(self, root, static_mapper=None):
+        if static_mapper is None:
+            static_mapper = SimpleMapper()
         self.root = root
 
-        self.static_router = static_router
-        self.add = static_router.add
-        self.lookup = static_router.lookup
+        self.static_mapper = static_mapper
+        self.add = static_mapper.add
+        self.lookup = static_mapper.lookup
 
     def map(self, request):
-        static_map, static_kwargs = self.static_router.map(request=request)
+        static_map, static_kwargs = self.static_mapper.map(request=request)
         if static_map is not None:
             return static_map, static_kwargs
         resource = traverse(request=request, resource=self.root)
