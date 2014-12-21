@@ -49,12 +49,12 @@ class TestMethodDelegate(TestCase):
             GET=lambda request : b"foo",
             put=lambda request : request.method,
         )
-        self.assertEqual(render(Request(path="/", method=b"GET")), b"foo")
-        self.assertEqual(render(Request(path="/", method=b"PUT")), b"PUT")
+        self.assertEqual(render(Request(path=b"/", method=b"GET")), b"foo")
+        self.assertEqual(render(Request(path=b"/", method=b"PUT")), b"PUT")
 
     def test_unknown_HTTP_methods_return_405s(self):
         render = traversal.method_delegate(get=lambda _ : b"foo")
-        self.assertEqual(render(Request(path="/", method=b"PUT")).code, 405)
+        self.assertEqual(render(Request(path=b"/", method=b"PUT")).code, 405)
 
 
 class LineDelimiterResource(object):

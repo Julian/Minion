@@ -6,7 +6,7 @@ This module defines (different) implementations of routers -- objects which map
 
 """
 
-from minion.compat import urlencode
+from minion.compat import iteritems, urlencode
 from minion.request import redirect
 from minion.traversal import traverse
 
@@ -146,5 +146,5 @@ class SimpleMapper(object):
     def lookup(self, route_name, **kwargs):
         url = self._names.get(route_name, route_name)
         if kwargs:
-            url += b"?" + urlencode(kwargs)
+            url += b"?" + urlencode(iteritems(kwargs))
         return url

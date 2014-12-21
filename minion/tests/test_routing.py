@@ -1,6 +1,7 @@
 from unittest import TestCase, skipIf
 
 from minion import Response, routing
+from minion.compat import PY3
 from minion.request import Request, redirect
 from minion.traversal import LeafResource
 
@@ -69,7 +70,7 @@ class TestTraversalMapperStatic(MapperTestMixin, TestCase):
         self.mapper = routing.TraversalMapper(root=LeafResource(render=None))
 
 
-@skipIf(not hasattr(routing, "RoutesMapper"), "routes not found")
+@skipIf(not hasattr(routing, "RoutesMapper"), "Routes not found")
 class TestRoutesMapper(MapperTestMixin, TestCase):
     def setUp(self):
         self.mapper = routing.RoutesMapper()
@@ -87,7 +88,8 @@ class TestRoutesMapper(MapperTestMixin, TestCase):
         self.assertEqual(url, b"/2012")
 
 
-@skipIf(not hasattr(routing, "WerkzeugMapper"), "werkzeug not found")
+@skipIf(not hasattr(routing, "WerkzeugMapper"), "Werkzeug not found")
+@skipIf(PY3, "WSGI on Py3 is insanity")
 class TestWerkzeugMapper(MapperTestMixin, TestCase):
     def setUp(self):
         self.mapper = routing.WerkzeugMapper()

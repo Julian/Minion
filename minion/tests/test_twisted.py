@@ -1,5 +1,7 @@
+from unittest import skipIf
+
 from minion import Application, Response
-from minion.compat import BytesIO
+from minion.compat import BytesIO, PY3
 from minion.http import Headers
 from minion.twisted import MinionResource
 
@@ -27,6 +29,7 @@ class TestMinionResource(SynchronousTestCase):
         if content is not None:
             self.assertEqual(result, content)
 
+    @skipIf(PY3, "twisted.web doesn't support Py3 yet")
     def test_render(self):
         @self.minion.route(b"/foo/bar")
         def foo_bar(request):
@@ -44,6 +47,7 @@ class TestMinionResource(SynchronousTestCase):
             request, response, b"http://example.com", content=b"/foo/bar",
         )
 
+    @skipIf(PY3, "twisted.web doesn't support Py3 yet")
     def test_request_body(self):
         @self.minion.route(b"/")
         def respond(request):
