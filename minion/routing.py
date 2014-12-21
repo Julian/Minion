@@ -105,10 +105,10 @@ class TraversalMapper(object):
         if static_router is None:
             static_router = SimpleMapper()
         self.root = root
-        self.static_router = static_router
 
-    def add(self, route, fn, **kwargs):
-        self.static_router.add(route=route, fn=fn, **kwargs)
+        self.static_router = static_router
+        self.add = static_router.add
+        self.lookup = static_router.lookup
 
     def map(self, request):
         static_map, static_kwargs = self.static_router.map(request=request)
@@ -116,9 +116,6 @@ class TraversalMapper(object):
             return static_map, static_kwargs
         resource = traverse(request=request, resource=self.root)
         return resource.render, {}
-
-    def lookup(self, route_name, **kwargs):
-        return self.static_router.lookup(route_name=route_name, **kwargs)
 
 
 class SimpleMapper(object):
