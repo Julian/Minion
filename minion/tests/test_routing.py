@@ -48,6 +48,44 @@ class TestRouter(TestCase):
         response = self.router.route(Request(path=b"/", method=b"POST"))
         self.assertEqual(response, Response(b"?ereht tuo ydobyna sI"))
 
+    def test_renderer_with_render_error_handler(self):
+        class RendererWithErrorHandler(object):
+            def render(self, stuff):
+                raise ZeroDivisionError()
+
+            def render_error(self, stuff, error):
+                return Response(stuff.content[:2] + error.__class__.__name__)
+
+        self.router.add(b"/", view, renderer=RendererWithErrorHandler())
+        response = self.router.route(Request(path=b"/"))
+        self.assertEqual(response, Response(b"IsZeroDivisionError"))
+
+    def test_renderer_without_error_handler(self):
+        class RendererWithoutErrorHandler(object):
+            def render(self, stuff):
+                raise ZeroDivisionError()
+
+        self.router.add(b"/", view, renderer=RendererWithoutErrorHandler())
+        request = Request(path=b"/")
+
+        with self.assertRaises(ZeroDivisionError):
+            response = self.router.route(request)
+
+    def test_renderer_with_view_error_handler(self):
+        class RendererWithErrorHandler(object):
+            def render(self, stuff):
+                raise ZeroDivisionError("I won't ever get raised")
+
+            def view_error(self, error):
+                return Response(error.__class__.__name__)
+
+        def boom(request):
+            raise IndexError()
+
+        self.router.add(b"/", boom, renderer=RendererWithErrorHandler())
+        response = self.router.route(Request(path=b"/"))
+        self.assertEqual(response, Response(b"IndexError"))
+
 
 class MapperTestMixin(object):
     """

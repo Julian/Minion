@@ -40,7 +40,21 @@ class Router(object):
         else:
             @wraps(fn)
             def view(request, **kwargs):
-                return renderer.render(fn(request, **kwargs))
+                try:
+                    returned = fn(request, **kwargs)
+                except Exception as error:
+                    view_error = getattr(renderer, "view_error", None)
+                    if view_error is None:
+                        raise
+                    return view_error(error)
+
+                try:
+                    return renderer.render(returned)
+                except Exception as error:
+                    render_error = getattr(renderer, "render_error", None)
+                    if render_error is None:
+                        raise
+                    return render_error(returned, error)
 
         self.mapper.add(
             route, view, route_name=route_name, methods=methods, **kw
