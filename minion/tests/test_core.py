@@ -1,5 +1,4 @@
 from unittest import TestCase, skipIf
-import mock
 
 try:
     import jinja2
@@ -24,13 +23,16 @@ class TestApplication(TestCase):
         self.assertEqual(subdict, matches)
 
     def test_it_delegates_routes_to_the_router(self):
-        router = mock.Mock(spec=SimpleMapper())
-        application = core.Application(router=router)
+        class Router(object):
+            def add(this, route, fn, baz):
+                self.added = route, fn, baz
 
-        fn = mock.Mock()
-        application.route("/foo/bar", baz=2)(fn)
+        application = core.Application(router=Router())
+        @application.route("/foo", baz=2)
+        def fn(request):
+            pass
 
-        router.add.assert_called_once_with("/foo/bar", fn, baz=2)
+        self.assertEqual(getattr(self, "added", None), ("/foo", fn, 2))
 
     def test_binds_to_its_bin(self):
         app = core.Application()
@@ -75,20 +77,10 @@ class TestApplication(TestCase):
 
 class TestApplicationIntegration(TestCase):
     def setUp(self):
-        self.manager = mock.Mock(spec=Manager())
+        self.manager = Manager()
         self.router = Router(mapper=SimpleMapper())
         self.app = core.Application(manager=self.manager, router=self.router)
         self.request = Request(path="/")
-
-    def test_it_starts_and_stops_the_request(self):
-        self.router.add(self.request.path, lambda request : Response(b"Hello"))
-        self.app.serve(self.request)
-        self.assertEqual(
-            self.manager.mock_calls, [
-                mock.call.request_started(self.request),
-                mock.call.request_served(self.request, Response(b"Hello")),
-            ],
-        )
 
     def test_it_serves_mapped_requests(self):
         self.router.add(self.request.path, lambda request : Response(b"Hello"))
