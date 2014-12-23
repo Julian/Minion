@@ -14,6 +14,8 @@ perform these operations in various ways.
 
 """
 
+from collections import defaultdict
+
 from characteristic import Attribute, attributes
 
 from minion.compat import items, urlencode
@@ -150,23 +152,18 @@ class SimpleMapper(object):
 
     """
 
-    def __init__(self, routes=None, names=None):
-        if routes is None:
-            routes = {}
-        if names is None:
-            names = {}
-        self.routes = routes
-        self._names = names
+    def __init__(self):
+        self._routes = defaultdict(dict)
+        self._names = {}
 
     def add(self, route, fn, route_name=None, methods=(b"GET", b"HEAD")):
-        self.routes[route] = fn, methods
+        for method in methods:
+            self._routes[method][route] = fn
         if route_name is not None:
             self._names[route_name] = route
 
     def map(self, request):
-        fn, methods = self.routes.get(request.path, (None, None))
-        if methods is not None and request.method not in methods:
-            return None, {}
+        fn = self._routes[request.method].get(request.path)
         return fn, {}
 
     def lookup(self, route_name, **kwargs):

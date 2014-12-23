@@ -50,6 +50,17 @@ class MapperTestMixin(object):
         mapped = self.mapper.map(Request(path=b"/route", method=b"GET"))
         self.assertEqual(mapped, (None, {}))
 
+    def test_it_maps_multiple_routes_for_specified_methods(self):
+        self.mapper.add(b"/", lambda r : Response(b"GET"), methods=[b"GET"])
+        self.mapper.add(b"/", lambda r : Response(b"POST"), methods=[b"POST"])
+
+        get = Request(path=b"/", method=b"GET")
+        post = Request(path=b"/", method=b"POST")
+        self.assertEqual(
+            (self.mapper.map(get)[0](get), self.mapper.map(post)[0](post)),
+            (Response(b"GET"), Response(b"POST")),
+        )
+
     def test_it_can_build_named_routes(self):
         self.mapper.add(b"/", view, route_name=u"home")
         self.assertEqual(self.mapper.lookup(u"home"), b"/")
