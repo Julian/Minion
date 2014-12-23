@@ -6,8 +6,13 @@ from minion.request import Request, redirect
 from minion.traversal import LeafResource
 
 
+class ReverseRenderer(object):
+    def render(self, view_response):
+        return Response("".join(reversed(view_response.content)))
+
+
 def view(request):
-    return Response("Is anybody out there?")
+    return Response(b"Is anybody out there?")
 
 
 class TestRouter(TestCase):
@@ -24,6 +29,24 @@ class TestRouter(TestCase):
         request = Request(path=b"/404")
         response = self.router.route(request)
         self.assertEqual(response, Response(code=404))
+
+    def test_specified_renderer(self):
+        self.router.add(b"/", view, renderer=ReverseRenderer())
+        request = Request(path=b"/")
+        response = self.router.route(request)
+        self.assertEqual(response, Response(b"?ereht tuo ydobyna sI"))
+
+    def test_specified_renderer_multiple_routes(self):
+        self.router.add(b"/", view, methods=[b"GET"], renderer=None)
+        self.router.add(
+            b"/", view, methods=[b"POST"], renderer=ReverseRenderer(),
+        )
+
+        response = self.router.route(Request(path=b"/", method=b"GET"))
+        self.assertEqual(response, Response(b"Is anybody out there?"))
+
+        response = self.router.route(Request(path=b"/", method=b"POST"))
+        self.assertEqual(response, Response(b"?ereht tuo ydobyna sI"))
 
 
 class MapperTestMixin(object):

@@ -15,6 +15,7 @@ perform these operations in various ways.
 """
 
 from collections import defaultdict
+from functools import wraps
 
 from characteristic import Attribute, attributes
 
@@ -25,9 +26,24 @@ from minion.traversal import traverse
 
 @attributes([Attribute(name="mapper")])
 class Router(object):
-    def add(self, route, fn, route_name=None, methods=(b"GET", b"HEAD"), **kw):
+    def add(
+        self,
+        route,
+        fn,
+        renderer=None,
+        route_name=None,
+        methods=(b"GET", b"HEAD"),
+        **kw
+    ):
+        if renderer is None:
+            view = fn
+        else:
+            @wraps(fn)
+            def view(request, **kwargs):
+                return renderer.render(fn(request, **kwargs))
+
         self.mapper.add(
-            route, fn, route_name=route_name, methods=methods, **kw
+            route, view, route_name=route_name, methods=methods, **kw
         )
 
     def route(self, request):
