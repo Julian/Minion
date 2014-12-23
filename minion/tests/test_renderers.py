@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+import json
 
 from minion import Response, renderers
 
@@ -21,3 +22,17 @@ class TestUnicodeRenderer(TestCase):
     def test_UTF8(self):
         response = renderers.UTF8.render(u"שלום")
         self.assertEqual(response, Response(b"שלום"))
+
+
+class TestJSON(TestCase):
+    def test_it_dumps_json(self):
+        self.assertEqual(
+            renderers.JSON().render({"foo" : "bar"}),
+            Response(b'{"foo": "bar"}'),
+        )
+
+    def test_customized_dumps(self):
+        self.assertEqual(
+            renderers.JSON(separators=",:").render({"foo" : "bar"}),
+            Response(b'{"foo":"bar"}'),
+        )
