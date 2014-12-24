@@ -4,7 +4,7 @@ from minion.compat import iteritems
 from minion.http import Accept, Headers
 
 
-class WSGIRequest(object):
+class Request(object):
     def __init__(self, environ):
         self.environ = environ
 
@@ -33,7 +33,7 @@ class WSGIRequest(object):
         return self.environ["PATH_INFO"]
 
 
-def wsgi_app(application, request_class=WSGIRequest):
+def create_app(application, request_class=Request):
     """
     Create a WSGI application out of the given Minion app.
 

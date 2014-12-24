@@ -12,7 +12,7 @@ from minion.http import Accept, Headers
 class TestWSGIMinion(TestCase):
     def setUp(self):
         self.minion = Application()
-        self.wsgi = TestApp(wsgi.wsgi_app(self.minion))
+        self.wsgi = TestApp(wsgi.create_app(self.minion))
 
     def test_it_speaks_wsgi(self):
         @self.minion.route(b"/respond")
@@ -60,17 +60,17 @@ class TestWSGIMinion(TestCase):
         )
 
 
-class TestWSGIRequest(TestCase):
+class TestRequest(TestCase):
     def test_accept(self):
         accept = "application/json"
-        request = wsgi.WSGIRequest(
+        request = wsgi.Request(
             environ=create_environ(headers={"Accept" : accept})
         )
         self.assertEqual(request.accept, Accept.from_header(accept))
 
     def test_accept_is_calculated_once(self):
         accept = "application/json"
-        request = wsgi.WSGIRequest(
+        request = wsgi.Request(
             environ=create_environ(headers={"Accept" : accept})
         )
         self.assertIs(request.accept, request.accept)
