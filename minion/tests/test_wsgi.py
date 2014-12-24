@@ -1,18 +1,18 @@
 from unittest import TestCase, skipIf
 
 from webtest import TestApp
+from werkzeug.test import create_environ
 
-from minion import Application, Response
+from minion import Application, Response, wsgi
 from minion.compat import PY3
-from minion.http import Headers
-from minion.wsgi import wsgi_app
+from minion.http import Accept, Headers
 
 
 @skipIf(PY3, "WSGI is pure insanity on Py3")
 class TestWSGIMinion(TestCase):
     def setUp(self):
         self.minion = Application()
-        self.wsgi = TestApp(wsgi_app(self.minion))
+        self.wsgi = TestApp(wsgi.wsgi_app(self.minion))
 
     def test_it_speaks_wsgi(self):
         @self.minion.route(b"/respond")
@@ -58,3 +58,19 @@ class TestWSGIMinion(TestCase):
             response.headers[b"Content-Type"],
             b"application/json",
         )
+
+
+class TestWSGIRequest(TestCase):
+    def test_accept(self):
+        accept = "application/json"
+        request = wsgi.WSGIRequest(
+            environ=create_environ(headers={"Accept" : accept})
+        )
+        self.assertEqual(request.accept, Accept.from_header(accept))
+
+    def test_accept_is_calculated_once(self):
+        accept = "application/json"
+        request = wsgi.WSGIRequest(
+            environ=create_environ(headers={"Accept" : accept})
+        )
+        self.assertIs(request.accept, request.accept)

@@ -1,12 +1,16 @@
 from cached_property import cached_property as calculated_once
 
 from minion.compat import iteritems
-from minion.http import Headers
+from minion.http import Accept, Headers
 
 
 class WSGIRequest(object):
     def __init__(self, environ):
         self.environ = environ
+
+    @calculated_once
+    def accept(self):
+        return Accept.from_header(header=self.environ.get("HTTP_ACCEPT"))
 
     @calculated_once
     def headers(self):
