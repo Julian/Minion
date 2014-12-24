@@ -7,8 +7,8 @@ from minion.traversal import LeafResource
 
 
 class ReverseRenderer(object):
-    def render(self, view_response):
-        return Response("".join(reversed(view_response.content)))
+    def render(self, request, response):
+        return Response(b"".join(reversed(response.content)))
 
 
 def view(request):
@@ -50,11 +50,11 @@ class TestRouter(TestCase):
 
     def test_renderer_with_render_error_handler(self):
         class RendererWithErrorHandler(object):
-            def render(self, stuff):
+            def render(self, request, response):
                 raise ZeroDivisionError()
 
-            def render_error(self, stuff, error):
-                return Response(stuff.content[:2] + error.__class__.__name__)
+            def render_error(self, request, response, exc):
+                return Response(response.content[:2] + exc.__class__.__name__)
 
         self.router.add(b"/", view, renderer=RendererWithErrorHandler())
         response = self.router.route(Request(path=b"/"))
@@ -62,7 +62,7 @@ class TestRouter(TestCase):
 
     def test_renderer_without_error_handler(self):
         class RendererWithoutErrorHandler(object):
-            def render(self, stuff):
+            def render(self, request, response):
                 raise ZeroDivisionError()
 
         self.router.add(b"/", view, renderer=RendererWithoutErrorHandler())
@@ -73,10 +73,10 @@ class TestRouter(TestCase):
 
     def test_renderer_with_view_error_handler(self):
         class RendererWithErrorHandler(object):
-            def render(self, stuff):
+            def render(self, request, response):
                 raise ZeroDivisionError("I won't ever get raised")
 
-            def view_error(self, error):
+            def view_error(self, request, error):
                 return Response(error.__class__.__name__)
 
         def boom(request):
