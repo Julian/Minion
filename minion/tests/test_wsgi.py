@@ -6,6 +6,7 @@ from werkzeug.test import create_environ
 from minion import Application, Response, wsgi
 from minion.compat import PY3
 from minion.http import Accept, Headers
+from minion.tests.test_request import RequestTestMixin
 
 
 @skipIf(PY3, "WSGI is pure insanity on Py3")
@@ -60,17 +61,7 @@ class TestWSGIMinion(TestCase):
         )
 
 
-class TestRequest(TestCase):
-    def test_accept(self):
-        accept = "application/json"
-        request = wsgi.Request(
-            environ=create_environ(headers={"Accept" : accept})
-        )
-        self.assertEqual(request.accept, Accept.from_header(accept))
-
-    def test_accept_is_calculated_once(self):
-        accept = "application/json"
-        request = wsgi.Request(
-            environ=create_environ(headers={"Accept" : accept})
-        )
-        self.assertIs(request.accept, request.accept)
+class TestRequest(RequestTestMixin, TestCase):
+    def make_request(self, headers):
+        headers = {k : ",".join(v) for k, v in headers.canonicalized()}
+        return wsgi.Request(environ=create_environ(headers=headers))

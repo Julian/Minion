@@ -68,18 +68,26 @@ class TestManager(TestCase):
         self.assertEqual(response.thing, 4)
 
 
-class TestRequest(TestCase):
+class RequestTestMixin(object):
+    """
+    Tests implementations of the Request interface.
+
+    """
+
     def test_accept(self):
         accept = "application/json"
-        headers = Headers([("accept", [accept])])
-        self.request = request.Request(path=b"/", headers=headers)
-        self.assertEqual(self.request.accept, Accept.from_header(accept))
+        request = self.make_request(headers=Headers([("accept", [accept])]))
+        self.assertEqual(request.accept, Accept.from_header(accept))
 
     def test_accept_is_calculated_once(self):
         accept = "application/json"
-        headers = Headers([("accept", [accept])])
-        self.request = request.Request(path=b"/", headers=headers)
-        self.assertIs(self.request.accept, self.request.accept)
+        request = self.make_request(headers=Headers([("accept", [accept])]))
+        self.assertIs(request.accept, request.accept)
+
+
+class TestRequest(RequestTestMixin, TestCase):
+    def make_request(self, headers):
+        return request.Request(path=b"/", headers=headers)
 
     def test_flash(self):
         self.request = request.Request(path=b"/")
