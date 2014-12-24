@@ -94,11 +94,17 @@ class HeaderRetrievalTestsMixin(object):
         )
 
         if PY3:
-            fields = " b'Foo'=[b'bar'] b'Thing'=[b'baz', b'quux']>"
+            fields = " contents={b'Foo'=[b'bar'] b'Thing'=[b'baz', b'quux']}>"
         else:
-            fields = " Foo=['bar'] Thing=['baz', 'quux']>"
+            fields = " contents={Foo=['bar'] Thing=['baz', 'quux']}>"
 
         self.assertEqual(repr(headers), "<" + self.Headers.__name__ + fields)
+
+    def test_empty_repr(self):
+        headers = self.Headers()
+        self.assertEqual(
+            repr(headers), "<" + self.Headers.__name__ + " contents={}>",
+        )
 
 
 class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):

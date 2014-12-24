@@ -61,7 +61,7 @@ class Headers(object):
             "{0}={1!r}".format(name, values)
             for name, values in sorted(self.canonicalized())
         )
-        return "<{0.__class__.__name__} {1}>".format(self, contents)
+        return "<{.__class__.__name__} contents={{{}}}>".format(self, contents)
 
     def canonicalized(self):
         for name, values in iteritems(self._contents):
