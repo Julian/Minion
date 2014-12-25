@@ -24,15 +24,15 @@ class TestUnicodeRenderer(TestCase):
         self.assertEqual(response, Response(b"שלום"))
 
 
-class TestJSON(TestCase):
+class TestSimpleJSON(TestCase):
     def test_it_dumps_json(self):
         self.assertEqual(
-            renderers.JSON().render({"foo" : "bar"}),
+            renderers.SimpleJSON().render({"foo" : "bar"}),
             Response(b'{"foo": "bar"}'),
         )
 
     def test_customized_dumps(self):
         self.assertEqual(
-            renderers.JSON(separators=",:").render({"foo" : "bar"}),
+            renderers.SimpleJSON(separators=",:").render({"foo" : "bar"}),
             Response(b'{"foo":"bar"}'),
         )

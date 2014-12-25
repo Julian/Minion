@@ -6,7 +6,12 @@ from characteristic import Attribute, attributes
 from minion import Response
 
 
-class JSON(object):
+class SimpleJSON(object):
+    """
+    A simple JSON renderer that renders by dumping with any given parameters.
+
+    """
+
     def __init__(self, **kwargs):
         self._dumps = partial(json.dumps, **kwargs)
 
