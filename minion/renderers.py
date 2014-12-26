@@ -39,12 +39,7 @@ def bind(renderer, to):
     """
     Bind a renderer to the given callable by constructing a new rendering view.
 
-    If ``renderer`` is None, return the given view unchanged.
-
     """
-
-    if renderer is None:
-        return to
 
     @wraps(to)
     def view(request, **kwargs):

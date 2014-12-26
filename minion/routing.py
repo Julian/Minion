@@ -35,9 +35,10 @@ class Router(object):
         methods=(b"GET", b"HEAD"),
         **kw
     ):
-        view = bind(renderer=renderer, to=fn)
+        if renderer is not None:
+            fn = bind(renderer=renderer, to=fn)
         self.mapper.add(
-            route, view, route_name=route_name, methods=methods, **kw
+            route, fn, route_name=route_name, methods=methods, **kw
         )
 
     def route(self, request):
