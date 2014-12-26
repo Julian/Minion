@@ -15,7 +15,7 @@ class SimpleJSON(object):
     def __init__(self, **kwargs):
         self._dumps = partial(json.dumps, **kwargs)
 
-    def render(self, jsonable):
+    def render(self, request, jsonable):
         return Response(self._dumps(jsonable))
 
 
@@ -26,7 +26,7 @@ class SimpleJSON(object):
     ],
 )
 class Unicode(object):
-    def render(self, text):
+    def render(self, request, text):
         return Response(
             text.encode(encoding=self.encoding, errors=self.errors),
         )
