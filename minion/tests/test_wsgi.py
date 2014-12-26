@@ -5,7 +5,7 @@ from werkzeug.test import create_environ
 
 from minion import Application, Response, wsgi
 from minion.compat import PY3
-from minion.http import Accept, Headers
+from minion.http import Headers
 from minion.tests.test_request import RequestTestMixin
 
 

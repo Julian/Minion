@@ -69,7 +69,7 @@ class TestRouter(TestCase):
         request = Request(path=b"/")
 
         with self.assertRaises(ZeroDivisionError):
-            response = self.router.route(request)
+            self.router.route(request)
 
     def test_renderer_with_view_error_handler(self):
         class RendererWithErrorHandler(object):

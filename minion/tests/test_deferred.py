@@ -61,18 +61,3 @@ class TestDeferred(TestCase):
         error = ABadThing("Whoops!")
         deferred.error(error)
         self.assertResultedIn(error=((error,), {}))
-
-    def test_succeed_without_args(self):
-        deferred = Deferred()
-        deferred.chain.on_success(self._succeeded)
-        deferred.succeed("hello")
-        self.assertResultedIn(success=(("hello",), {}))
-
-    def test_two_on_successes(self):
-        deferred = Deferred()
-        deferred.chain.on_success(self._succeeded)
-        deferred.chain.on_success(self._second_succeeded)
-        deferred.succeed("hello")
-        result = (("hello",), {})
-        self.assertResultedIn(success=result, second=result)
-
