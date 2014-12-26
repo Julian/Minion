@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 from unittest import TestCase
 import json
 
 from minion import Response, renderers
-from minion.http import Accept
+from minion.http import Headers
 from minion.request import Request
 
 
@@ -33,8 +34,58 @@ class TestUnicodeRenderer(TestCase):
 
 
 class TestJSON(TestCase):
+    def assertPretty(self, content, response):
+        self.assertNotEqual(
+            response, Response(
+                headers=Headers([("Content-Type", ["application/json"])]),
+                content=json.dumps(content),
+            ),
+        )
+        self.assertEqual(
+            response, Response(
+                headers=Headers([("Content-Type", ["application/json"])]),
+                content=json.dumps(content, indent=2, sort_keys=True)
+            ),
+        )
+
+    def assertNotPretty(self, content, response):
+        self.assertEqual(
+            response, Response(
+                headers=Headers([("Content-Type", ["application/json"])]),
+                content=json.dumps(content),
+            ),
+        )
+        self.assertNotEqual(
+            response, Response(
+                headers=Headers([("Content-Type", ["application/json"])]),
+                content=json.dumps(content, indent=2, sort_keys=True)
+            ),
+        )
+
     def test_it_dumps_pretty_json_for_humans(self):
-        pass
+        content = ["a", "b", "c"]
+        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        request = Request(path=b"/", headers=Headers([("Accept", ["*/*"])]))
+        self.assertPretty(content, render(request))
+
+    def test_it_dumps_pretty_json_for_humans_no_accept_header(self):
+        content = ["a", "b", "c"]
+        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        self.assertPretty(content, render(Request(path=b"/")))
+
+    def test_it_dumps_practical_json_for_machines(self):
+        content = ["a", "b", "c"]
+        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        request = Request(
+            path=b"/", headers=Headers([("Accept", ["application/json"])]),
+        )
+        self.assertNotPretty(content, render(request))
+
+    def test_dict_sort_keys(self):
+        content = OrderedDict([("foo", "bar"), ("baz", "quux")])
+        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        request = Request(path=b"/", headers=Headers([("Accept", ["*/*"])]))
+        self.assertPretty(content, render(request))
 
 
 class TestSimpleJSON(TestCase):

@@ -3,7 +3,28 @@ import json
 
 from characteristic import Attribute, attributes
 
+from minion.http import Headers, MediaRange
 from minion.request import Response
+
+
+class JSON(object):
+    """
+    An 'intelligent' JSON renderer that pretty-prints JSON for humans.
+
+    """
+
+    def render(self, request, jsonable):
+        machine_json = request.accept.media_types[-1] == MediaRange(
+            type="application", subtype="json",
+        )
+        if machine_json:
+            content = json.dumps(jsonable)
+        else:
+            content = json.dumps(jsonable, indent=2, sort_keys=True)
+        return Response(
+            content=content,
+            headers=Headers([("Content-Type", ["application/json"])]),
+        )
 
 
 class SimpleJSON(object):
