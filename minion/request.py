@@ -92,7 +92,9 @@ class Manager(object):
 class Request(object):
     @calculated_once
     def accept(self):
-        header = ",".join(self.headers.get("Accept"))
+        header = self.headers.get("Accept")
+        if header is not None:
+            header = ",".join(header)
         return Accept.from_header(header=header)
 
     def flash(self, message):

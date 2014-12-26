@@ -79,6 +79,10 @@ class RequestTestMixin(object):
         request = self.make_request(headers=Headers([("accept", [accept])]))
         self.assertEqual(request.accept, Accept.from_header(accept))
 
+    def test_accept_no_header(self):
+        request = self.make_request(headers=Headers())
+        self.assertEqual(request.accept, Accept.ALL)
+
     def test_accept_is_calculated_once(self):
         accept = "application/json"
         request = self.make_request(headers=Headers([("accept", [accept])]))
