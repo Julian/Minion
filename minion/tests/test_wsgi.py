@@ -3,9 +3,11 @@ from unittest import TestCase, skipIf
 from webtest import TestApp
 from werkzeug.test import create_environ
 
-from minion import Application, Response, wsgi
+from minion import wsgi
 from minion.compat import PY3
+from minion.core import Application
 from minion.http import Headers
+from minion.request import Response
 from minion.tests.test_request import RequestTestMixin
 
 

@@ -3,9 +3,9 @@ from collections import OrderedDict
 from unittest import TestCase
 import json
 
-from minion import Response, renderers
+from minion import renderers
 from minion.http import Headers
-from minion.request import Request
+from minion.request import Request, Response
 
 
 class TestUnicodeRenderer(TestCase):

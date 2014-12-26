@@ -1,8 +1,9 @@
 from unittest import skipIf
 
-from minion import Application, Response
 from minion.compat import BytesIO, PY3
+from minion.core import Application
 from minion.http import Headers
+from minion.request import Response
 from minion.twisted import MinionResource
 
 from twisted.internet.defer import succeed

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from minion import Application, Response
-from minion.request import Request
+from minion.core import Application
+from minion.request import Request, Response
 from minion.routing import Router, SimpleMapper
 
 
