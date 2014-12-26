@@ -15,11 +15,11 @@ perform these operations in various ways.
 """
 
 from collections import defaultdict
-from functools import wraps
 
 from characteristic import Attribute, attributes
 
 from minion.compat import items, urlencode
+from minion.renderers import bind
 from minion.request import Response, redirect
 from minion.traversal import traverse
 
@@ -35,27 +35,7 @@ class Router(object):
         methods=(b"GET", b"HEAD"),
         **kw
     ):
-        if renderer is None:
-            view = fn
-        else:
-            @wraps(fn)
-            def view(request, **kwargs):
-                try:
-                    returned = fn(request, **kwargs)
-                except Exception as error:
-                    view_error = getattr(renderer, "view_error", None)
-                    if view_error is None:
-                        raise
-                    return view_error(request, error)
-
-                try:
-                    return renderer.render(request, returned)
-                except Exception as error:
-                    render_error = getattr(renderer, "render_error", None)
-                    if render_error is None:
-                        raise
-                    return render_error(request, returned, error)
-
+        view = bind(renderer=renderer, to=fn)
         self.mapper.add(
             route, view, route_name=route_name, methods=methods, **kw
         )

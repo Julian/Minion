@@ -1,9 +1,9 @@
-from functools import partial
+from functools import partial, wraps
 import json
 
 from characteristic import Attribute, attributes
 
-from minion import Response
+from minion.request import Response
 
 
 class SimpleJSON(object):
@@ -33,3 +33,35 @@ class Unicode(object):
 
 
 UTF8 = Unicode(encoding="utf-8")
+
+
+def bind(renderer, to):
+    """
+    Bind a renderer to the given callable by constructing a new rendering view.
+
+    If ``renderer`` is None, return the given view unchanged.
+
+    """
+
+    if renderer is None:
+        return to
+
+    @wraps(to)
+    def view(request, **kwargs):
+        try:
+            returned = to(request, **kwargs)
+        except Exception as error:
+            view_error = getattr(renderer, "view_error", None)
+            if view_error is None:
+                raise
+            return view_error(request, error)
+
+        try:
+            return renderer.render(request, returned)
+        except Exception as error:
+            render_error = getattr(renderer, "render_error", None)
+            if render_error is None:
+                raise
+            return render_error(request, returned, error)
+
+    return view
