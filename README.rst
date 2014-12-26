@@ -31,7 +31,8 @@ Here's the Minion hello world:
 
     .. code-block:: python
 
-        from minion import Application, Response
+        from minion.core import Application
+        from minion.request import Response
 
 
         app = Application()
