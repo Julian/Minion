@@ -26,8 +26,9 @@ setup(
     version=__version__,
     packages=find_packages(),
     install_requires=[
-        "cached_property",
+        "cached-property",
         "characteristic>=14.2.0",
+        "future",
         "itsdangerous",
         "Werkzeug",
     ],
