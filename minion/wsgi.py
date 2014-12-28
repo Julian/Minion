@@ -1,6 +1,6 @@
 from cached_property import cached_property as calculated_once
+from future.utils import iteritems
 
-from minion.compat import iteritems
 from minion.http import Accept, Headers
 
 

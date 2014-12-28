@@ -1,17 +1,18 @@
+from io import BytesIO
 from unittest import skipIf
 
-from minion.compat import BytesIO, PY3
-from minion.core import Application
-from minion.http import Headers
-from minion.request import Response
-from minion.twisted import MinionResource
-
+from future.utils import PY3
 from twisted.internet.defer import succeed
 from twisted.trial.unittest import SynchronousTestCase
 from twisted.web import server
 from twisted.web.resource import IResource
 from twisted.web.test.test_web import DummyChannel
 from zope.interface.verify import verifyObject
+
+from minion.core import Application
+from minion.http import Headers
+from minion.request import Response
+from minion.twisted import MinionResource
 
 
 class TestMinionResource(SynchronousTestCase):

@@ -3,7 +3,8 @@ Helpers for applications that use object traversal routing.
 
 """
 
-from minion.compat import PY3, iteritems
+from future.utils import PY3, iteritems
+
 from minion.request import Response
 
 

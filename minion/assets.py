@@ -1,6 +1,6 @@
 from functools import wraps
 
-from minion.compat import viewkeys
+from future.utils import viewkeys
 
 
 class DuplicateAsset(Exception):

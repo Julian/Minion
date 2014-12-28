@@ -6,8 +6,7 @@ APIs for storing and retrieving HTTP headers and cookies.
 from bisect import insort
 
 from characteristic import Attribute, attributes
-
-from minion.compat import iteritems, viewkeys
+from future.utils import iteritems, viewkeys
 
 
 _CANONICAL_NAMES = {

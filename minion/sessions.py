@@ -1,4 +1,7 @@
-from minion.compat import MutableMapping
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 
 class UnencryptedCookieSession(MutableMapping):

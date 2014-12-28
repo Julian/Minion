@@ -17,8 +17,9 @@ perform these operations in various ways.
 from collections import defaultdict
 
 from characteristic import Attribute, attributes
+from future.utils import listitems as items
+from future.moves.urllib.parse import urlencode
 
-from minion.compat import items, urlencode
 from minion.renderers import bind
 from minion.request import Response, redirect
 from minion.traversal import traverse

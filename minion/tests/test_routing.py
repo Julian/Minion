@@ -1,7 +1,8 @@
 from unittest import TestCase, skipIf
 
+from future.utils import PY3
+
 from minion import routing
-from minion.compat import PY3
 from minion.request import Request, Response, redirect
 from minion.traversal import LeafResource
 

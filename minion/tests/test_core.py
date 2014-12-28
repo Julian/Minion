@@ -1,12 +1,13 @@
 from unittest import TestCase, skipIf
 
+from future.utils import iteritems
+
 try:
     import jinja2
 except ImportError:
     jinja2 = None
 
 from minion import core, assets
-from minion.compat import iteritems
 from minion.request import Manager, Request, Response
 from minion.routing import Router, SimpleMapper
 

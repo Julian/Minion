@@ -1,4 +1,5 @@
 cached-property
 characteristic>=14.2.0
+future
 itsdangerous
 Werkzeug

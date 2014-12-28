@@ -1,7 +1,8 @@
 from unittest import TestCase
 
+from future.utils import PY3
+
 from minion import http
-from minion.compat import PY3
 
 
 class HeaderRetrievalTestsMixin(object):
