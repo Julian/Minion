@@ -9,7 +9,7 @@ from characteristic import Attribute, attributes
 from future.utils import iteritems, viewkeys
 
 
-_CANONICAL_NAMES = {
+_CANONICAL_HEADER_NAMES = {
     b"content-md5": b"Content-MD5",
     b"dnt": b"DNT",
     b"etag": b"ETag",
@@ -64,7 +64,7 @@ class Headers(object):
 
     def canonicalized(self):
         for name, values in iteritems(self._contents):
-            canonical_name = _CANONICAL_NAMES.get(name)
+            canonical_name = _CANONICAL_HEADER_NAMES.get(name)
             if canonical_name is None:
                 canonical_name = b"-".join(
                     word.capitalize() for word in name.split(b"-")
