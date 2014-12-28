@@ -65,5 +65,5 @@ class TestWSGIMinion(TestCase):
 
 class TestRequest(RequestTestMixin, TestCase):
     def make_request(self, headers):
-        headers = {k : ",".join(v) for k, v in headers.canonicalized()}
+        headers = {k : b",".join(v) for k, v in headers.canonicalized()}
         return wsgi.Request(environ=create_environ(headers=headers))
