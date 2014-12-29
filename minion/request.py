@@ -49,7 +49,7 @@ class Manager(object):
     """
 
     def __init__(self):
-        self.requests = {}
+        self._requests = {}
 
     def after_response(self, request, fn, *args, **kwargs):
         """
@@ -64,13 +64,13 @@ class Manager(object):
 
         """
 
-        self.requests[request]["callbacks"].append((fn, args, kwargs))
+        self._requests[id(request)]["callbacks"].append((fn, args, kwargs))
 
     def request_started(self, request):
-        self.requests[request] = {"callbacks": [], "assets": {}}
+        self._requests[id(request)] = {"callbacks": [], "assets": {}}
 
     def request_served(self, request, response):
-        request_data = self.requests.pop(request)
+        request_data = self._requests.pop(id(request))
         for callback, args, kwargs in request_data["callbacks"]:
             callback_response = callback(response, *args, **kwargs)
             if callback_response is not None:
