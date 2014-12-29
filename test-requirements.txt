@@ -1,3 +1,6 @@
 Mock
 WebTest
+
+bzr+lp:~julian+/testscenarios/testscenarios#egg=testscenarios
+
 -r requirements.txt

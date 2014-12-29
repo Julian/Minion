@@ -6,6 +6,7 @@ APIs for storing and retrieving HTTP headers and cookies.
 from bisect import insort
 
 from characteristic import Attribute, attributes
+from future.moves.urllib.parse import parse_qs, unquote, unquote_plus
 from future.utils import iteritems, viewkeys
 
 
@@ -25,6 +26,88 @@ class NoSuchHeader(LookupError):
     An operation on a non-present or -existing HTTP header was performed.
 
     """
+
+
+class InvalidURL(LookupError):
+    """
+    Parsing resulted in an invalid URL.
+
+    """
+
+
+@attributes(
+    [
+        Attribute(name="scheme", default_value=b""),
+        Attribute(name="username", default_value=b""),
+        Attribute(name="password", default_value=b""),
+        Attribute(name="host", default_value=b""),
+        Attribute(name="port", default_value=None),
+        Attribute(name="path", default_value=b""),
+        Attribute(name="query", default_factory=dict),
+        Attribute(name="fragment", default_value=b""),
+        Attribute(
+            name="_unnormalized",
+            default_value=None,
+            exclude_from_cmp=True,
+        ),
+        Attribute(
+            name="unnormalized_scheme",
+            default_value=None,
+            exclude_from_cmp=True,
+        ),
+    ],
+)
+class URL(object):
+    @classmethod
+    def from_bytes(cls, bytes):
+        """
+        Parse a URL from some bytes.
+
+        """
+
+        scheme, _, rest = bytes.strip().partition(b":")
+
+        if scheme and not rest.startswith(b"//"):
+            raise InvalidURL("{!r} is not a valid URL".format(bytes))
+
+        creds_host_and_port, slash, rest = rest[2:].partition(b"/")
+        credentials, _, host_and_port = creds_host_and_port.rpartition(b"@")
+        username, _, password = credentials.partition(b":")
+        host, _, port_str = host_and_port.partition(b":")
+
+        if not port_str:
+            port = None
+        else:
+            try:
+                port = int(unquote(port_str))
+            except ValueError:
+                raise InvalidURL("{!r} is not a valid port".format(port_str))
+
+        path, _, rest = rest.partition(b"?")
+        query, _, fragment = rest.partition(b"#")
+
+        return cls.normalized(
+            scheme=scheme,
+            username=username,
+            password=password,
+            host=host,
+            port=port,
+            path=unquote(slash + path),
+            query=parse_qs(query),
+            fragment=unquote_plus(fragment),
+            unnormalized=bytes,
+        )
+
+    @classmethod
+    def normalized(cls, scheme, **kwargs):
+        return cls(
+            unnormalized_scheme=scheme,
+            scheme=scheme.lower(),
+            **kwargs
+        )
+
+    def to_bytes(self):
+        return self._unnormalized
 
 
 class Headers(object):

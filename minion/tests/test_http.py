@@ -1,8 +1,147 @@
 from unittest import TestCase
 
 from future.utils import PY3
+from testscenarios import with_scenarios
 
 from minion import http
+
+
+class TestURLNormalized(TestCase):
+    def test_whitespace_is_stripped(self):
+        """
+        https://url.spec.whatwg.org/#url-parsing
+
+        """
+
+        url = http.URL.from_bytes(" \n http://example.com  \t ")
+        self.assertEqual(url, http.URL.from_bytes("http://example.com"))
+
+    def test_scheme_is_lowercased(self):
+        """
+        https://url.spec.whatwg.org/#scheme-start-state
+
+        """
+
+        url = http.URL.normalized(scheme=b"HTTP")
+        self.assertEqual(url.scheme, b"http")
+        self.assertEqual(url.unnormalized_scheme, b"HTTP")
+
+    def test_scheme_already_lowercased(self):
+        url = http.URL.normalized(scheme=b"http")
+        self.assertEqual(url.scheme, b"http")
+        self.assertEqual(url.unnormalized_scheme, b"http")
+
+
+@with_scenarios()
+class TestURLFromBytes(TestCase):
+
+    scenarios = [
+        (
+            "quoting", {
+                "url" : b"HTTP://example.com.:%38%30/%70a%74%68?a=%31#1%323",
+                "expected" : {
+                    "scheme" : b"HTTP",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"example.com.",
+                    "port" : 80,
+                    "path" : b"/path",
+                    "query" : {b"a" : [b"1"]},
+                    "fragment" : b"123",
+                },
+            },
+        ),
+        (
+            "credentials", {
+                "url" : b"http://user:pass@example.com:8080/path?q=val#frag",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"user",
+                    "password" : b"pass",
+                    "host" : b"example.com",
+                    "port" : 8080,
+                    "path" : b"/path",
+                    "query" : {b"q" : [b"val"]},
+                    "fragment" : b"frag",
+                },
+            },
+        ),
+        (
+            "no_path", {
+                "url" : b"http://example.org:8080",
+                "expected" : {
+                    "scheme" : b"http",
+                    "host" : b"example.org",
+                    "port" : 8080,
+                    "path" : b"",
+                },
+            },
+        ),
+        (
+            "no_path_no_port", {
+                "url" : b"http://example.org",
+                "expected" : {
+                    "scheme" : b"http",
+                    "host" : b"example.org",
+                    "path" : b"",
+                },
+            },
+        ),
+        (
+            "empty", {
+                "url" : b"",
+                "expected" : {
+                    "scheme" : b"",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"",
+                    "port" : None,
+                    "path" : b"",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+    ]
+
+    def test_from_bytes(self):
+        self.assertEqual(
+            http.URL.from_bytes(self.url),
+            http.URL.normalized(**self.expected),
+        )
+
+    def test_roundtrip(self):
+        self.assertEqual(http.URL.from_bytes(self.url).to_bytes(), self.url)
+
+
+@with_scenarios()
+class TestFromInvalidURLs(TestCase):
+
+    scenarios = [
+        (
+            "with_invalid_port", {
+                "url" : b"http://example.org:invalid",
+                "message" : "'invalid' is not a valid port"
+            },
+        ),
+        (
+            "with_missing_slashes", {
+                "url" : b"http:",
+                "message" : "'http:' is not a valid URL"
+            },
+        ),
+        (
+            "with_missing_slash", {
+                "url" : b"http:/",
+                "message" : "'http:/' is not a valid URL"
+            },
+        ),
+    ]
+
+    def test_invalid_url(self):
+        with self.assertRaises(http.InvalidURL) as e:
+            http.URL.from_bytes(self.url)
+        self.assertEqual(str(e.exception), self.message)
 
 
 class HeaderRetrievalTestsMixin(object):
