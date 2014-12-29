@@ -8,6 +8,7 @@ except ImportError:
     jinja2 = None
 
 from minion import core, assets
+from minion.http import URL
 from minion.request import Manager, Request, Response
 from minion.routing import Router, SimpleMapper
 
@@ -81,10 +82,12 @@ class TestApplicationIntegration(TestCase):
         self.manager = Manager()
         self.router = Router(mapper=SimpleMapper())
         self.app = core.Application(manager=self.manager, router=self.router)
-        self.request = Request(path="/")
+        self.request = Request(url=URL(path=b"/"))
 
     def test_it_serves_mapped_requests(self):
-        self.router.add(self.request.path, lambda request : Response(b"Hello"))
+        self.router.add(
+            self.request.url.path, lambda request : Response(b"Hello"),
+        )
         self.assertEqual(self.app.serve(self.request), Response(b"Hello"))
 
     def test_it_serves_404s_for_unmapped_requests_by_default(self):

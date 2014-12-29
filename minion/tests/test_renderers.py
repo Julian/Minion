@@ -4,13 +4,13 @@ from unittest import TestCase
 import json
 
 from minion import renderers
-from minion.http import Headers
+from minion.http import Headers, URL
 from minion.request import Request, Response
 
 
 class TestUnicodeRenderer(TestCase):
 
-    request = Request(path=b"/")
+    request = Request(url=URL(path=b"/"))
 
     def test_it_renders_via_the_given_encoding(self):
         renderer = renderers.Unicode(encoding="utf-8")
@@ -65,32 +65,39 @@ class TestJSON(TestCase):
     def test_it_dumps_pretty_json_for_humans(self):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
-        request = Request(path=b"/", headers=Headers([("Accept", ["*/*"])]))
+        request = Request(
+            url=URL(path=b"/"),
+            headers=Headers([("Accept", ["*/*"])]),
+        )
         self.assertPretty(content, render(request))
 
     def test_it_dumps_pretty_json_for_humans_no_accept_header(self):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
-        self.assertPretty(content, render(Request(path=b"/")))
+        self.assertPretty(content, render(Request(url=URL(path=b"/"))))
 
     def test_it_dumps_practical_json_for_machines(self):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
         request = Request(
-            path=b"/", headers=Headers([("Accept", ["application/json"])]),
+            url=URL(path=b"/"),
+            headers=Headers([("Accept", ["application/json"])]),
         )
         self.assertNotPretty(content, render(request))
 
     def test_dict_sort_keys(self):
         content = OrderedDict([("foo", "bar"), ("baz", "quux")])
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
-        request = Request(path=b"/", headers=Headers([("Accept", ["*/*"])]))
+        request = Request(
+            url=URL(path=b"/"),
+            headers=Headers([("Accept", ["*/*"])]),
+        )
         self.assertPretty(content, render(request))
 
 
 class TestSimpleJSON(TestCase):
 
-    request = Request(path=b"/")
+    request = Request(url=URL(path=b"/"))
 
     def test_it_dumps_json(self):
         renderer = renderers.SimpleJSON()

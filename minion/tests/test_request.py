@@ -2,7 +2,7 @@ from unittest import TestCase
 import mock
 
 from minion import request
-from minion.http import Accept, Headers
+from minion.http import Accept, Headers, URL
 from minion.tests.utils import ResponseHelpersMixin
 
 
@@ -91,10 +91,14 @@ class RequestTestMixin(object):
 
 class TestRequest(RequestTestMixin, TestCase):
     def make_request(self, headers):
-        return request.Request(path=b"/", headers=headers)
+        return request.Request(url=URL(path=b"/"), headers=headers)
+
+    def test_url(self):
+        self.request = request.Request(url=URL(path=b"/foo/bar"))
+        self.assertEqual(self.request.url, URL(path=b"/foo/bar"))
 
     def test_flash(self):
-        self.request = request.Request(path=b"/")
+        self.request = request.Request(url=URL(path=b"/"))
         self.assertEqual(self.request.messages, [])
         self.request.flash(b"Hello World")
         self.assertEqual(

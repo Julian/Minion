@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from minion import traversal
+from minion.http import URL
 from minion.request import Request, Response
 
 
@@ -12,29 +13,29 @@ def path_view(request):
 
     """
 
-    return Response(content=request.path)
+    return Response(content=request.url.path)
 
 
 class TestTreeResource(TestCase):
     def test_it_renders_what_its_told(self):
         resource = traversal.TreeResource(render=path_view)
-        request = Request(path=b"/bar")
+        request = Request(url=URL(path=b"/bar"))
         self.assertEqual(resource.render(request), Response(content=b"/bar"))
 
     def test_it_supports_adding_children(self):
         resource = traversal.TreeResource(render=path_view)
         child = traversal.LeafResource(render=path_view)
         resource.set_child(b"foo", child)
-        request = Request(path=b"/bar")
+        request = Request(url=URL(path=b"/bar"))
         self.assertEqual(resource.get_child(b"foo", request=request), child)
 
 
 class TestLeafResource(TestCase):
     def test_it_renders_what_its_told(self):
         resource = traversal.LeafResource(
-            render=lambda request : Response(content=request.path)
+            render=lambda request : Response(content=request.url.path)
         )
-        request = Request(path=b"/foo")
+        request = Request(url=URL(path=b"/foo"))
         self.assertEqual(resource.render(request), Response(content=b"/foo"))
 
     def test_it_is_a_leaf_resource(self):
@@ -49,12 +50,16 @@ class TestMethodDelegate(TestCase):
             GET=lambda request : b"foo",
             put=lambda request : request.method,
         )
-        self.assertEqual(render(Request(path=b"/", method=b"GET")), b"foo")
-        self.assertEqual(render(Request(path=b"/", method=b"PUT")), b"PUT")
+        get = Request(url=URL(path=b"/"), method=b"GET")
+        self.assertEqual(render(get), b"foo")
+
+        put = Request(url=URL(path=b"/"), method=b"PUT")
+        self.assertEqual(render(put), b"PUT")
 
     def test_unknown_HTTP_methods_return_405s(self):
         render = traversal.method_delegate(get=lambda _ : b"foo")
-        self.assertEqual(render(Request(path=b"/", method=b"PUT")).code, 405)
+        request = Request(url=URL(path=b"/"), method=b"PUT")
+        self.assertEqual(render(request).code, 405)
 
 
 class LineDelimiterResource(object):
@@ -77,19 +82,19 @@ class LineDelimiterResource(object):
 class TestTraverse(TestCase):
     def test_it_traverses_resources(self):
         root = LineDelimiterResource()
-        request = Request(path=b"/foo/bar/baz")
+        request = Request(url=URL(path=b"/foo/bar/baz"))
         renderer = traversal.traverse(resource=root, request=request)
         self.assertEqual(renderer.render(request), b"foo\nbar\nbaz")
 
     def test_single_level(self):
         root = LineDelimiterResource()
-        request = Request(path=b"/foo")
+        request = Request(url=URL(path=b"/foo"))
         renderer = traversal.traverse(resource=root, request=request)
         self.assertEqual(renderer.render(request), b"foo")
 
     def test_zero_levels(self):
         root = LineDelimiterResource()
-        request = Request(path=b"/")
+        request = Request(url=URL(path=b"/"))
         renderer = traversal.traverse(resource=root, request=request)
         self.assertIs(renderer, root)
 
@@ -108,6 +113,6 @@ class TestTraverse(TestCase):
                 return self.name
 
         root = Resource()
-        request = Request(path=b"/0/1/2/3/4/5")
+        request = Request(url=URL(path=b"/0/1/2/3/4/5"))
         renderer = traversal.traverse(resource=root, request=request)
         self.assertEqual(renderer.render(request), b"2")

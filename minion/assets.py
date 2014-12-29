@@ -88,7 +88,7 @@ class Bin(object):
                 "The {0!r} asset needs a request!".format(name)
             )
 
-        state = self._manager.requests[request]["assets"]
+        state = self._manager._requests[id(request)]["assets"]
 
         if name in state:
             asset = state[name]

@@ -75,7 +75,7 @@ else:
 
         def map(self, request):
             match = self._mapper.match(
-                request.path,
+                request.url.path,
                 # Yes seriously. This seems to be the only way to do this.
                 environ={"REQUEST_METHOD" : request.method},
             )
@@ -118,7 +118,7 @@ else:
         def map(self, request):
             try:
                 return self._adapter.match(
-                    path_info=request.path, method=request.method,
+                    path_info=request.url.path, method=request.method,
                 )
             except werkzeug.routing.RequestRedirect as redirect_exception:
                 return lambda request : redirect(
@@ -175,7 +175,7 @@ class SimpleMapper(object):
             self._names[route_name] = route
 
     def map(self, request):
-        fn = self._routes[request.method].get(request.path)
+        fn = self._routes[request.method].get(request.url.path)
         return fn, {}
 
     def lookup(self, route_name, **kwargs):

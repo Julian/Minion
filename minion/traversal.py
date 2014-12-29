@@ -62,7 +62,7 @@ def traverse(request, resource):
 
     """
 
-    path = request.path.lstrip(b"/")
+    path = request.url.path.lstrip(b"/")
     for component in path and path.split(b"/"):
         if getattr(resource, "is_leaf", False):
             break

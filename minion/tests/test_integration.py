@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from minion.core import Application
+from minion.http import URL
 from minion.request import Request, Response
 from minion.routing import Router, SimpleMapper
 
@@ -13,5 +14,5 @@ class TestMinion(TestCase):
         def show(request):
             return Response(b"Hello World!")
 
-        response = minion.serve(Request(path=b"/show"))
+        response = minion.serve(Request(url=URL(path=b"/show")))
         self.assertEqual(response, Response(b"Hello World!"))

@@ -1,7 +1,7 @@
 from cached_property import cached_property as calculated_once
 from future.utils import iteritems
 
-from minion.http import Accept, Headers
+from minion.http import Accept, Headers, URL
 
 
 class Request(object):
@@ -29,8 +29,9 @@ class Request(object):
         return self.environ["REQUEST_METHOD"]
 
     @calculated_once
-    def path(self):
-        return self.environ["PATH_INFO"]
+    def url(self):
+        # XXX: Fill me in Craig David
+        return URL(path=self.environ["PATH_INFO"])
 
 
 def create_app(application, request_class=Request):

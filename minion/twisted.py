@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from twisted.web.resource import IResource
 from zope.interface import implementer
 
-from minion.http import Headers
+from minion.http import Headers, URL
 from minion.request import Request
 
 
@@ -32,7 +32,7 @@ class MinionResource(object):
             content=twisted_request.content,
             headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
             method=twisted_request.method,
-            path=b"/" + b"/".join(twisted_request.postpath),
+            url=URL(path=b"/" + b"/".join(twisted_request.postpath)),
         )
         response = self.application.serve(request)
 

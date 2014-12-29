@@ -12,7 +12,6 @@ class TestAssetBin(TestCase):
 
         self.request_manager = Manager()
         self.request_manager.request_started(self.request)
-        self.addCleanup(self.request_manager.requests.clear)
 
         self.bin = assets.Bin(manager=self.request_manager)
 
