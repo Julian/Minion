@@ -71,9 +71,9 @@ class URL(object):
         if scheme and not rest.startswith(b"//"):
             raise InvalidURL("{!r} is not a valid URL".format(bytes))
 
-        creds_host_and_port, slash, rest = rest[2:].partition(b"/")
-        credentials, _, host_and_port = creds_host_and_port.rpartition(b"@")
-        username, _, password = credentials.partition(b":")
+        authority, slash, rest = rest[2:].partition(b"/")
+        userinfo, _, host_and_port = authority.rpartition(b"@")
+        username, _, password = userinfo.partition(b":")
         host, _, port_str = host_and_port.partition(b":")
 
         if not port_str:

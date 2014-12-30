@@ -47,7 +47,6 @@ class TestWSGIMinion(TestCase):
         )
         self.assertEqual(response.body, b"Check out this body.")
 
-
     def test_it_sets_headers(self):
         @self.minion.route(b"/respond")
         def respond(request):
