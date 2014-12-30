@@ -5,6 +5,7 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 from bisect import insort
 
+from cached_property import cached_property as calculated_once
 from characteristic import Attribute, attributes
 from future.moves.urllib.parse import parse_qs, unquote, unquote_plus
 from future.utils import iteritems, viewkeys
@@ -105,6 +106,14 @@ class URL(object):
             scheme=scheme.lower(),
             **kwargs
         )
+
+    @calculated_once
+    def authority(self):
+        return "{self.userinfo}@{self.host}:{self.port}".format(self=self)
+
+    @calculated_once
+    def userinfo(self):
+        return "{self.username}:{self.password}".format(self=self)
 
     def to_bytes(self):
         return self._unnormalized

@@ -6,6 +6,32 @@ from testscenarios import with_scenarios
 from minion import http
 
 
+class TestURLCompoundComponents(TestCase):
+
+    url = http.URL(
+        scheme="http",
+        username="user",
+        password="password",
+        host="example.com",
+        port=8080,
+        path="/path",
+        query="query=value",
+        fragment="fragment",
+    )
+
+    def test_authority(self):
+        self.assertEqual(self.url.authority, "user:password@example.com:8080")
+
+    def test_userinfo(self):
+        url = http.URL(
+            username="user",
+            password="password",
+            host="example.com",
+            port=8080,
+        )
+        self.assertEqual(self.url.userinfo, "user:password")
+
+
 class TestURLNormalized(TestCase):
     def test_whitespace_is_stripped(self):
         """
