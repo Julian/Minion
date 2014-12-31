@@ -6,6 +6,24 @@ from testscenarios import with_scenarios
 from minion import http
 
 
+class TestURL(TestCase):
+    def test_to_bytes_all_components(self):
+        url = http.URL(
+            scheme="http",
+            username="user",
+            password="password",
+            host="example.com",
+            port=8080,
+            path="/path",
+            query="query=value",
+            fragment="fragment",
+        )
+        self.assertEqual(
+            url.to_bytes(),
+            "http://user:password@example.com:8080/path?query=value#fragment",
+        )
+
+
 class TestURLCompoundComponents(TestCase):
 
     url = http.URL(

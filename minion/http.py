@@ -116,7 +116,13 @@ class URL(object):
         return "{self.username}:{self.password}".format(self=self)
 
     def to_bytes(self):
-        return self._unnormalized
+        url = self._unnormalized
+        if url is not None:
+            return url
+        url = self._unnormalized = (
+            "{self.scheme}://{self.authority}{self.path}?{self.query}#{self.fragment}".format(self=self)
+        )
+        return url
 
 
 class Headers(object):
