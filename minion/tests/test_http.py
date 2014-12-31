@@ -9,62 +9,62 @@ from minion import http
 class TestURL(TestCase):
     def test_to_bytes_all_components(self):
         url = http.URL(
-            scheme="http",
-            username="user",
-            password="password",
-            host="example.com",
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
             port=8080,
-            path="/path",
-            query="query=value",
-            fragment="fragment",
+            path=b"/path",
+            query=b"query=value",
+            fragment=b"fragment",
         )
         self.assertEqual(
             url.to_bytes(),
-            "http://user:password@example.com:8080/path?query=value#fragment",
+            b"http://user:password@example.com:8080/path?query=value#fragment",
         )
 
 
 class TestURLCompoundComponents(TestCase):
     def test_authority(self):
         url = http.URL(
-            scheme="http",
-            username="user",
-            password="password",
-            host="example.com",
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
             port=8080,
-            path="/path",
-            query="query=value",
-            fragment="fragment",
+            path=b"/path",
+            query=b"query=value",
+            fragment=b"fragment",
         )
-        self.assertEqual(url.authority, "user:password@example.com:8080")
+        self.assertEqual(url.authority, b"user:password@example.com:8080")
 
     def test_authority_no_user(self):
         url = http.URL(
-            scheme="http", password="pass", host="example.com", port=8080,
+            scheme=b"http", password=b"pass", host=b"example.com", port=8080,
         )
-        self.assertEqual(url.authority, ":pass@example.com:8080")
+        self.assertEqual(url.authority, b":pass@example.com:8080")
 
     def test_authority_no_password(self):
         url = http.URL(
-            scheme="http", username="user", host="example.com", port=8080,
+            scheme=b"http", username=b"user", host=b"example.com", port=8080,
         )
-        self.assertEqual(url.authority, "user@example.com:8080")
+        self.assertEqual(url.authority, b"user@example.com:8080")
 
     def test_authority_no_userinfo(self):
-        url = http.URL(scheme="http", host="example.com", port=8080)
-        self.assertEqual(url.authority, "example.com:8080")
+        url = http.URL(scheme=b"http", host=b"example.com", port=8080)
+        self.assertEqual(url.authority, b"example.com:8080")
 
     def test_authority_from_bytes(self):
-        url = http.URL.from_bytes("https://foo:bar@example.org:4443/path")
-        self.assertEqual(url.authority, "foo:bar@example.org:4443")
+        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.authority, b"foo:bar@example.org:4443")
 
     def test_authority_from_bytes_no_user(self):
-        url = http.URL.from_bytes("https://:bar@example.org:4443/path")
-        self.assertEqual(url.authority, ":bar@example.org:4443")
+        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
+        self.assertEqual(url.authority, b":bar@example.org:4443")
 
     def test_authority_from_bytes_no_password(self):
-        url = http.URL.from_bytes("https://foo@example.org:4443/path")
-        self.assertEqual(url.authority, "foo@example.org:4443")
+        url = http.URL.from_bytes(b"https://foo@example.org:4443/path")
+        self.assertEqual(url.authority, b"foo@example.org:4443")
 
     def test_authority_from_bytes_no_userinfo(self):
         url = http.URL.from_bytes("https://example.org:4443/path")
@@ -72,28 +72,28 @@ class TestURLCompoundComponents(TestCase):
 
     def test_userinfo(self):
         url = http.URL(
-            username="user",
-            password="password",
-            host="example.com",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
             port=8080,
         )
-        self.assertEqual(url.userinfo, "user:password")
+        self.assertEqual(url.userinfo, b"user:password")
 
     def test_userinfo_no_user(self):
-        url = http.URL(password="pass", host="example.com", port=8080)
-        self.assertEqual(url.userinfo, ":pass")
+        url = http.URL(password=b"pass", host=b"example.com", port=8080)
+        self.assertEqual(url.userinfo, b":pass")
 
     def test_userinfo_no_password(self):
-        url = http.URL(username="user", host="example.com", port=8080)
-        self.assertEqual(url.userinfo, "user")
+        url = http.URL(username=b"user", host=b"example.com", port=8080)
+        self.assertEqual(url.userinfo, b"user")
 
     def test_userinfo_from_bytes(self):
-        url = http.URL.from_bytes("https://foo:bar@example.org:4443/path")
-        self.assertEqual(url.userinfo, "foo:bar")
+        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.userinfo, b"foo:bar")
 
     def test_userinfo_from_bytes_no_user(self):
-        url = http.URL.from_bytes("https://:bar@example.org:4443/path")
-        self.assertEqual(url.userinfo, ":bar")
+        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
+        self.assertEqual(url.userinfo, b":bar")
 
     def test_userinfo_from_bytes_no_password(self):
         url = http.URL.from_bytes("https://foo@example.org:4443/path")
@@ -107,8 +107,8 @@ class TestURLNormalized(TestCase):
 
         """
 
-        url = http.URL.from_bytes(" \n http://example.com  \t ")
-        self.assertEqual(url, http.URL.from_bytes("http://example.com"))
+        url = http.URL.from_bytes(b" \n http://example.com  \t ")
+        self.assertEqual(url, http.URL.from_bytes(b"http://example.com"))
 
     def test_scheme_is_lowercased(self):
         """
