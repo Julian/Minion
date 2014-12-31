@@ -40,6 +40,10 @@ class TestURLCompoundComponents(TestCase):
     def test_authority(self):
         self.assertEqual(self.url.authority, "user:password@example.com:8080")
 
+    def test_authority_from_bytes(self):
+        url = http.URL.from_bytes("https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.authority, "foo:bar@example.org:4443")
+
     def test_userinfo(self):
         url = http.URL(
             username="user",
@@ -48,6 +52,10 @@ class TestURLCompoundComponents(TestCase):
             port=8080,
         )
         self.assertEqual(self.url.userinfo, "user:password")
+
+    def test_userinfo_from_bytes(self):
+        url = http.URL.from_bytes("https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.userinfo, "foo:bar")
 
 
 class TestURLNormalized(TestCase):

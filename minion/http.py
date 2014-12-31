@@ -59,6 +59,12 @@ class InvalidURL(LookupError):
     ],
 )
 class URL(object):
+    def __init__(self, authority=None, userinfo=None):
+        if authority is not None:
+            self.authority = authority
+        if userinfo is not None:
+            self.userinfo = userinfo
+
     @classmethod
     def from_bytes(cls, bytes):
         """
@@ -97,6 +103,8 @@ class URL(object):
             query=parse_qs(query),
             fragment=unquote_plus(fragment),
             unnormalized=bytes,
+            authority=authority,
+            userinfo=userinfo,
         )
 
     @classmethod
