@@ -117,11 +117,17 @@ class URL(object):
 
     @calculated_once
     def authority(self):
-        return "{self.userinfo}@{self.host}:{self.port}".format(self=self)
+        userinfo = self.userinfo
+        if userinfo:
+            return "{}@{}:{}".format(userinfo, self.host, self.port)
+        return "{}:{}".format(self.host, self.port)
 
     @calculated_once
     def userinfo(self):
-        return "{self.username}:{self.password}".format(self=self)
+        password = self.password
+        if password:
+            return "{}:{}".format(self.username, password)
+        return self.username
 
     def to_bytes(self):
         url = self._unnormalized
