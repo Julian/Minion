@@ -38,11 +38,19 @@ class TestURLCompoundComponents(TestCase):
         )
         self.assertEqual(url.authority, b"user:password@example.com:8080")
 
+    def test_authority_from_bytes(self):
+        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.authority, b"foo:bar@example.org:4443")
+
     def test_authority_no_user(self):
         url = http.URL(
             scheme=b"http", password=b"pass", host=b"example.com", port=8080,
         )
         self.assertEqual(url.authority, b":pass@example.com:8080")
+
+    def test_authority_no_user_from_bytes(self):
+        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
+        self.assertEqual(url.authority, b":bar@example.org:4443")
 
     def test_authority_no_password(self):
         url = http.URL(
@@ -50,25 +58,27 @@ class TestURLCompoundComponents(TestCase):
         )
         self.assertEqual(url.authority, b"user@example.com:8080")
 
+    def test_authority_no_password_from_bytes(self):
+        url = http.URL.from_bytes(b"https://foo@example.org:4443/path")
+        self.assertEqual(url.authority, b"foo@example.org:4443")
+
     def test_authority_no_userinfo(self):
         url = http.URL(scheme=b"http", host=b"example.com", port=8080)
         self.assertEqual(url.authority, b"example.com:8080")
 
-    def test_authority_from_bytes(self):
-        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
-        self.assertEqual(url.authority, b"foo:bar@example.org:4443")
+    def test_authority_no_userinfo_from_bytes(self):
+        url = http.URL.from_bytes(b"https://example.org:4443/path")
+        self.assertEqual(url.authority, b"example.org:4443")
 
-    def test_authority_from_bytes_no_user(self):
-        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
-        self.assertEqual(url.authority, b":bar@example.org:4443")
+    def test_authority_no_userinfo_with_delimiter_from_bytes(self):
+        url = http.URL.from_bytes(b"https://@example.org:4443/path")
+        self.assertEqual(url.authority, b"example.org:4443")
+        self.assertEqual(url.unnormalized_authority, b"@example.org:4443")
 
-    def test_authority_from_bytes_no_password(self):
-        url = http.URL.from_bytes(b"https://foo@example.org:4443/path")
-        self.assertEqual(url.authority, b"foo@example.org:4443")
-
-    def test_authority_from_bytes_no_userinfo(self):
-        url = http.URL.from_bytes("https://example.org:4443/path")
-        self.assertEqual(url.authority, "example.org:4443")
+    def test_authority_no_userinfo_with_both_delimiters_from_bytes(self):
+        url = http.URL.from_bytes(b"https://:@example.org:4443/path")
+        self.assertEqual(url.authority, b"example.org:4443")
+        self.assertEqual(url.unnormalized_authority, b":@example.org:4443")
 
     def test_userinfo(self):
         url = http.URL(
@@ -79,25 +89,35 @@ class TestURLCompoundComponents(TestCase):
         )
         self.assertEqual(url.userinfo, b"user:password")
 
+    def test_userinfo_from_bytes(self):
+        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
+        self.assertEqual(url.userinfo, b"foo:bar")
+
     def test_userinfo_no_user(self):
         url = http.URL(password=b"pass", host=b"example.com", port=8080)
         self.assertEqual(url.userinfo, b":pass")
+
+    def test_userinfo_no_user_from_bytes(self):
+        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
+        self.assertEqual(url.userinfo, b":bar")
 
     def test_userinfo_no_password(self):
         url = http.URL(username=b"user", host=b"example.com", port=8080)
         self.assertEqual(url.userinfo, b"user")
 
-    def test_userinfo_from_bytes(self):
-        url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
-        self.assertEqual(url.userinfo, b"foo:bar")
+    def test_userinfo_no_password_from_bytes(self):
+        url = http.URL.from_bytes(b"https://foo@example.org:4443/path")
+        self.assertEqual(url.userinfo, b"foo")
 
-    def test_userinfo_from_bytes_no_user(self):
-        url = http.URL.from_bytes(b"https://:bar@example.org:4443/path")
-        self.assertEqual(url.userinfo, b":bar")
+    def test_userinfo_no_userinfo_with_delimiter_from_bytes(self):
+        url = http.URL.from_bytes(b"https://@example.org:4443/path")
+        self.assertEqual(url.userinfo, b"")
+        self.assertEqual(url.unnormalized_userinfo, b"")
 
-    def test_userinfo_from_bytes_no_password(self):
-        url = http.URL.from_bytes("https://foo@example.org:4443/path")
-        self.assertEqual(url.userinfo, "foo")
+    def test_userinfo_no_userinfo_with_both_delimiters_from_bytes(self):
+        url = http.URL.from_bytes(b"https://:@example.org:4443/path")
+        self.assertEqual(url.userinfo, b"")
+        self.assertEqual(url.unnormalized_userinfo, b":")
 
 
 class TestURLNormalized(TestCase):
@@ -124,6 +144,21 @@ class TestURLNormalized(TestCase):
         url = http.URL.normalized(scheme=b"http")
         self.assertEqual(url.scheme, b"http")
         self.assertEqual(url.unnormalized_scheme, b"http")
+
+    def test_empty_userinfo_is_removed(self):
+        url = http.URL.normalized(userinfo=b":")
+        self.assertEqual(url.userinfo, b"")
+        self.assertEqual(url.unnormalized_userinfo, b":")
+
+    def test_an_initial_authority_delimiter_is_removed(self):
+        url = http.URL.normalized(authority=b"@example.com")
+        self.assertEqual(url.authority, b"example.com")
+        self.assertEqual(url.unnormalized_authority, b"@example.com")
+
+    def test_multiple_initial_authority_delimiters_are_removed(self):
+        url = http.URL.normalized(authority=b":@example.com")
+        self.assertEqual(url.authority, b"example.com")
+        self.assertEqual(url.unnormalized_authority, b":@example.com")
 
 
 @with_scenarios()

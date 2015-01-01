@@ -56,6 +56,16 @@ class InvalidURL(LookupError):
             default_value=None,
             exclude_from_cmp=True,
         ),
+        Attribute(
+            name="unnormalized_userinfo",
+            default_value=None,
+            exclude_from_cmp=True,
+        ),
+        Attribute(
+            name="unnormalized_authority",
+            default_value=None,
+            exclude_from_cmp=True,
+        ),
     ],
 )
 class URL(object):
@@ -108,12 +118,31 @@ class URL(object):
         )
 
     @classmethod
-    def normalized(cls, scheme, **kwargs):
-        return cls(
-            unnormalized_scheme=scheme,
-            scheme=scheme.lower(),
-            **kwargs
-        )
+    def normalized(cls, **kwargs):
+        scheme = unnormalized_scheme = kwargs.pop("scheme", None)
+        if scheme is not None:
+            scheme = scheme.lower()
+            kwargs.update(
+                scheme=scheme, unnormalized_scheme=unnormalized_scheme,
+            )
+
+        userinfo = unnormalized_userinfo = kwargs.pop("userinfo", None)
+        if userinfo is not None:
+            userinfo = userinfo if userinfo != b":" else b""
+            kwargs.update(
+                userinfo=userinfo, unnormalized_userinfo=unnormalized_userinfo,
+            )
+
+        authority = unnormalized_authority = kwargs.pop("authority", None)
+        if authority is not None:
+            authority = (
+                authority if userinfo else authority.lstrip(b":")).lstrip("@")
+            kwargs.update(
+                authority=authority,
+                unnormalized_authority=unnormalized_authority,
+            )
+
+        return cls(**kwargs)
 
     @calculated_once
     def authority(self):
