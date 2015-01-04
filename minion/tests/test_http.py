@@ -294,11 +294,18 @@ class HeaderRetrievalTestsMixin(object):
     def test_get(self):
         headers = self.Headers([(b"thing", [b"value"])])
         self.assertEqual(headers.get(b"thing"), [b"value"])
+        self.assertIn(b"thing", headers)
 
-    def test_get_with_default(self):
+    def test_get_with_default_returning_default(self):
         headers = self.Headers()
         default = object()
         self.assertIs(headers.get(b"nonexisting", default), default)
+
+    def test_get_with_default_returning_value(self):
+        headers = self.Headers([(b"existing", [b"value"])])
+        default = object()
+        self.assertEqual(headers.get(b"existing", default), [b"value"])
+        self.assertIn(b"existing", headers)
 
     def test_get_defaults_to_None(self):
         headers = self.Headers()
@@ -399,33 +406,26 @@ class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):
         headers.add_value(b"thing", b"value")
         self.assertEqual(headers.get(b"thing"), [b"value"])
 
-    def test_discard(self):
-        headers = self.Headers([(b"Foo", [b"bar"])])
-        self.assertIn(b"foo", headers)
+    def test_pop(self):
+        headers = self.Headers([(b"thing", [b"value"])])
+        self.assertEqual(headers.pop(b"thing"), [b"value"])
+        self.assertNotIn(b"thing", headers)
 
-        headers.discard(b"fOo")
-
-        self.assertNotIn(b"foo", headers)
-        self.assertEqual(headers, self.Headers())
-
-    def test_discard_nonexisting(self):
+    def test_pop_with_default_returning_default(self):
         headers = self.Headers()
-        headers.discard(b"nonexisting")
-        self.assertEqual(headers, self.Headers())
+        default = object()
+        self.assertIs(headers.pop(b"nonexisting", default), default)
 
-    def test_remove(self):
-        headers = self.Headers([(b"Foo", [b"bar"])])
-        self.assertIn(b"foo", headers)
+    def test_pop_with_default_returning_value(self):
+        headers = self.Headers([(b"existing", [b"value"])])
+        default = object()
+        self.assertEqual(headers.pop(b"existing", default), [b"value"])
+        self.assertNotIn(b"existing", headers)
 
-        headers.remove(b"fOo")
-
-        self.assertNotIn(b"foo", headers)
-        self.assertEqual(headers, self.Headers())
-
-    def test_remove_nonexisting(self):
+    def test_pop_defaults_to_a_lookup_error(self):
         headers = self.Headers()
         with self.assertRaises(http.NoSuchHeader):
-            headers.remove(b"nonexisting")
+            self.assertIsNone(headers.pop(b"nonexisting"))
 
     def test_mutated_eq_ne(self):
         first = self.Headers([(b"foo", [b"bar"])])

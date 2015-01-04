@@ -231,17 +231,14 @@ class MutableHeaders(Headers):
     def get(self, name, default=None):
         return self._contents.get(name.lower(), default)
 
-    def set(self, name, values):
-        self._contents[name.lower()] = values
-
-    def discard(self, name):
-        self._contents.pop(name.lower(), None)
-
-    def remove(self, name):
+    def pop(self, name, *args, **kwargs):
         try:
-            del self._contents[name.lower()]
+            return self._contents.pop(name.lower(), *args, **kwargs)
         except KeyError:
             raise NoSuchHeader(name)
+
+    def set(self, name, values):
+        self._contents[name.lower()] = values
 
 
 @attributes(
