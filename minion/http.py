@@ -50,21 +50,25 @@ class InvalidURL(LookupError):
             name="_unnormalized",
             default_value=None,
             exclude_from_cmp=True,
+            exclude_from_repr=True,
         ),
         Attribute(
             name="unnormalized_scheme",
             default_value=None,
             exclude_from_cmp=True,
+            exclude_from_repr=True,
         ),
         Attribute(
             name="unnormalized_userinfo",
             default_value=None,
             exclude_from_cmp=True,
+            exclude_from_repr=True,
         ),
         Attribute(
             name="unnormalized_authority",
             default_value=None,
             exclude_from_cmp=True,
+            exclude_from_repr=True,
         ),
     ],
 )
