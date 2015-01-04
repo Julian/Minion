@@ -291,8 +291,17 @@ class HeaderRetrievalTestsMixin(object):
         headers = self.Headers()
         self.assertNotIn(b"test", headers)
 
-    def test_get(self):
+    def test_getitem(self):
         headers = self.Headers([(b"thing", [b"value"])])
+        self.assertEqual(headers[b"tHiNg"], [b"value"])
+        self.assertIn(b"thing", headers)
+
+    def test_getitem_missing(self):
+        with self.assertRaises(http.NoSuchHeader):
+            self.Headers()[b"thiNg"]
+
+    def test_get(self):
+        headers = self.Headers([(b"thiNg", [b"value"])])
         self.assertEqual(headers.get(b"thing"), [b"value"])
         self.assertIn(b"thing", headers)
 
@@ -391,7 +400,7 @@ class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):
         headers = self.Headers()
         self.assertNotIn(b"thing", headers)
 
-        headers.set(b"Thing", [b"hello", b"world"])
+        headers[b"Thing"] = [b"hello", b"world"]
 
         self.assertIn(b"thing", headers)
         self.assertEqual(headers.get(b"thing"), [b"hello", b"world"])

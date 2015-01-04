@@ -181,6 +181,12 @@ class Headers(object):
     def __contains__(self, name):
         return name.lower() in self._contents
 
+    def __getitem__(self, name):
+        try:
+            return self._contents[name.lower()]
+        except KeyError:
+            raise NoSuchHeader(name)
+
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
@@ -221,10 +227,13 @@ class Headers(object):
 
 
 class MutableHeaders(Headers):
+    def __setitem__(self, name, values):
+        self._contents[name.lower()] = values
+
     def add_value(self, name, value):
         existing = self.get(name)
         if existing is None:
-            self.set(name, [value])
+            self[name] = [value]
         else:
             existing.append(value)
 
@@ -236,9 +245,6 @@ class MutableHeaders(Headers):
             return self._contents.pop(name.lower(), *args, **kwargs)
         except KeyError:
             raise NoSuchHeader(name)
-
-    def set(self, name, values):
-        self._contents[name.lower()] = values
 
 
 @attributes(
