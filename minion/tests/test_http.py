@@ -446,6 +446,10 @@ class TestMutableHeaders(HeaderRetrievalTestsMixin, TestCase):
         second.add_value(b"foo", b"baz")
         self.assertNotEqual(first, second)
 
+    def test_not_hashable(self):
+        with self.assertRaises(TypeError):
+            hash(self.Headers())
+
 
 class TestImmutableHeaders(HeaderRetrievalTestsMixin, TestCase):
 

@@ -227,6 +227,9 @@ class Headers(object):
 
 
 class MutableHeaders(Headers):
+
+    __hash__ = None
+
     def __setitem__(self, name, values):
         self._contents[name.lower()] = values
 
