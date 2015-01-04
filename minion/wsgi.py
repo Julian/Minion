@@ -31,12 +31,12 @@ class Request(object):
 
     @calculated_once
     def url(self):
-        # XXX: Fill me in Craig David
         environ = self.environ
-        return URL(
-            host=environ["HTTP_HOST"],
-            path=environ["PATH_INFO"],
-            query=parse_qs(environ["QUERY_STRING"]),
+        return URL.normalized(
+            host=environ.get("HTTP_HOST") or environ["SERVER_NAME"],
+            port=int(environ["SERVER_PORT"]),
+            path=environ.get("SCRIPT_NAME", "") + environ.get("PATH_INFO", ""),
+            query=parse_qs(environ.get("QUERY_STRING", "")),
             scheme=environ["wsgi.url_scheme"],
         )
 
