@@ -13,14 +13,17 @@ class JSON(object):
 
     """
 
+    def __init__(self, **kwargs):
+        self._dumps = partial(json.dumps, **kwargs)
+
     def render(self, request, jsonable):
         machine_json = request.accept.media_types[-1] == MediaRange(
             type="application", subtype="json",
         )
         if machine_json:
-            content = json.dumps(jsonable)
+            content = self._dumps(jsonable)
         else:
-            content = json.dumps(jsonable, indent=2, sort_keys=True)
+            content = self._dumps(jsonable, indent=2, sort_keys=True)
         return Response(
             content=content,
             headers=Headers([("Content-Type", ["application/json"])]),

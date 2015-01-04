@@ -94,6 +94,31 @@ class TestJSON(TestCase):
         )
         self.assertPretty(content, render(request))
 
+    def test_customized_dumps(self):
+        """
+        A customized dumps applies to both pretty and non-pretty responses.
+
+        """
+
+        renderer = renderers.JSON(default=lambda obj : 23)
+        render = renderers.bind(renderer, to=lambda _ : {"foo" : object()})
+        request = Request(
+            url=URL(path=b"/"),
+            headers=Headers([("Accept", ["application/json"])]),
+        )
+        self.assertEqual(
+            render(request), Response(
+                content=b'{"foo": 23}',
+                headers=Headers([("Content-Type", ["application/json"])]),
+            ),
+        )
+        self.assertEqual(
+            render(Request(url=URL(path=b"/"))), Response(
+                content=b'{\n  "foo": 23\n}',
+                headers=Headers([("Content-Type", ["application/json"])]),
+            ),
+        )
+
 
 class TestSimpleJSON(TestCase):
 
