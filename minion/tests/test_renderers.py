@@ -52,7 +52,7 @@ class TestJSON(TestCase):
         self.assertEqual(
             response, Response(
                 headers=Headers([("Content-Type", ["application/json"])]),
-                content=json.dumps(content),
+                content=json.dumps(content, separators=",:"),
             ),
         )
         self.assertNotEqual(
@@ -94,6 +94,19 @@ class TestJSON(TestCase):
         )
         self.assertPretty(content, render(request))
 
+    def test_separators(self):
+        render = renderers.bind(renderers.JSON(), to=lambda _ : dict(a=1, b=2))
+        request = Request(
+            url=URL(path=b"/"),
+            headers=Headers([("Accept", ["application/json"])]),
+        )
+        self.assertEqual(
+            render(request), Response(
+                content=b'{"a":1,"b":2}',
+                headers=Headers([("Content-Type", ["application/json"])]),
+            ),
+        )
+
     def test_customized_dumps(self):
         """
         A customized dumps applies to both pretty and non-pretty responses.
@@ -108,7 +121,7 @@ class TestJSON(TestCase):
         )
         self.assertEqual(
             render(request), Response(
-                content=b'{"foo": 23}',
+                content=b'{"foo":23}',
                 headers=Headers([("Content-Type", ["application/json"])]),
             ),
         )

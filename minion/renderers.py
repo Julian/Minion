@@ -21,7 +21,7 @@ class JSON(object):
             type="application", subtype="json",
         )
         if machine_json:
-            content = self._dumps(jsonable)
+            content = self._dumps(jsonable, separators=",:")
         else:
             content = self._dumps(jsonable, indent=2, sort_keys=True)
         return Response(
