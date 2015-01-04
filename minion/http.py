@@ -20,6 +20,7 @@ _CANONICAL_HEADER_NAMES = {
     b"www-authenticate": b"WWW-Authenticate",
     b"x-xss-protection": b"X-XSS-Protection",
 }
+DEFAULT_PORTS = {b"http" : 80, b"https" : 443}
 
 
 class NoSuchHeader(LookupError):
@@ -66,6 +67,12 @@ class InvalidURL(LookupError):
         ),
         Attribute(
             name="unnormalized_authority",
+            default_value=None,
+            exclude_from_cmp=True,
+            exclude_from_repr=True,
+        ),
+        Attribute(
+            name="unnormalized_port",
             default_value=None,
             exclude_from_cmp=True,
             exclude_from_repr=True,
@@ -144,6 +151,13 @@ class URL(object):
             kwargs.update(
                 authority=authority,
                 unnormalized_authority=unnormalized_authority,
+            )
+
+        port = unnormalized_port = kwargs.pop("port", None)
+        if port is not None:
+            kwargs.update(
+                port=None if DEFAULT_PORTS.get(scheme) == port else port,
+                unnormalized_port=unnormalized_port,
             )
 
         return cls(**kwargs)

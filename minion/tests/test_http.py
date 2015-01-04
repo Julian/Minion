@@ -160,6 +160,26 @@ class TestURLNormalized(TestCase):
         self.assertEqual(url.authority, b"example.com")
         self.assertEqual(url.unnormalized_authority, b":@example.com")
 
+    def test_port_80_is_the_default_for_http(self):
+        url = http.URL.normalized(scheme=b"http", port=80)
+        self.assertIsNone(url.port)
+        self.assertEqual(url.unnormalized_port, 80)
+
+    def test_port_443_is_the_default_for_https(self):
+        url = http.URL.normalized(scheme=b"https", port=443)
+        self.assertIsNone(url.port)
+        self.assertEqual(url.unnormalized_port, 443)
+
+    def test_port_443_is_not_the_default_for_http(self):
+        url = http.URL.normalized(scheme=b"http", port=443)
+        self.assertEqual(url.port, 443)
+        self.assertEqual(url.unnormalized_port, 443)
+
+    def test_non_default_port(self):
+        url = http.URL.normalized(scheme=b"http", port=8080)
+        self.assertEqual(url.port, 8080)
+        self.assertEqual(url.unnormalized_port, 8080)
+
 
 @with_scenarios()
 class TestURLFromBytes(TestCase):
