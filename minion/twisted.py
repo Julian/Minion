@@ -32,7 +32,12 @@ class MinionResource(object):
             content=twisted_request.content,
             headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
             method=twisted_request.method,
-            url=URL(path=b"/" + b"/".join(twisted_request.postpath)),
+            url=URL(
+                scheme=b"https" if twisted_request.isSecure() else b"http",
+                host=twisted_request.getRequestHostname(),
+                path=twisted_request.uri,
+                query=twisted_request.args,
+            ),
         )
         response = self.application.serve(request)
 

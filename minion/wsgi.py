@@ -1,4 +1,5 @@
 from cached_property import cached_property as calculated_once
+from future.moves.urllib.parse import parse_qs
 from future.utils import iteritems
 
 from minion.http import Accept, Headers, URL
@@ -31,7 +32,13 @@ class Request(object):
     @calculated_once
     def url(self):
         # XXX: Fill me in Craig David
-        return URL(path=self.environ["PATH_INFO"])
+        environ = self.environ
+        return URL(
+            host=environ["HTTP_HOST"],
+            path=environ["PATH_INFO"],
+            query=parse_qs(environ["QUERY_STRING"]),
+            scheme=environ["wsgi.url_scheme"],
+        )
 
 
 def create_app(application, request_class=Request):

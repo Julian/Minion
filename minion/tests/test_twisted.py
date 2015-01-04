@@ -1,17 +1,16 @@
-from io import BytesIO
 from unittest import skipIf
 
+from future.moves.urllib.parse import parse_qs
 from future.utils import PY3
-from twisted.internet.defer import succeed
+from klein.test_resource import _render as render, requestMock as _requestMock
 from twisted.trial.unittest import SynchronousTestCase
-from twisted.web import server
 from twisted.web.resource import IResource
-from twisted.web.test.test_web import DummyChannel
 from zope.interface.verify import verifyObject
 
 from minion.core import Application
 from minion.http import Headers
 from minion.request import Response
+from minion.tests.test_integration import RequestIntegrationTestMixin
 from minion.twisted import MinionResource
 
 
@@ -21,15 +20,13 @@ class TestMinionResource(SynchronousTestCase):
         self.resource = MinionResource(self.minion)
 
     def assertRedirected(self, request, response, url, content=None):
-        result = self.successResultOf(response)
-
         self.assertEqual(request.code, 302)
         self.assertEqual(
             request.responseHeaders.getRawHeaders("Location"), [url],
         )
 
         if content is not None:
-            self.assertEqual(result, content)
+            self.assertEqual(content, request.getWrittenData())
 
     @skipIf(PY3, "twisted.web doesn't support Py3 yet")
     def test_render(self):
@@ -42,8 +39,9 @@ class TestMinionResource(SynchronousTestCase):
                 headers=Headers([(b"Location", [b"http://example.com"])]),
             )
 
-        request = FakeRequest(uri=b"/bla/foo/bar", postpath=[b"foo", b"bar"])
-        request.requestHeaders.setRawHeaders(b"X-Foo", [b"Hello"])
+        request = makeRequest(
+            path=b"/foo/bar", headers={b"X-Foo" : [b"Hello"]},
+        )
         response = render(resource=self.resource, request=request)
         self.assertRedirected(
             request, response, b"http://example.com", content=b"/foo/bar",
@@ -55,42 +53,27 @@ class TestMinionResource(SynchronousTestCase):
         def respond(request):
             return Response(content=request.content.read())
 
-        request = FakeRequest(uri=b"/", content=b"Hello world")
-        response = self.successResultOf(
-            render(resource=self.resource, request=request),
-        )
-        self.assertEqual(response, b"Hello world")
+        request = makeRequest(path=b"/", body=b"Hello world")
+        render(resource=self.resource, request=request)
+        self.assertEqual(request.getWrittenData(), b"Hello world")
 
     def test_interface(self):
         verifyObject(IResource, self.resource)
 
 
-# Copied from https://tm.tl/5527
-def render(resource, request):
-    result = resource.render(request)
-    if isinstance(result, bytes):
-        request.write(result)
-        request.finish()
-        return succeed(request.written.getvalue())
-    elif result is server.NOT_DONE_YET:
-        if request.finished:
-            return succeed(request.written.getvalue())
-        else:
-            d = request.notifyFinish()
-            d.addCallback(lambda _: request.written.getvalue())
-            return d
-    else:
-        raise ValueError("Unexpected return value: %r" % (result,))
+class TestRequestIntegration(RequestIntegrationTestMixin, SynchronousTestCase):
+    def get(self, url, headers):
+        request = makeRequest(
+            path=url,  # klein has a bug where it overrides the host header
+            host=headers.get(b"Host", [b"localhost"])[0],
+            headers=dict(headers.canonicalized()),
+        )
+        render(resource=MinionResource(self.minion), request=request)
+        return request.getWrittenData()
 
 
-class FakeRequest(server.Request):
-    def __init__(self, uri, postpath=(), method=b"GET", content=b""):
-        server.Request.__init__(self, DummyChannel(), False)
-        self.written = BytesIO()
-        self.content = BytesIO(content)
-        self.method = method
-        self.uri = uri
-        self.postpath = list(postpath)
-
-    def write(self, data):
-        self.written.write(data)
+def makeRequest(path, *args, **kwargs):
+    path, _, query_string = path.partition(b"?")
+    request = _requestMock(path=path, *args, **kwargs)
+    request.args = parse_qs(query_string.rpartition(b"#")[0])
+    return request

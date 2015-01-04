@@ -8,6 +8,7 @@ from minion import wsgi
 from minion.core import Application
 from minion.http import Headers
 from minion.request import Response
+from minion.tests.test_integration import RequestIntegrationTestMixin
 from minion.tests.test_request import RequestTestMixin
 
 
@@ -66,3 +67,13 @@ class TestRequest(RequestTestMixin, TestCase):
     def make_request(self, headers):
         headers = {k : b",".join(v) for k, v in headers.canonicalized()}
         return wsgi.Request(environ=create_environ(headers=headers))
+
+
+class TestRequestIntegration(RequestIntegrationTestMixin, TestCase):
+    def get(self, url, headers):
+        app = TestApp(wsgi.create_app(self.minion))
+        response = app.get(
+            url,
+            headers=[(k, ",".join(v)) for k , v in headers.canonicalized()],
+        )
+        return response.body
