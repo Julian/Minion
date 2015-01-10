@@ -31,7 +31,7 @@ class TestMinionResource(SynchronousTestCase):
     @skipIf(PY3, "twisted.web doesn't support Py3 yet")
     def test_render(self):
         @self.minion.route(b"/foo/bar")
-        def foo_bar(request):
+        def fooBar(request):
             self.assertEqual(request.headers.get(b"X-Foo"), [b"Hello"])
             return Response(
                 code=302,
@@ -63,17 +63,23 @@ class TestMinionResource(SynchronousTestCase):
 
 class TestRequestIntegration(RequestIntegrationTestMixin, SynchronousTestCase):
     def get(self, url, headers):
-        request = makeRequest(
-            path=url,  # klein has a bug where it overrides the host header
-            host=headers.get(b"Host", [b"localhost"])[0],
-            headers=dict(headers.canonicalized()),
-        )
+        request = makeRequest(path=url, headers=dict(headers.canonicalized()))
         render(resource=MinionResource(self.minion), request=request)
         return request.getWrittenData()
 
 
 def makeRequest(path, *args, **kwargs):
-    path, _, query_string = path.partition(b"?")
+    """
+    Wrap Klein's request mock to support query strings and host headers.
+
+    """
+
+    path, _, queryString = path.partition(b"?")
     request = _requestMock(path=path, *args, **kwargs)
-    request.args = parse_qs(query_string.rpartition(b"#")[0])
+    request.args = parse_qs(queryString.rpartition(b"#")[0])
+
+    # klein has a bug where it overrides the host when you call requestMock
+    host = kwargs.get("headers", {}).get(b"Host", [b"localhost"])[0]
+    request.setHost(host, kwargs.get("port", 80))
+
     return request
