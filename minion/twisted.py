@@ -27,23 +27,23 @@ class MinionResource(object):
     def putChild(self, path, child):
         raise NotImplementedError()
 
-    def render(self, twisted_request):
+    def render(self, twistedRequest):
         request = Request(
-            content=twisted_request.content,
-            headers=Headers(twisted_request.requestHeaders.getAllRawHeaders()),
-            method=twisted_request.method,
+            content=twistedRequest.content,
+            headers=Headers(twistedRequest.requestHeaders.getAllRawHeaders()),
+            method=twistedRequest.method,
             url=URL(
-                scheme=b"https" if twisted_request.isSecure() else b"http",
-                host=twisted_request.getRequestHostname(),
-                path=twisted_request.uri,
-                query=twisted_request.args,
+                scheme=b"https" if twistedRequest.isSecure() else b"http",
+                host=twistedRequest.getRequestHostname(),
+                path=twistedRequest.uri,
+                query=twistedRequest.args,
             ),
         )
         response = self.application.serve(request)
 
-        twisted_request.setResponseCode(response.code)
+        twistedRequest.setResponseCode(response.code)
 
         for k, v in response.headers.canonicalized():
-            twisted_request.responseHeaders.setRawHeaders(k, v)
+            twistedRequest.responseHeaders.setRawHeaders(k, v)
 
         return response.content
