@@ -55,9 +55,9 @@ class Application(object):
             return fn
         return _add_route
 
-    def serve(self, request):
+    def serve(self, request, path):
         self.manager.request_started(request)
-        response = self.router.route(request)
+        response = self.router.route(request=request, path=path)
         self.manager.request_served(request, response)
         return response
 

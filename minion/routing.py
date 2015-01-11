@@ -42,8 +42,8 @@ class Router(object):
             route, fn, route_name=route_name, methods=methods, **kw
         )
 
-    def route(self, request):
-        view, kwargs = self.mapper.map(request)
+    def route(self, request, path):
+        view, kwargs = self.mapper.map(request=request, path=path)
         if view is not None:
             response = view(request=request, **kwargs)
         else:
@@ -73,7 +73,7 @@ else:
                 kwargs.setdefault("conditions", {})["method"] = methods
             self._mapper.connect(route_name, route, minion_target=fn, **kwargs)
 
-        def map(self, request):
+        def map(self, request, path):
             match = self._mapper.match(
                 request.url.path,
                 # Yes seriously. This seems to be the only way to do this.
@@ -115,7 +115,7 @@ else:
             rule = werkzeug.routing.Rule(route, endpoint=endpoint, **kwargs)
             self._map.add(rule)
 
-        def map(self, request):
+        def map(self, request, path):
             try:
                 return self._adapter.match(
                     path_info=request.url.path, method=request.method,
@@ -150,11 +150,13 @@ class TraversalMapper(object):
         self.add = static_mapper.add
         self.lookup = static_mapper.lookup
 
-    def map(self, request):
-        static_map, static_kwargs = self.static_mapper.map(request=request)
+    def map(self, request, path):
+        static_map, static_kwargs = self.static_mapper.map(
+            request=request, path=path,
+        )
         if static_map is not None:
             return static_map, static_kwargs
-        resource = traverse(request=request, resource=self.root)
+        resource = traverse(path=path, request=request, resource=self.root)
         return resource.render, {}
 
 
@@ -174,8 +176,8 @@ class SimpleMapper(object):
         if route_name is not None:
             self._names[route_name] = route
 
-    def map(self, request):
-        fn = self._routes[request.method].get(request.url.path)
+    def map(self, request, path):
+        fn = self._routes[request.method].get(path)
         return fn, {}
 
     def lookup(self, route_name, **kwargs):

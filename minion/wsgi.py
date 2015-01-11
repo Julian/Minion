@@ -54,8 +54,10 @@ def create_app(application, request_class=Request):
     """
 
     def wsgi(environ, start_response):
-        request = request_class(environ)
-        response = application.serve(request)
+        response = application.serve(
+            request=request_class(environ),
+            path=environ.get("PATH_INFO", ""),
+        )
         start_response(
             response.status, [
                 (name, b",".join(values))

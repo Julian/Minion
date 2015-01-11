@@ -83,19 +83,25 @@ class TestTraverse(TestCase):
     def test_it_traverses_resources(self):
         root = LineDelimiterResource()
         request = Request(url=URL(path=b"/foo/bar/baz"))
-        renderer = traversal.traverse(resource=root, request=request)
+        renderer = traversal.traverse(
+            path=b"/foo/bar/baz", resource=root, request=request,
+        )
         self.assertEqual(renderer.render(request), b"foo\nbar\nbaz")
 
     def test_single_level(self):
         root = LineDelimiterResource()
         request = Request(url=URL(path=b"/foo"))
-        renderer = traversal.traverse(resource=root, request=request)
+        renderer = traversal.traverse(
+            path=b"/foo", resource=root, request=request,
+        )
         self.assertEqual(renderer.render(request), b"foo")
 
     def test_zero_levels(self):
         root = LineDelimiterResource()
         request = Request(url=URL(path=b"/"))
-        renderer = traversal.traverse(resource=root, request=request)
+        renderer = traversal.traverse(
+            path=b"/", resource=root, request=request,
+        )
         self.assertIs(renderer, root)
 
     def test_leaf_resources_are_not_traversed(self):
@@ -114,5 +120,7 @@ class TestTraverse(TestCase):
 
         root = Resource()
         request = Request(url=URL(path=b"/0/1/2/3/4/5"))
-        renderer = traversal.traverse(resource=root, request=request)
+        renderer = traversal.traverse(
+            path=b"/0/1/2/3/4/5", resource=root, request=request,
+        )
         self.assertEqual(renderer.render(request), b"2")

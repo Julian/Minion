@@ -135,3 +135,12 @@ class TestRequestIntegration(RequestIntegrationTestMixin, TestCase):
             headers=[(k, ",".join(v)) for k , v in headers.canonicalized()],
         )
         return response.body
+
+    def test_script_name(self):
+        self.minion.route(b"/home")(lambda request : Response(b"Hi!"))
+        app = TestApp(
+            wsgi.create_app(self.minion),
+            extra_environ={"SCRIPT_NAME" : "/app"},
+        )
+        response = app.get(b"/app/home")
+        self.assertEqual(response.body, b"Hi!")

@@ -39,7 +39,9 @@ class MinionResource(object):
                 query=twistedRequest.args,
             ),
         )
-        response = self.application.serve(request)
+        response = self.application.serve(
+            request=request, path=b"/" + b"/".join(twistedRequest.postpath),
+        )
 
         twistedRequest.setResponseCode(response.code)
 

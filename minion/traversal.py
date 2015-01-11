@@ -56,13 +56,13 @@ def method_delegate(**methods):
     return render
 
 
-def traverse(request, resource):
+def traverse(path, request, resource):
     """
     Traverse a root resource, retrieving the appropriate child for the request.
 
     """
 
-    path = request.url.path.lstrip(b"/")
+    path = path.lstrip(b"/")
     for component in path and path.split(b"/"):
         if getattr(resource, "is_leaf", False):
             break

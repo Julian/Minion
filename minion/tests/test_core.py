@@ -88,7 +88,12 @@ class TestApplicationIntegration(TestCase):
         self.router.add(
             self.request.url.path, lambda request : Response(b"Hello"),
         )
-        self.assertEqual(self.app.serve(self.request), Response(b"Hello"))
+        self.assertEqual(
+            self.app.serve(self.request, path=self.request.url.path),
+            Response(b"Hello"),
+        )
 
     def test_it_serves_404s_for_unmapped_requests_by_default(self):
-        self.assertEqual(self.app.serve(self.request).code, 404)
+        self.assertEqual(
+            self.app.serve(self.request, path=self.request.url.path).code, 404,
+        )
