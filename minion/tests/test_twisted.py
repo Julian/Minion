@@ -4,7 +4,8 @@ from future.moves.urllib.parse import parse_qs
 from future.utils import PY3
 from klein.test_resource import _render as render, requestMock as _requestMock
 from twisted.trial.unittest import SynchronousTestCase
-from twisted.web.resource import IResource
+from twisted.web.resource import Resource, IResource
+from twisted.web.server import Site
 from zope.interface.verify import verifyObject
 
 from minion.core import Application
@@ -66,6 +67,13 @@ class TestRequestIntegration(RequestIntegrationTestMixin, SynchronousTestCase):
         request = makeRequest(path=url, headers=dict(headers.canonicalized()))
         render(resource=MinionResource(self.minion), request=request)
         return request.getWrittenData()
+
+    def test_it_properly_routes_when_mounted_on_a_subpath(self):
+        self.minion.route(b"/hello")(lambda request : Response(b"World"))
+        request = makeRequest(path=b"/minion/hello")
+        request.prepath.append(request.postpath.pop(0))
+        render(resource=MinionResource(self.minion), request=request)
+        self.assertEqual(request.getWrittenData(), b"World")
 
 
 def makeRequest(path, *args, **kwargs):
