@@ -216,6 +216,24 @@ class TestURLFromBytes(TestCase):
             },
         ),
         (
+            "preserves_query_string_order", {
+                "url" : b"http://example.com/?a=1&z=2&b=3&x=4&q=5&a=7&p",
+                "expected" : {
+                    "scheme" : b"http",
+                    "host" : b"example.com",
+                    "path" : b"/",
+                    "query" : {
+                        b"a" : [b"1", b"7"],
+                        b"b" : [b"3"],
+                        b"p" : [b""],
+                        b"q" : [b"5"],
+                        b"x" : [b"4"],
+                        b"z" : [b"2"],
+                    },
+                },
+            },
+        ),
+        (
             "no_path", {
                 "url" : b"http://example.org:8080",
                 "expected" : {

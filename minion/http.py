@@ -121,7 +121,7 @@ class URL(object):
             host=host,
             port=port,
             path=unquote(slash + path),
-            query=parse_qs(query),
+            query=parse_qs(query, keep_blank_values=True),
             fragment=unquote_plus(fragment),
             unnormalized=bytes,
             authority=authority,
