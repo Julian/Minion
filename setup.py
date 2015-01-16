@@ -2,8 +2,6 @@ import os
 
 from setuptools import find_packages, setup
 
-from minion import __version__
-
 
 with open(os.path.join(os.path.dirname(__file__), "README.rst")) as readme:
     long_description = readme.read()
@@ -23,8 +21,8 @@ classifiers = [
 
 setup(
     name="minion",
-    version=__version__,
     packages=find_packages(),
+    setup_requires=["vcversioner"],
     install_requires=[
         "cached-property",
         "characteristic>=14.2.0",
@@ -40,4 +38,5 @@ setup(
     url="https://github.com/Julian/Minion",
     description="A microframework based on evil intentions and "
                 "whatever else you've got",
+    vcversioner={"version_module_paths" : ["minion/__init__.py"]},
 )
