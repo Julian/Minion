@@ -2,6 +2,7 @@ Klein==0.2.3
 Mock
 WebTest
 
+testtools
 bzr+lp:~julian+/testscenarios/testscenarios#egg=testscenarios
 
 -r requirements.txt
