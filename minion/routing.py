@@ -15,6 +15,7 @@ perform these operations in various ways.
 """
 
 from collections import defaultdict
+from functools import partial
 
 from characteristic import Attribute, attributes
 from future.utils import listitems as items
@@ -22,7 +23,7 @@ from future.moves.urllib.parse import urlencode
 
 from minion.renderers import bind
 from minion.request import Response, redirect
-from minion.traversal import traverse
+from minion.traversal import LeafResource, traverse
 
 
 @attributes([Attribute(name="mapper")])
@@ -43,9 +44,9 @@ class Router(object):
         )
 
     def route(self, request, path):
-        view, kwargs = self.mapper.map(request=request, path=path)
-        if view is not None:
-            response = view(request=request, **kwargs)
+        render = self.mapper.map(request=request, path=path)
+        if render is not None:
+            response = render(request=request)
         else:
             response = Response(code=404)
         return response
@@ -80,10 +81,12 @@ else:
                 environ={"REQUEST_METHOD" : request.method},
             )
             if match is None:
-                return None, {}
+                return None
 
-            fn = match.pop("minion_target")
-            return fn, match
+            render = match.pop("minion_target")
+            if match:
+                render = partial(render, **match)
+            return render
 
         def lookup(self, route_name, **kwargs):
             return self._generator(route_name, **kwargs)
@@ -117,16 +120,20 @@ else:
 
         def map(self, request, path):
             try:
-                return self._adapter.match(
+                render, kwargs = self._adapter.match(
                     path_info=request.url.path, method=request.method,
                 )
             except werkzeug.routing.RequestRedirect as redirect_exception:
                 return lambda request : redirect(
                     to=redirect_exception.new_url,
                     code=redirect_exception.code,
-                ), {}
+                )
             except werkzeug.routing.HTTPException:
-                return None, {}
+                return None
+            else:
+                if kwargs:
+                    render = partial(render, **kwargs)
+                return render
 
         def lookup(self, route_name, **kwargs):
             try:
@@ -151,13 +158,11 @@ class TraversalMapper(object):
         self.lookup = static_mapper.lookup
 
     def map(self, request, path):
-        static_map, static_kwargs = self.static_mapper.map(
-            request=request, path=path,
-        )
-        if static_map is not None:
-            return static_map, static_kwargs
+        static_render = self.static_mapper.map(request=request, path=path)
+        if static_render is not None:
+            return static_render
         resource = traverse(path=path, request=request, resource=self.root)
-        return resource.render, {}
+        return resource.render
 
 
 class SimpleMapper(object):
@@ -177,8 +182,7 @@ class SimpleMapper(object):
             self._names[route_name] = route
 
     def map(self, request, path):
-        fn = self._routes[request.method].get(path)
-        return fn, {}
+        return self._routes[request.method].get(path)
 
     def lookup(self, route_name, **kwargs):
         url = self._names.get(route_name, route_name)
