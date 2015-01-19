@@ -10,7 +10,7 @@ from minion.request import Response
 
 class TreeResource(object):
     """
-    A tree resource that supports adding children via :meth:`put_child`\ .
+    A tree resource that supports adding children via :meth:`set_child`\ .
 
     """
 
