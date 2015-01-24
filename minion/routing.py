@@ -26,17 +26,24 @@ from minion.request import Response, redirect
 from minion.traversal import LeafResource, traverse
 
 
-@attributes([Attribute(name="mapper")])
+@attributes(
+    [
+        Attribute(name="mapper"),
+        Attribute(name="default_renderer", default_value=None),
+    ],
+)
 class Router(object):
     def add(
         self,
         route,
         fn,
-        renderer=None,
+        renderer=False,
         route_name=None,
         methods=(b"GET", b"HEAD"),
         **kw
     ):
+        if renderer is False:
+            renderer = self.default_renderer
         if renderer is not None:
             fn = bind(renderer=renderer, to=fn)
         self.mapper.add(

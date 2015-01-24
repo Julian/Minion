@@ -92,6 +92,25 @@ class TestRouter(TestCase):
         self.assertEqual(response, Response(b"IndexError"))
 
 
+class TestRouterDefaultRenderer(TestCase):
+    def setUp(self):
+        self.router = routing.Router(
+            mapper=routing.SimpleMapper(), default_renderer=ReverseRenderer(),
+        )
+
+    def test_default_renderer(self):
+        self.router.add(b"/", view)
+        request = Request(url=URL(path=b"/"))
+        response = self.router.route(request, path=b"/")
+        self.assertEqual(response, Response(b"}{"))
+
+    def test_disable_default_renderer(self):
+        self.router.add(b"/", view, renderer=None)
+        request = Request(url=URL(path=b"/"))
+        response = self.router.route(request, path=b"/")
+        self.assertEqual(response, Response(b"{}"))
+
+
 class MapperTestMixin(object):
     """
     Test basic functionality common to all mappers.
