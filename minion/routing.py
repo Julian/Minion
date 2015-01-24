@@ -23,7 +23,7 @@ from future.moves.urllib.parse import urlencode
 
 from minion.renderers import bind
 from minion.request import Response, redirect
-from minion.traversal import LeafResource, traverse
+from minion.traversal import traverse
 
 
 @attributes(

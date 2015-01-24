@@ -4,8 +4,7 @@ from future.moves.urllib.parse import parse_qs
 from future.utils import PY3
 from klein.test_resource import _render as render, requestMock as _requestMock
 from twisted.trial.unittest import SynchronousTestCase
-from twisted.web.resource import Resource, IResource
-from twisted.web.server import Site
+from twisted.web.resource import IResource
 from zope.interface.verify import verifyObject
 
 from minion.core import Application

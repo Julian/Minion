@@ -6,7 +6,6 @@ flaskr -- the Flask tutorial app. Or, should I say, Minion.io
 from contextlib import closing
 import os
 import sqlite3
-import textwrap
 
 import jinja2
 import werkzeug.wrappers
