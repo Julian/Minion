@@ -1,5 +1,6 @@
-from minion import Application, Response
-from minion.wsgi import wsgi_app
+from minion.core import Application
+from minion.request import Response
+from minion.wsgi import create_app
 
 
 app = Application()
@@ -10,4 +11,4 @@ def index(request):
     return Response("Hello World!")
 
 
-wsgi = wsgi_app(app)
+wsgi = create_app(app)

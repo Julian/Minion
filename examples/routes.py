@@ -1,8 +1,10 @@
-from minion import Application, Response, wsgi_app
-from minion.routing import RoutesMapper
+from minion.core import Application
+from minion.request import Response
+from minion.routing import Router, RoutesMapper
+from minion.wsgi import create_app
 
 
-app = Application(router=RoutesMapper())
+app = Application(router=Router(mapper=RoutesMapper()))
 
 
 @app.route("/greet/{user}", greeting="Hey")
@@ -10,4 +12,4 @@ def greet(request, greeting, user):
     return Response(u"{} {}\n".format(greeting, user).encode("utf-8"))
 
 
-wsgi = wsgi_app(app)
+wsgi = create_app(app)

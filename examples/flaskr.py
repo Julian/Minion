@@ -10,8 +10,10 @@ import sqlite3
 import jinja2
 import werkzeug.wrappers
 
-from minion import Application, Response, wsgi_app
-from minion.routing import WerkzeugMapper
+from minion.core import Application
+from minion.request import Response
+from minion.routing import Router, WerkzeugMapper
+from minion.wsgi import create_app
 import examples.static
 
 
@@ -21,7 +23,7 @@ loader = jinja2.FileSystemLoader(
 )
 app = Application(
     jinja=jinja2.Environment(loader=loader),
-    router=WerkzeugMapper(),
+    router=Router(mapper=WerkzeugMapper()),
     config = {
         "credentials" : {"user" : "admin", "password" : "default"},
         "database" : {"uri" : "/tmp/flaskr.db"},
@@ -110,7 +112,7 @@ def init_db():
         db.commit()
 
 
-wsgi = wsgi_app(app, request_class=werkzeug.wrappers.Request)
+wsgi = create_app(app)
 
 
 if __name__ == "__main__":
