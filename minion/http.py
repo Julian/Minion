@@ -176,6 +176,10 @@ class URL(object):
             return "{}:{}".format(self.username, password)
         return self.username
 
+    @calculated_once
+    def is_absolute(self):
+        return bool(self.scheme)
+
     def to_bytes(self):
         url = self._unnormalized
         if url is not None:

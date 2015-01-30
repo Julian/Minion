@@ -23,6 +23,35 @@ class TestURL(TestCase):
             b"http://user:password@example.com:8080/path?query=value#fragment",
         )
 
+    def test_absolute_URLs_are_absolute(self):
+        url = http.URL(
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
+            port=8080,
+            path=b"/path",
+            query=b"query=value",
+            fragment=b"fragment",
+        )
+        self.assertTrue(url.is_absolute)
+
+    def test_URLs_without_schemes_are_not_absolute(self):
+        url = http.URL(
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
+            port=8080,
+            path=b"/path",
+            query=b"query=value",
+            fragment=b"fragment",
+        )
+        self.assertFalse(url.is_absolute)
+
+    def test_empty_is_relative(self):
+        url = http.URL()
+        self.assertFalse(url.is_absolute)
+
 
 class TestURLCompoundComponents(TestCase):
     def test_authority(self):
