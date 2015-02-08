@@ -29,6 +29,12 @@ class TestTreeResource(TestCase):
         request = Request(url=URL(path=b"/bar"))
         self.assertEqual(resource.get_child(b"foo", request=request), child)
 
+    def test_it_returns_404s_for_unknown_children(self):
+        resource = traversal.TreeResource(render=path_view)
+        request = Request(url=URL(path=b"/foo"))
+        child = resource.get_child(b"foo", request=request)
+        self.assertEqual(child.render(request), Response(code=404))
+
 
 class TestLeafResource(TestCase):
     def test_it_renders_what_its_told(self):

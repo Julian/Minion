@@ -8,23 +8,6 @@ from future.utils import PY3, iteritems
 from minion.request import Response
 
 
-class TreeResource(object):
-    """
-    A tree resource that supports adding children via :meth:`set_child`\ .
-
-    """
-
-    def __init__(self, render):
-        self.children = {}
-        self.render = render
-
-    def get_child(self, name, request):
-        return self.children[name]
-
-    def set_child(self, name, resource):
-        self.children[name] = resource
-
-
 class LeafResource(object):
     """
     A leaf resource that simply renders via a provided view.
@@ -35,6 +18,28 @@ class LeafResource(object):
 
     def __init__(self, render):
         self.render = render
+
+
+class TreeResource(object):
+    """
+    A tree resource that supports adding children via :meth:`set_child`\ .
+
+    """
+
+    _no_such_child = LeafResource(render=lambda request : Response(code=404))
+
+    def __init__(self, render):
+        self.children = {}
+        self.render = render
+
+    def get_child(self, name, request):
+        child = self.children.get(name)
+        if child is None:
+            return self._no_such_child
+        return child
+
+    def set_child(self, name, resource):
+        self.children[name] = resource
 
 
 def method_delegate(**methods):
