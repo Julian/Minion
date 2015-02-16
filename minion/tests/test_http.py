@@ -473,13 +473,13 @@ class TestFromInvalidURLs(TestCase):
         (
             "with_missing_slashes", {
                 "url" : b"http:",
-                "message" : "'http:' is not a valid URL"
+                "message" : "'http:' is not a valid URL without initial '//'"
             },
         ),
         (
             "with_missing_slash", {
                 "url" : b"http:/",
-                "message" : "'http:/' is not a valid URL"
+                "message" : "'http:/' is not a valid URL without initial '//'"
             },
         ),
     ]

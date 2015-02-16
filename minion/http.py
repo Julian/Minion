@@ -98,7 +98,9 @@ class URL(object):
         scheme, _, rest = bytes.strip().partition(b":")
 
         if scheme and not rest.startswith(b"//"):
-            raise InvalidURL("{!r} is not a valid URL".format(bytes))
+            raise InvalidURL(
+                "{!r} is not a valid URL without initial '//'".format(bytes),
+            )
 
         authority, slash, rest = rest[2:].partition(b"/")
         userinfo, _, host_and_port = authority.rpartition(b"@")
