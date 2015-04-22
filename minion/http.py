@@ -212,13 +212,20 @@ class URL(object):
         """
         Retrieve the URL of a "child" resource with the given name.
 
-        Does not add a trailing slash. Use ``foo/`` if you want one.
+        .. note::
+
+            Does not add a trailing slash.
+
+            Use ``url.child("foo").child("")`` if you want one.
 
         Unless specified explicitly (i.e. as a new query string or
         fragment), will clear the query string and fragment off of the
         child URL.
 
         """
+
+        if b"/" in name:
+            raise ValueError("Child names cannot contain separators.")
 
         if query is None:
             query = {}

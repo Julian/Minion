@@ -110,6 +110,18 @@ class TestURL(TestCase):
             ),
         )
 
+    def test_child_cannot_contain_slashes(self):
+        """
+
+        Since /foo/ and /foo%2F are generally treated as the same path, child
+        should not contain slashes.
+
+        """
+
+        url = http.URL(scheme=b"http", host=b"example.com", path=b"/bar")
+        with self.assertRaises(ValueError):
+            url.child("foo/")
+
     def test_to_bytes_all_components(self):
         url = http.URL(
             scheme=b"http",
