@@ -164,10 +164,14 @@ class URL(object):
 
     @calculated_once
     def authority(self):
-        userinfo = self.userinfo
+        port, userinfo = self.port, self.userinfo
         if userinfo:
-            return "{}@{}:{}".format(userinfo, self.host, self.port)
-        return "{}:{}".format(self.host, self.port)
+            if port is not None:
+                return "{}@{}:{}".format(userinfo, self.host, port)
+            return "{}@{}".format(userinfo, self.host)
+        if port:
+            return "{}:{}".format(self.host, self.port)
+        return self.host
 
     @calculated_once
     def userinfo(self):

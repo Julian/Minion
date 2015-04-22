@@ -91,6 +91,27 @@ class TestURLCompoundComponents(TestCase):
         url = http.URL.from_bytes(b"https://foo@example.org:4443/path")
         self.assertEqual(url.authority, b"foo@example.org:4443")
 
+    def test_authority_user_no_port(self):
+        url = http.URL(
+            scheme=b"https",
+            username=b"foo",
+            host=b"example.org",
+            path=b"/path",
+        )
+        self.assertEqual(url.authority, b"foo@example.org")
+
+    def test_authority_no_user_no_port_from_bytes(self):
+        url = http.URL.from_bytes(b"https://example.net/path")
+        self.assertEqual(url.authority, b"example.net")
+
+    def test_authority_no_user_no_port(self):
+        url = http.URL(scheme=b"https", host=b"example.net", path=b"/path")
+        self.assertEqual(url.authority, b"example.net")
+
+    def test_authority_user_no_port_from_bytes(self):
+        url = http.URL.from_bytes(b"https://foo@example.org/path")
+        self.assertEqual(url.authority, b"foo@example.org")
+
     def test_authority_no_userinfo(self):
         url = http.URL(scheme=b"http", host=b"example.com", port=8080)
         self.assertEqual(url.authority, b"example.com:8080")
