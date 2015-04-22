@@ -23,6 +23,10 @@ class TestURL(TestCase):
             b"http://user:password@example.com:8080/path?query=value#fragment",
         )
 
+    def test_to_bytes_scheme_and_host(self):
+        url = http.URL(scheme=b"http", host=b"example.net")
+        self.assertEqual(url.to_bytes(), b"http://example.net")
+
     def test_absolute_URLs_are_absolute(self):
         url = http.URL(
             scheme=b"http",

@@ -7,7 +7,9 @@ from bisect import insort
 
 from cached_property import cached_property as calculated_once
 from characteristic import Attribute, attributes
-from future.moves.urllib.parse import parse_qs, unquote, unquote_plus
+from future.moves.urllib.parse import (
+    parse_qs, unquote, unquote_plus, urlencode,
+)
 from future.utils import iteritems, viewkeys
 
 
@@ -188,9 +190,22 @@ class URL(object):
         url = self._unnormalized
         if url is not None:
             return url
-        url = self._unnormalized = (
-            "{self.scheme}://{self.authority}{self.path}?{self.query}#{self.fragment}".format(self=self)
-        )
+        url = "{self.scheme}://{self.authority}{self.path}".format(self=self)
+
+        query = self.query
+        if query:
+            url += b"?" + urlencode(
+                [
+                    (key, value)
+                    for key, values in query.iteritems() for value in values
+                ]
+            )
+
+        fragment = self.fragment
+        if fragment:
+            url += "#" + fragment
+
+        self._unnormalized = url
         return url
 
 
