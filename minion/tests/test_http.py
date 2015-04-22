@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from unittest import TestCase
 
 from future.utils import PY3
@@ -162,10 +163,19 @@ class TestURL(TestCase):
             host=b"example.com",
             port=8080,
             path=b"/path",
-            query=[(b"query", b"value")],
+            query={b"query" : [b"value"]},
             fragment=b"fragment",
         )
         self.assertFalse(url.is_absolute)
+
+    def test_query_string(self):
+        url = http.URL(
+            host=b"example.com",
+            query=OrderedDict(
+                [(b"foo", [b"bar"]), (b"baz", [b"spam", b"eggs"])],
+            ),
+        )
+        self.assertEqual(url.query_string, b"foo=bar&baz=spam&baz=eggs")
 
     def test_empty_is_relative(self):
         url = http.URL()

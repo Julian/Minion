@@ -183,6 +183,16 @@ class URL(object):
         return self.username
 
     @calculated_once
+    def query_string(self):
+        return urlencode(
+            [
+                (key, value)
+                for key, values in self.query.iteritems()
+                for value in values
+            ]
+        )
+
+    @calculated_once
     def is_absolute(self):
         return bool(self.scheme)
 
@@ -192,14 +202,9 @@ class URL(object):
             return url
         url = "{self.scheme}://{self.authority}{self.path}".format(self=self)
 
-        query = self.query
-        if query:
-            url += b"?" + urlencode(
-                [
-                    (key, value)
-                    for key, values in query.iteritems() for value in values
-                ]
-            )
+        query_string = self.query_string
+        if query_string:
+            url += b"?" + query_string
 
         fragment = self.fragment
         if fragment:
