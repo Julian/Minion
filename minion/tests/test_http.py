@@ -7,6 +7,98 @@ from minion import http
 
 
 class TestURL(TestCase):
+    def test_child(self):
+        url = http.URL(scheme=b"http", host=b"example.com", path=b"/foo/")
+        self.assertEqual(
+            url.child("bar"), http.URL(
+                scheme=b"http",
+                host=b"example.com",
+                path=b"/foo/bar",
+            ),
+        )
+
+    def test_child_no_trailing_slash(self):
+        url = http.URL(scheme=b"http", host=b"example.com", path=b"/bar")
+        self.assertEqual(
+            url.child("baz"), http.URL(
+                scheme=b"http",
+                host=b"example.com",
+                path=b"/bar/baz",
+            ),
+        )
+
+    def test_child_of_root(self):
+        url = http.URL(
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
+            port=8080,
+        )
+        self.assertEqual(
+            url.child("child"), http.URL(
+                scheme=b"http",
+                username=b"user",
+                password=b"password",
+                host=b"example.com",
+                port=8080,
+                path=b"/child",
+            )
+        )
+
+    def test_child_with_query_string(self):
+        """
+        Query strings are stripped when accessing children.
+
+        """
+
+        url = http.URL(
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
+            port=8080,
+            path=b"/path",
+            query={b"query" : [b"value"]},
+        )
+        self.assertEqual(
+            url.child("child"), http.URL(
+                scheme=b"http",
+                username=b"user",
+                password=b"password",
+                host=b"example.com",
+                port=8080,
+                path=b"/path/child",
+            )
+        )
+
+    def test_child_with_fragment(self):
+        """
+        Fragments are stripped too.
+
+        """
+
+        url = http.URL(
+            scheme=b"http",
+            username=b"user",
+            password=b"password",
+            host=b"example.com",
+            port=8080,
+            path=b"/path",
+            query={b"query" : [b"value"]},
+            fragment=b"fragment",
+        )
+        self.assertEqual(
+            url.child("child"), http.URL(
+                scheme=b"http",
+                username=b"user",
+                password=b"password",
+                host=b"example.com",
+                port=8080,
+                path=b"/path/child",
+            )
+        )
+
     def test_to_bytes_all_components(self):
         url = http.URL(
             scheme=b"http",

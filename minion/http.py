@@ -208,6 +208,21 @@ class URL(object):
         self._unnormalized = url
         return url
 
+    def child(self, name):
+        """
+        Retrieve the URL of a "child" resource with the given name.
+
+        Does not add a trailing slash. Use ``foo/`` if you want one.
+
+        """
+
+        path = self.path
+        if path.endswith(b"/"):
+            path += name
+        else:
+            path += b"/" + name
+        return _replace(self, path=path, query={}, fragment=b"")
+
 
 class Headers(object):
     def __init__(self, contents=()):
@@ -415,3 +430,16 @@ class MediaRange(object):
 
 
 Accept.ALL = Accept(media_types=(MediaRange(),))
+
+
+def _vars(instance):
+    for attr in instance.characteristic_attributes:
+        name = attr.name
+        yield attr.init_aliaser(name), getattr(instance, name)
+
+
+def _replace(instance, **new):
+    for name, value in _vars(instance):
+        if name not in new:
+            new[name] = value
+    return instance.__class__(**new)
