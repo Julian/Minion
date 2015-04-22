@@ -99,6 +99,17 @@ class TestURL(TestCase):
             )
         )
 
+    def test_child_with_additional_args(self):
+        url = http.URL(scheme=b"http", host=b"example.com", path=b"/bar")
+        self.assertEqual(
+            url.child("baz", query={b"foo" : [b"bar"]}), http.URL(
+                scheme=b"http",
+                host=b"example.com",
+                path=b"/bar/baz",
+                query={b"foo" : [b"bar"]},
+            ),
+        )
+
     def test_to_bytes_all_components(self):
         url = http.URL(
             scheme=b"http",

@@ -208,20 +208,34 @@ class URL(object):
         self._unnormalized = url
         return url
 
-    def child(self, name):
+    def child(self, name, query=None, fragment=b"", **kwargs):
         """
         Retrieve the URL of a "child" resource with the given name.
 
         Does not add a trailing slash. Use ``foo/`` if you want one.
 
+        Unless specified explicitly (i.e. as a new query string or
+        fragment), will clear the query string and fragment off of the
+        child URL.
+
         """
+
+        if query is None:
+            query = {}
 
         path = self.path
         if path.endswith(b"/"):
             path += name
         else:
             path += b"/" + name
-        return _replace(self, path=path, query={}, fragment=b"")
+
+        return _replace(
+            self,
+            path=path,
+            query=query,
+            fragment=fragment,
+            **kwargs
+        )
 
 
 class Headers(object):
