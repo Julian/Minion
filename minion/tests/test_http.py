@@ -15,7 +15,7 @@ class TestURL(TestCase):
             host=b"example.com",
             port=8080,
             path=b"/path",
-            query=b"query=value",
+            query={b"query" : [b"value"]},
             fragment=b"fragment",
         )
         self.assertEqual(
@@ -35,7 +35,7 @@ class TestURL(TestCase):
             host=b"example.com",
             port=8080,
             path=b"/path",
-            query=b"query=value",
+            query=[(b"query", b"value")],
             fragment=b"fragment",
         )
         self.assertTrue(url.is_absolute)
@@ -47,7 +47,7 @@ class TestURL(TestCase):
             host=b"example.com",
             port=8080,
             path=b"/path",
-            query=b"query=value",
+            query=[(b"query", b"value")],
             fragment=b"fragment",
         )
         self.assertFalse(url.is_absolute)
@@ -66,7 +66,7 @@ class TestURLCompoundComponents(TestCase):
             host=b"example.com",
             port=8080,
             path=b"/path",
-            query=b"query=value",
+            query=[(b"query", b"value")],
             fragment=b"fragment",
         )
         self.assertEqual(url.authority, b"user:password@example.com:8080")

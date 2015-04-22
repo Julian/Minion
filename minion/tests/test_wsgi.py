@@ -68,6 +68,21 @@ class TestRequest(RequestTestMixin, TestCase):
         headers = {k : b",".join(v) for k, v in headers.canonicalized()}
         return wsgi.Request(environ=create_environ(headers=headers))
 
+    def test_query_string(self):
+        environ = {
+            "SERVER_NAME" : "example.com",
+            "SERVER_PORT" : "80",
+            "QUERY_STRING" : "foo=bar",
+            "wsgi.url_scheme" : "http",
+        }
+        self.assertEqual(
+            wsgi.Request(environ).url, URL(
+                scheme=b"http",
+                host=b"example.com",
+                query={b"foo" : [b"bar"]},
+            ),
+        )
+
     def test_default_port(self):
         environ = {
             "SERVER_NAME" : "localhost",
