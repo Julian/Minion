@@ -359,6 +359,14 @@ class TestURLNormalized(TestCase):
         self.assertEqual(url.port, 8080)
         self.assertEqual(url.unnormalized_port, 8080)
 
+    def test_trailing_dots_in_hostnames_are_not_removed(self):
+        url = http.URL.normalized(host=b"example.com.")
+        self.assertEqual(url.host, b"example.com.")
+        self.assertNotEqual(
+            http.URL.normalized(host=b"example.com."),
+            http.URL.normalized(host=b"example.com"),
+        )
+
 
 @with_scenarios()
 class TestURLFromBytes(TestCase):
