@@ -139,6 +139,9 @@ class TestURL(TestCase):
             b"http://user:password@example.com:8080/path?query=value#fragment",
         )
 
+    def to_bytes_no_components(self):
+        self.assertEqual(URL().to_bytes(), b"")
+
     def test_to_bytes_scheme_and_host(self):
         url = http.URL(scheme=b"http", host=b"example.net")
         self.assertEqual(url.to_bytes(), b"http://example.net")
