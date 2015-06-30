@@ -105,7 +105,12 @@ class URL(object):
         authority, slash, rest = rest[2:].partition(b"/")
         userinfo, _, host_and_port = authority.rpartition(b"@")
         username, _, password = userinfo.partition(b":")
-        host, _, port_str = host_and_port.partition(b":")
+
+        if host_and_port.startswith(b"["):  # IPv6 Host
+            host, delimiter, port_str = host_and_port.partition(b"]:")
+            host += b"]" if delimiter else b""
+        else:
+            host, _, port_str = host_and_port.partition(b":")
 
         if not port_str:
             port = None

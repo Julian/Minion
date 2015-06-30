@@ -459,6 +459,96 @@ class TestURLFromBytes(TestCase):
                 },
             },
         ),
+        (
+            "IPv6", {
+                "url" : b"http://[3ffe:1900:4545:3:200:f8ff:fe21:67cf]/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[3ffe:1900:4545:3:200:f8ff:fe21:67cf]",
+                    "port" : None,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
+            "link_local_IPv6", {
+                "url" : b"http://[fe80:0:0:0:200:f8ff:fe21:67cf]/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[fe80:0:0:0:200:f8ff:fe21:67cf]",
+                    "port" : None,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
+            "link_local_IPv6_without_sections_of_zeros", {
+                "url" : b"http://[fe80::200:f8ff:fe21:67cf]/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[fe80::200:f8ff:fe21:67cf]",
+                    "port" : None,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
+            "abbreviated_IPv6", {
+                "url" : b"http://[::1]/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[::1]",
+                    "port" : None,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
+            "abbreviated_link_local_IPv6", {
+                "url" : b"http://[fe80::1]/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[fe80::1]",
+                    "port" : None,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
+            "iPv6_with_port", {
+                "url" : b"http://[fe80::1]:4443/",
+                "expected" : {
+                    "scheme" : b"http",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"[fe80::1]",
+                    "port" : 4443,
+                    "path" : b"/",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
     ]
 
     def test_from_bytes(self):
