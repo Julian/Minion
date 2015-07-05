@@ -3,6 +3,6 @@ Mock
 WebTest
 
 testtools
-bzr+lp:~julian+/testscenarios/testscenarios#egg=testscenarios
+git+https://github.com/Julian/testscenarios#egg=testscenarios
 
 -r requirements.txt
