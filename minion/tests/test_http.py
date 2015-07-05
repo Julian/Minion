@@ -203,6 +203,10 @@ class TestURLCompoundComponents(TestCase):
         url = http.URL.from_bytes(b"https://foo:bar@example.org:4443/path")
         self.assertEqual(url.authority, b"foo:bar@example.org:4443")
 
+    def test_authority_from_bytes_with_normalization(self):
+        url = http.URL.from_bytes(b"https://foo:bar@exAMple.org:4443/path")
+        self.assertEqual(url.authority, b"foo:bar@example.org:4443")
+
     def test_authority_no_user(self):
         url = http.URL(
             scheme=b"http", password=b"pass", host=b"example.com", port=8080,
@@ -261,6 +265,16 @@ class TestURLCompoundComponents(TestCase):
         url = http.URL.from_bytes(b"https://:@example.org:4443/path")
         self.assertEqual(url.authority, b"example.org:4443")
         self.assertEqual(url.unnormalized_authority, b":@example.org:4443")
+
+    def test_authority_no_port_userinfo_with_delimiter_from_bytes(self):
+        url = http.URL.from_bytes(b"http://@example.org/path")
+        self.assertEqual(url.authority, b"example.org")
+        self.assertEqual(url.unnormalized_authority, b"@example.org")
+
+    def test_authority_default_port_userinfo_with_delimiter_from_bytes(self):
+        url = http.URL.from_bytes(b"http://@example.org:80/path")
+        self.assertEqual(url.authority, b"example.org")
+        self.assertEqual(url.unnormalized_authority, b"@example.org:80")
 
     def test_userinfo(self):
         url = http.URL(
@@ -327,20 +341,20 @@ class TestURLNormalized(TestCase):
         self.assertEqual(url.scheme, b"http")
         self.assertEqual(url.unnormalized_scheme, b"http")
 
-    def test_empty_userinfo_is_removed(self):
-        url = http.URL.normalized(userinfo=b":")
-        self.assertEqual(url.userinfo, b"")
-        self.assertEqual(url.unnormalized_userinfo, b":")
+    def test_host_is_lowercased(self):
+        """
+        https://url.spec.whatwg.org/#host-state
 
-    def test_an_initial_authority_delimiter_is_removed(self):
-        url = http.URL.normalized(authority=b"@example.com")
-        self.assertEqual(url.authority, b"example.com")
-        self.assertEqual(url.unnormalized_authority, b"@example.com")
+        """
 
-    def test_multiple_initial_authority_delimiters_are_removed(self):
-        url = http.URL.normalized(authority=b":@example.com")
-        self.assertEqual(url.authority, b"example.com")
-        self.assertEqual(url.unnormalized_authority, b":@example.com")
+        url = http.URL.normalized(host=b"Example")
+        self.assertEqual(url.host, b"example")
+        self.assertEqual(url.unnormalized_host, b"Example")
+
+    def test_host_already_lowercased(self):
+        url = http.URL.normalized(host=b"example")
+        self.assertEqual(url.host, b"example")
+        self.assertEqual(url.unnormalized_host, b"example")
 
     def test_port_80_is_the_default_for_http(self):
         url = http.URL.normalized(scheme=b"http", port=80)
@@ -362,7 +376,7 @@ class TestURLNormalized(TestCase):
         self.assertEqual(url.port, 8080)
         self.assertEqual(url.unnormalized_port, 8080)
 
-    def test_trailing_dots_in_hostnames_are_not_removed(self):
+    def test_trailing_dots_in_hosts_are_not_removed(self):
         url = http.URL.normalized(host=b"example.com.")
         self.assertEqual(url.host, b"example.com.")
         self.assertNotEqual(

@@ -62,6 +62,12 @@ class InvalidURL(LookupError):
             exclude_from_repr=True,
         ),
         Attribute(
+            name="unnormalized_host",
+            default_value=None,
+            exclude_from_cmp=True,
+            exclude_from_repr=True,
+        ),
+        Attribute(
             name="unnormalized_userinfo",
             default_value=None,
             exclude_from_cmp=True,
@@ -82,12 +88,6 @@ class InvalidURL(LookupError):
     ],
 )
 class URL(object):
-    def __init__(self, authority=None, userinfo=None):
-        if authority is not None:
-            self.authority = authority
-        if userinfo is not None:
-            self.userinfo = userinfo
-
     @classmethod
     def from_bytes(cls, bytes):
         """
@@ -133,8 +133,8 @@ class URL(object):
             query=parse_qs(query, keep_blank_values=True),
             fragment=unquote_plus(fragment),
             unnormalized=bytes,
-            authority=authority,
-            userinfo=userinfo,
+            unnormalized_authority=authority,
+            unnormalized_userinfo=userinfo,
         )
 
     @classmethod
@@ -146,21 +146,10 @@ class URL(object):
                 scheme=scheme, unnormalized_scheme=unnormalized_scheme,
             )
 
-        userinfo = unnormalized_userinfo = kwargs.pop("userinfo", None)
-        if userinfo is not None:
-            userinfo = userinfo if userinfo != b":" else b""
-            kwargs.update(
-                userinfo=userinfo, unnormalized_userinfo=unnormalized_userinfo,
-            )
-
-        authority = unnormalized_authority = kwargs.pop("authority", None)
-        if authority is not None:
-            authority = (
-                authority if userinfo else authority.lstrip(b":")).lstrip("@")
-            kwargs.update(
-                authority=authority,
-                unnormalized_authority=unnormalized_authority,
-            )
+        host = unnormalized_host = kwargs.pop("host", None)
+        if unnormalized_host is not None:
+            host = unnormalized_host.lower()
+            kwargs.update(host=host, unnormalized_host=unnormalized_host)
 
         port = unnormalized_port = kwargs.pop("port", None)
         if port is not None:
