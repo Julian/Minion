@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from collections import OrderedDict
 from unittest import TestCase
 import json
@@ -15,7 +14,9 @@ class TestUnicodeRenderer(TestCase):
     def test_it_renders_via_the_given_encoding(self):
         renderer = renderers.Unicode(encoding="utf-8")
         render = renderers.bind(renderer, to=lambda _ : u"שלום")
-        self.assertEqual(render(self.request), Response(b"שלום"))
+        self.assertEqual(
+            render(self.request), Response(u"שלום".encode("utf-8")),
+        )
 
     def test_encoding_ignoring_errors(self):
         renderer = renderers.Unicode(encoding="ascii", errors="ignore")
@@ -30,7 +31,9 @@ class TestUnicodeRenderer(TestCase):
 
     def test_UTF8(self):
         render = renderers.bind(renderers.UTF8, to=lambda _ : u"שלום")
-        self.assertEqual(render(self.request), Response(b"שלום"))
+        self.assertEqual(
+            render(self.request), Response(u"שלום".encode("utf-8")),
+        )
 
 
 class TestJSON(TestCase):
