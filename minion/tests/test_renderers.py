@@ -104,12 +104,15 @@ class TestJSON(TestCase):
             url=URL(path=b"/"),
             headers=Headers([("Accept", ["application/json"])]),
         )
+        response = render(request)
         self.assertEqual(
-            render(request), Response(
-                content=b'{"a":1,"b":2}',
+            response, Response(
+                content=response.content,
                 headers=Headers([("Content-Type", ["application/json"])]),
             ),
         )
+        self.assertNotIn(response.content, " ")
+        self.assertEqual(json.loads(response.content), {"a" : 1, "b" : 2})
 
     def test_customized_dumps(self):
         """
