@@ -16,23 +16,29 @@ from minion.tests.test_integration import RequestIntegrationTestMixin
 from minion.twisted import MinionResource
 
 
-class EverythingIsTerrible(object):
-    Klein = run = route = resource = flattenString = None
-    Element = object
-    XMLString = str
-    renderer = lambda fn : None
+if PY3:
+    class EverythingIsTerrible(object):
+        Klein = run = route = resource = flattenString = None
+        Element = object
+        XMLString = str
+        renderer = lambda fn : None
 
 
-with patch.dict(
-    sys.modules, {
-        "StringIO" : io,
-        "klein.app" : EverythingIsTerrible,
-        "twisted.web.template" : EverythingIsTerrible,
-    },
-):
+    with patch.dict(
+        sys.modules, {
+            "StringIO" : io,
+            "klein.app" : EverythingIsTerrible,
+            "twisted.web.template" : EverythingIsTerrible,
+        },
+    ):
+        from klein.test_resource import (
+            _render as render, requestMock as _requestMock,
+        )
+else:
     from klein.test_resource import (
-        _render as render, requestMock as _requestMock,
-    )
+            _render as render, requestMock as _requestMock,
+        )
+
 
 class TestMinionResource(SynchronousTestCase):
     def setUp(self):
