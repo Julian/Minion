@@ -1,8 +1,10 @@
+from mock import patch
 from unittest import skipIf
+import io
+import sys
 
 from future.moves.urllib.parse import parse_qs
 from future.utils import PY3
-from klein.test_resource import _render as render, requestMock as _requestMock
 from twisted.trial.unittest import SynchronousTestCase
 from twisted.web.resource import IResource
 from zope.interface.verify import verifyObject
@@ -13,6 +15,24 @@ from minion.request import Response
 from minion.tests.test_integration import RequestIntegrationTestMixin
 from minion.twisted import MinionResource
 
+
+class EverythingIsTerrible(object):
+    Klein = run = route = resource = flattenString = None
+    Element = object
+    XMLString = str
+    renderer = lambda fn : None
+
+
+with patch.dict(
+    sys.modules, {
+        "StringIO" : io,
+        "klein.app" : EverythingIsTerrible,
+        "twisted.web.template" : EverythingIsTerrible,
+    },
+):
+    from klein.test_resource import (
+        _render as render, requestMock as _requestMock,
+    )
 
 class TestMinionResource(SynchronousTestCase):
     def setUp(self):
