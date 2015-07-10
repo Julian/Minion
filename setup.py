@@ -38,5 +38,5 @@ setup(
     url="https://github.com/Julian/Minion",
     description="A microframework based on evil intentions and "
                 "whatever else you've got",
-    vcversioner={"version_module_paths" : ["minion/__init__.py"]},
+    vcversioner={"version_module_paths" : ["minion/_version.py"]},
 )
