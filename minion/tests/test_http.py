@@ -597,6 +597,12 @@ class TestFromInvalidURLs(TestCase):
                 "message" : "'http:/' is not a valid URL without initial '//'"
             },
         ),
+        (
+            "from_non_bytes", {
+                "url" : None,
+                "message" : "None is not a valid URL",
+            },
+        ),
     ]
 
     def test_invalid_url(self):

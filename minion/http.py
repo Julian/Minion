@@ -3,6 +3,8 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 """
 
+import sys
+
 from bisect import insort
 
 from cached_property import cached_property as calculated_once
@@ -95,7 +97,11 @@ class URL(object):
 
         """
 
-        scheme, _, rest = bytes.strip().partition(b":")
+        try:  # this belongs on the first thing likely to cause a (Type)Error
+            scheme, _, rest = bytes.strip().partition(b":")
+        except Exception:
+            exception = InvalidURL("{!r} is not a valid URL".format(bytes))
+            raise InvalidURL, exception, sys.exc_info()[2]
 
         if scheme and not rest.startswith(b"//"):
             raise InvalidURL(
