@@ -3,8 +3,6 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 """
 
-import sys
-
 from bisect import insort
 
 from cached_property import cached_property as calculated_once
@@ -202,7 +200,18 @@ class URL(object):
         url = self._unnormalized
         if url is not None:
             return url
-        url = "{self.scheme}://{self.authority}{self.path}".format(self=self)
+
+        scheme, authority, path = self.scheme, self.authority, self.path
+        if scheme:
+            url = "{scheme}://{authority}{path}".format(
+                scheme=scheme, authority=authority, path=path,
+            )
+        elif authority:
+            url = "//{authority}{path}".format(
+                authority=authority, path=self.path,
+            )
+        else:
+            url = path
 
         query_string = self.query_string
         if query_string:
