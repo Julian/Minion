@@ -22,6 +22,7 @@ if PY3:
         Element = object
         XMLString = str
         renderer = lambda fn : None
+        TagLoader = object
 
 
     with patch.dict(
