@@ -12,7 +12,7 @@ from characteristic import Attribute, attributes
 from future.moves.urllib.parse import (
     parse_qs, unquote, unquote_plus, urlencode,
 )
-from future.utils import iteritems, viewkeys
+from future.utils import iteritems, raise_with_traceback, viewkeys
 
 
 _CANONICAL_HEADER_NAMES = {
@@ -101,7 +101,7 @@ class URL(object):
             scheme, _, rest = bytes.strip().partition(b":")
         except Exception:
             exception = InvalidURL("{!r} is not a valid URL".format(bytes))
-            raise InvalidURL, exception, sys.exc_info()[2]
+            raise_with_traceback(exception)
 
         if scheme and not rest.startswith(b"//"):
             raise InvalidURL(
