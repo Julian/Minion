@@ -169,17 +169,17 @@ class URL(object):
         port, userinfo = self.port, self.userinfo
         if userinfo:
             if port is not None:
-                return "{}@{}:{}".format(userinfo, self.host, port)
-            return "{}@{}".format(userinfo, self.host)
+                return b"{}@{}:{}".format(userinfo, self.host, port)
+            return b"{}@{}".format(userinfo, self.host)
         if port:
-            return "{}:{}".format(self.host, self.port)
+            return b"{}:{}".format(self.host, self.port)
         return self.host
 
     @calculated_once
     def userinfo(self):
         password = self.password
         if password:
-            return "{}:{}".format(self.username, password)
+            return b"{}:{}".format(self.username, password)
         return self.username
 
     @calculated_once
@@ -203,11 +203,11 @@ class URL(object):
 
         scheme, authority, path = self.scheme, self.authority, self.path
         if scheme:
-            url = "{scheme}://{authority}{path}".format(
+            url = b"{scheme}://{authority}{path}".format(
                 scheme=scheme, authority=authority, path=path,
             )
         elif authority:
-            url = "//{authority}{path}".format(
+            url = b"//{authority}{path}".format(
                 authority=authority, path=self.path,
             )
         else:
@@ -361,22 +361,22 @@ class Accept(object):
             return cls.ALL
 
         media_types = []
-        for range_and_parameters in header.split(","):
-            raw_range, _, raw_parameters = range_and_parameters.partition(";")
+        for range_and_parameters in header.split(b","):
+            raw_range, _, raw_parameters = range_and_parameters.partition(b";")
 
             quality = 1.0
             media_parameters = {}
             if raw_parameters:
-                for raw_parameter in raw_parameters.split(";"):
-                    key, _, value = raw_parameter.partition("=")
+                for raw_parameter in raw_parameters.split(b";"):
+                    key, _, value = raw_parameter.partition(b"=")
                     key = key.strip()
                     value = value.strip()
-                    if key == "q":
+                    if key == b"q":
                         quality = float(value)
                     else:
                         media_parameters[key] = value
 
-            raw_type, _, raw_subtype = raw_range.partition("/")
+            raw_type, _, raw_subtype = raw_range.partition(b"/")
 
             type = raw_type.strip()
             subtype = raw_subtype.strip()
@@ -384,8 +384,8 @@ class Accept(object):
             insort(
                 media_types,
                 MediaRange(
-                    type=type if type != "*" else STAR,
-                    subtype=subtype if subtype != "*" else STAR,
+                    type=type if type != b"*" else STAR,
+                    subtype=subtype if subtype != b"*" else STAR,
                     quality=quality,
                     parameters=media_parameters,
                 ),
@@ -461,7 +461,7 @@ class MediaRange(object):
         values = tuple(
             getattr(self, attr.name)
             for attr in self.characteristic_attributes
-            if attr.name != "parameters"
+            if attr.name != b"parameters"
         )
         return hash(values + tuple(self.parameters.items()))
 

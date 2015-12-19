@@ -147,7 +147,7 @@ class TestRequestIntegration(RequestIntegrationTestMixin, TestCase):
         app = TestApp(wsgi.create_app(self.minion))
         response = app.get(
             url,
-            headers=[(k, ",".join(v)) for k , v in headers.canonicalized()],
+            headers=[(k, b",".join(v)) for k , v in headers.canonicalized()],
         )
         return response.body
 

@@ -835,71 +835,73 @@ class TestImmutableHeaders(HeaderRetrievalTestsMixin, TestCase):
 
 class TestAccept(TestCase):
     def test_basic(self):
-        accept = http.Accept.from_header(header="application/json")
+        accept = http.Accept.from_header(header=b"application/json")
         media_range = http.MediaRange(
-            type="application", subtype="json", quality=1.0,
+            type=b"application", subtype=b"json", quality=1.0,
         )
         self.assertEqual(accept, http.Accept(media_types=(media_range,)))
 
     def test_multiple(self):
-        accept = http.Accept.from_header(header="audio/*; q=0.2, audio/basic")
+        accept = http.Accept.from_header(header=b"audio/*; q=0.2, audio/basic")
         media_types = (
-            http.MediaRange(type="audio", quality=0.2),
-            http.MediaRange(type="audio", subtype="basic", quality=1.0),
+            http.MediaRange(type=b"audio", quality=0.2),
+            http.MediaRange(type=b"audio", subtype=b"basic", quality=1.0),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
 
     def test_strips_spaces(self):
-        accept = http.Accept.from_header(header=" text/* ; q=0.2 ,  text/foo")
+        accept = http.Accept.from_header(header=b" text/* ; q=0.2 ,  text/foo")
         media_types = (
-            http.MediaRange(type="text", quality=0.2),
-            http.MediaRange(type="text", subtype="foo", quality=1.0),
+            http.MediaRange(type=b"text", quality=0.2),
+            http.MediaRange(type=b"text", subtype=b"foo", quality=1.0),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
 
     def test_more_elaborate(self):
         accept = http.Accept.from_header(
-            header="text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c",
+            header=b"text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"
         )
         media_types = (
-            http.MediaRange(type="text", subtype="plain", quality=0.5),
-            http.MediaRange(type="text", subtype="x-dvi", quality=0.8),
-            http.MediaRange(type="text", subtype="html"),
-            http.MediaRange(type="text", subtype="x-c"),
+            http.MediaRange(type=b"text", subtype=b"plain", quality=0.5),
+            http.MediaRange(type=b"text", subtype=b"x-dvi", quality=0.8),
+            http.MediaRange(type=b"text", subtype=b"html"),
+            http.MediaRange(type=b"text", subtype=b"x-c"),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
 
     def test_override_with_more_specific_type(self):
         accept = http.Accept.from_header(
-            header="text/*, text/plain, text/plain;format=flowed, */*",
+            header=b"text/*, text/plain, text/plain;format=flowed, */*",
         )
         media_types = (
             http.MediaRange(),
-            http.MediaRange(type="text"),
-            http.MediaRange(type="text", subtype="plain"),
+            http.MediaRange(type=b"text"),
+            http.MediaRange(type=b"text", subtype=b"plain"),
             http.MediaRange(
-                type="text", subtype="plain", parameters=dict(format="flowed"),
+                type=b"text",
+                subtype=b"plain",
+                parameters={b"format" : b"flowed"},
             ),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
 
     def test_quality_factors(self):
         accept = http.Accept.from_header(
-            header="text/*;q=0.3, text/html;q=0.7, text/html;level=1, "
-                   "text/html;level=2;q=0.4, */*;q=0.5",
+            header=b"text/*;q=0.3, text/html;q=0.7, text/html;level=1, "
+                   b"text/html;level=2;q=0.4, */*;q=0.5",
         )
         media_types = (
-            http.MediaRange(type="text", quality=0.3),
+            http.MediaRange(type=b"text", quality=0.3),
             http.MediaRange(
-                type="text",
-                subtype="html",
+                type=b"text",
+                subtype=b"html",
                 quality=0.4,
-                parameters=dict(level="2"),
+                parameters={b"level" : b"2"},
             ),
             http.MediaRange(quality=0.5),
-            http.MediaRange(type="text", subtype="html", quality=0.7),
+            http.MediaRange(type=b"text", subtype=b"html", quality=0.7),
             http.MediaRange(
-                type="text", subtype="html", parameters=dict(level="1"),
+                type=b"text", subtype=b"html", parameters={b"level": b"1"},
             ),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
