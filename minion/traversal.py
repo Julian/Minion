@@ -3,11 +3,17 @@ Helpers for applications that use object traversal routing.
 
 """
 
+from characteristic import Attribute, attributes
 from future.utils import PY3, iteritems
 
 from minion.request import Response
 
 
+@attributes(
+    [
+        Attribute(name="render"),
+    ],
+)
 class LeafResource(object):
     """
     A leaf resource that simply renders via a provided view.
@@ -16,10 +22,13 @@ class LeafResource(object):
 
     is_leaf = True
 
-    def __init__(self, render):
-        self.render = render
 
-
+@attributes(
+    [
+        Attribute(name="_children", default_factory=dict),
+        Attribute(name="render"),
+    ],
+)
 class TreeResource(object):
     """
     A tree resource that supports adding children via :meth:`set_child`\ .
@@ -28,18 +37,14 @@ class TreeResource(object):
 
     _no_such_child = LeafResource(render=lambda request : Response(code=404))
 
-    def __init__(self, render):
-        self.children = {}
-        self.render = render
-
     def get_child(self, name, request):
-        child = self.children.get(name)
+        child = self._children.get(name)
         if child is None:
             return self._no_such_child
         return child
 
     def set_child(self, name, resource):
-        self.children[name] = resource
+        self._children[name] = resource
 
 
 def method_delegate(**methods):
