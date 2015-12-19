@@ -594,15 +594,27 @@ class TestFromInvalidURLs(TestCase):
             },
         ),
         (
-            "with_missing_slashes", {
+            "http_with_missing_slashes", {
                 "url" : b"http:",
                 "message" : "'http:' is not a valid URL without initial '//'"
             },
         ),
         (
-            "with_missing_slash", {
+            "http_with_missing_slash", {
                 "url" : b"http:/",
                 "message" : "'http:/' is not a valid URL without initial '//'"
+            },
+        ),
+        (
+            "https_with_missing_slashes", {
+                "url" : b"https:",
+                "message" : "'https:' is not a valid URL without initial '//'"
+            },
+        ),
+        (
+            "https_with_missing_slash", {
+                "url" : b"https:/",
+                "message" : "'https:/' is not a valid URL without initial '//'"
             },
         ),
         (
