@@ -590,31 +590,39 @@ class TestFromInvalidURLs(TestCase):
         (
             "with_invalid_port", {
                 "url" : b"http://example.org:invalid",
-                "message" : "'invalid' is not a valid port"
+                "message" : "{b}'invalid' is not a valid port"
             },
         ),
         (
             "http_with_missing_slashes", {
                 "url" : b"http:",
-                "message" : "'http:' is not a valid URL without initial '//'"
+                "message" : (
+                    "{b}'http:' is not a valid URL without initial '//'"
+                ),
             },
         ),
         (
             "http_with_missing_slash", {
                 "url" : b"http:/",
-                "message" : "'http:/' is not a valid URL without initial '//'"
+                "message" : (
+                    "{b}'http:/' is not a valid URL without initial '//'"
+                ),
             },
         ),
         (
             "https_with_missing_slashes", {
                 "url" : b"https:",
-                "message" : "'https:' is not a valid URL without initial '//'"
+                "message" : (
+                    "{b}'https:' is not a valid URL without initial '//'"
+                )
             },
         ),
         (
             "https_with_missing_slash", {
                 "url" : b"https:/",
-                "message" : "'https:/' is not a valid URL without initial '//'"
+                "message" : (
+                    "{b}'https:/' is not a valid URL without initial '//'"
+                )
             },
         ),
         (
@@ -628,7 +636,8 @@ class TestFromInvalidURLs(TestCase):
     def test_invalid_url(self):
         with self.assertRaises(http.InvalidURL) as e:
             http.URL.from_bytes(self.url)
-        self.assertEqual(str(e.exception), self.message)
+        message = self.message.format(b="b" if PY3 else "")
+        self.assertEqual(str(e.exception), message)
 
 
 class HeaderRetrievalTestsMixin(object):
