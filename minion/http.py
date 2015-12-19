@@ -187,7 +187,7 @@ class URL(object):
         return urlencode(
             [
                 (key, value)
-                for key, values in self.query.iteritems()
+                for key, values in iteritems(self.query)
                 for value in values
             ]
         )

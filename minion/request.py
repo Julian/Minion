@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from characteristic import Attribute, attributes
 from cached_property import cached_property as calculated_once
-from six import BytesIO, iteritems
+from future.utils import BytesIO, iteritems
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
 
 from minion.deferred import Deferred
