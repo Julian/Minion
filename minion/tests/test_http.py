@@ -467,6 +467,21 @@ class TestURLFromBytes(TestCase):
             },
         ),
         (
+            "path_relative", {
+                "url" : b"/foo",
+                "expected" : {
+                    "scheme" : b"",
+                    "username" : b"",
+                    "password" : b"",
+                    "host" : b"",
+                    "port" : None,
+                    "path" : b"/foo",
+                    "query" : {},
+                    "fragment" : b"",
+                },
+            },
+        ),
+        (
             "empty", {
                 "url" : b"",
                 "expected" : {
