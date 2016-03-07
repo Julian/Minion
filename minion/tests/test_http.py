@@ -583,6 +583,11 @@ class TestURLFromBytes(TestCase):
         self.assertEqual(http.URL.from_bytes(self.url).to_bytes(), self.url)
 
 
+    def test_child_roundtrip(self):
+        child = http.URL.from_bytes(self.url).child("foo")
+        self.assertEqual(http.URL.from_bytes(child.to_bytes()), child)
+
+
 @with_scenarios()
 class TestFromInvalidURLs(TestCase):
 

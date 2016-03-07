@@ -254,6 +254,7 @@ class URL(object):
 
         return _replace(
             self,
+            unnormalized=None,
             path=path,
             query=query,
             fragment=fragment,
