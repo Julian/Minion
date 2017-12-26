@@ -29,10 +29,16 @@ class Bin(object):
         """
         Declare that the decorated callable provides the given asset.
 
-        :argument str asset: the name of the new asset
-        :argument bool needs_request: whether to pass the request in to the
-            given callable when calling it
+        Arguments:
 
+            asset (str):
+
+                the name of the new asset
+
+            needs_request (bool):
+
+                whether to pass the request in to the given callable when
+                calling it
         """
 
         def _provides(fn):
@@ -50,8 +56,11 @@ class Bin(object):
         """
         Wrap the decorated callable to include the given assets when called.
 
-        :argument iterable assets: the needed asset names
+        Arguments:
 
+            assets (iterable):
+
+                the needed asset names
         """
 
         def _needs(fn):

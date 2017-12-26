@@ -65,6 +65,7 @@ class TestAssetBin(TestCase):
             return 12
 
         thing = mock.Mock()
+
         @self.bin.provides("wine")
         def make_wine():
             return thing
@@ -200,7 +201,7 @@ class TestAssetBin(TestCase):
         self.bin.provides("wine")(wine)
 
         gold = mock.Mock()
-        bin = assets.Bin(self.request_manager, globals={"gold" : gold})
+        bin = assets.Bin(self.request_manager, globals={"gold": gold})
 
         self.bin.update(bin)
 

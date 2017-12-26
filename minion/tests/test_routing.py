@@ -142,8 +142,8 @@ class MapperTestMixin(object):
         self.assertIsNone(self.mapper.map(request, path=b"/route"))
 
     def test_it_maps_multiple_routes_for_specified_methods(self):
-        self.mapper.add(b"/", lambda r : Response(b"GET"), methods=[b"GET"])
-        self.mapper.add(b"/", lambda r : Response(b"POST"), methods=[b"POST"])
+        self.mapper.add(b"/", lambda r: Response(b"GET"), methods=[b"GET"])
+        self.mapper.add(b"/", lambda r: Response(b"POST"), methods=[b"POST"])
 
         get = Request(url=URL(path=[u""], rooted=True), method=b"GET")
         post = Request(url=URL(path=[u""], rooted=True), method=b"POST")
@@ -176,7 +176,7 @@ class TestTraversalMapper(TestCase):
         class Resource(object):
             def get_child(self, name, request):
                 return LeafResource(
-                    render=lambda request : Response(b"Hello " + name),
+                    render=lambda request: Response(b"Hello " + name),
                 )
 
         mapper = routing.TraversalMapper(root=Resource())
@@ -202,7 +202,7 @@ class TestRoutesMapper(MapperTestMixin, TestCase):
         render = self.mapper.map(request, path=b"/route/2013")
         self.assertEqual(
             json.loads(render(request).content),
-            {b"year" : b"2013", b"stuff" : b"12"},
+            {b"year": b"2013", b"stuff": b"12"},
         )
 
     def test_it_builds_routes_with_arguments(self):
@@ -221,7 +221,7 @@ class TestWerkzeugMapper(MapperTestMixin, TestCase):
         self.mapper.add(b"/route/<int:year>", view)
         request = Request(url=URL(path=[u"route", u"2013"], rooted=True))
         render = self.mapper.map(request, path=b"/route/2013")
-        self.assertEqual(json.loads(render(request).content), {b"year" : 2013})
+        self.assertEqual(json.loads(render(request).content), {b"year": 2013})
 
     def test_it_builds_routes_with_arguments(self):
         self.mapper.add(b"/<int:year>", view, route_name=u"year")

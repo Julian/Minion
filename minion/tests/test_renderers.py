@@ -16,24 +16,24 @@ class TestUnicodeRenderer(TestCase):
 
     def test_it_renders_via_the_given_encoding(self):
         renderer = renderers.Unicode(encoding="utf-8")
-        render = renderers.bind(renderer, to=lambda _ : u"שלום")
+        render = renderers.bind(renderer, to=lambda _: u"שלום")
         self.assertEqual(
             render(self.request), Response(u"שלום".encode("utf-8")),
         )
 
     def test_encoding_ignoring_errors(self):
         renderer = renderers.Unicode(encoding="ascii", errors="ignore")
-        render = renderers.bind(renderer, to=lambda _ : u"שלום")
+        render = renderers.bind(renderer, to=lambda _: u"שלום")
         self.assertEqual(render(self.request), Response(b""))
 
     def test_encoding_errors_by_default(self):
         renderer = renderers.Unicode(encoding="ascii")
-        render = renderers.bind(renderer, to=lambda _ : u"שלום")
+        render = renderers.bind(renderer, to=lambda _: u"שלום")
         with self.assertRaises(UnicodeEncodeError):
             render(self.request)
 
     def test_UTF8(self):
-        render = renderers.bind(renderers.UTF8, to=lambda _ : u"שלום")
+        render = renderers.bind(renderers.UTF8, to=lambda _: u"שלום")
         self.assertEqual(
             render(self.request), Response(u"שלום".encode("utf-8")),
         )
@@ -70,7 +70,7 @@ class TestJSON(TestCase):
 
     def test_it_dumps_pretty_json_for_humans(self):
         content = ["a", "b", "c"]
-        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        render = renderers.bind(renderers.JSON(), to=lambda _: content)
         request = Request(
             url=URL(path=[u""]),
             headers=Headers([("Accept", ["*/*"])]),
@@ -79,12 +79,12 @@ class TestJSON(TestCase):
 
     def test_it_dumps_pretty_json_for_humans_no_accept_header(self):
         content = ["a", "b", "c"]
-        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        render = renderers.bind(renderers.JSON(), to=lambda _: content)
         self.assertPretty(content, render(Request(url=URL(path=[u""]))))
 
     def test_it_dumps_practical_json_for_machines(self):
         content = ["a", "b", "c"]
-        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        render = renderers.bind(renderers.JSON(), to=lambda _: content)
         request = Request(
             url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
@@ -93,7 +93,7 @@ class TestJSON(TestCase):
 
     def test_dict_sort_keys(self):
         content = OrderedDict([("foo", "bar"), ("baz", "quux")])
-        render = renderers.bind(renderers.JSON(), to=lambda _ : content)
+        render = renderers.bind(renderers.JSON(), to=lambda _: content)
         request = Request(
             url=URL(path=[u""]),
             headers=Headers([("Accept", ["*/*"])]),
@@ -101,7 +101,7 @@ class TestJSON(TestCase):
         self.assertPretty(content, render(request))
 
     def test_separators(self):
-        render = renderers.bind(renderers.JSON(), to=lambda _ : dict(a=1, b=2))
+        render = renderers.bind(renderers.JSON(), to=lambda _: dict(a=1, b=2))
         request = Request(
             url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
@@ -114,7 +114,7 @@ class TestJSON(TestCase):
             ),
         )
         self.assertNotIn(response.content, " ")
-        self.assertEqual(json.loads(response.content), {"a" : 1, "b" : 2})
+        self.assertEqual(json.loads(response.content), {"a": 1, "b": 2})
 
     def test_customized_dumps(self):
         """
@@ -122,8 +122,8 @@ class TestJSON(TestCase):
 
         """
 
-        renderer = renderers.JSON(default=lambda obj : 23)
-        render = renderers.bind(renderer, to=lambda _ : {"foo" : object()})
+        renderer = renderers.JSON(default=lambda obj: 23)
+        render = renderers.bind(renderer, to=lambda _: {"foo": object()})
         request = Request(
             url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
@@ -148,10 +148,10 @@ class TestSimpleJSON(TestCase):
 
     def test_it_dumps_json(self):
         renderer = renderers.SimpleJSON()
-        render = renderers.bind(renderer, to=lambda _ : {"foo" : "bar"})
+        render = renderers.bind(renderer, to=lambda _: {"foo": "bar"})
         self.assertEqual(render(self.request), Response(b'{"foo": "bar"}'))
 
     def test_customized_dumps(self):
         renderer = renderers.SimpleJSON(separators=",:")
-        render = renderers.bind(renderer, to=lambda _ : {"foo" : "bar"})
+        render = renderers.bind(renderer, to=lambda _: {"foo": "bar"})
         self.assertEqual(render(self.request), Response(b'{"foo":"bar"}'))

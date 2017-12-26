@@ -33,7 +33,7 @@ class TestWSGIMinion(TestCase):
             return Response(request.headers.get("Accept")[0])
 
         response = self.wsgi.get(
-            b"/respond", status=200, headers={b"Accept" : b"2"},
+            b"/respond", status=200, headers={b"Accept": b"2"},
         )
         self.assertEqual(response.body, b"2")
 
@@ -66,15 +66,15 @@ class TestWSGIMinion(TestCase):
 
 class TestRequest(RequestTestMixin, TestCase):
     def make_request(self, headers):
-        headers = {k : b",".join(v) for k, v in headers.canonicalized()}
+        headers = {k: b",".join(v) for k, v in headers.canonicalized()}
         return wsgi.Request(environ=create_environ(headers=headers))
 
     def test_query_string(self):
         environ = {
-            "SERVER_NAME" : "example.com",
-            "SERVER_PORT" : "80",
-            "QUERY_STRING" : "foo=bar",
-            "wsgi.url_scheme" : "http",
+            "SERVER_NAME": "example.com",
+            "SERVER_PORT": "80",
+            "QUERY_STRING": "foo=bar",
+            "wsgi.url_scheme": "http",
         }
         self.assertEqual(
             wsgi.Request(environ).url, URL(
@@ -86,9 +86,9 @@ class TestRequest(RequestTestMixin, TestCase):
 
     def test_default_port(self):
         environ = {
-            "SERVER_NAME" : "localhost",
-            "SERVER_PORT" : "80",
-            "wsgi.url_scheme" : "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "80",
+            "wsgi.url_scheme": "http",
         }
         self.assertEqual(
             wsgi.Request(environ).url,
@@ -97,9 +97,9 @@ class TestRequest(RequestTestMixin, TestCase):
 
     def test_non_default_port(self):
         environ = {
-            "SERVER_NAME" : "localhost",
-            "SERVER_PORT" : "8080",
-            "wsgi.url_scheme" : "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+            "wsgi.url_scheme": "http",
         }
         self.assertEqual(
             wsgi.Request(environ).url,
@@ -108,11 +108,11 @@ class TestRequest(RequestTestMixin, TestCase):
 
     def test_script_name(self):
         environ = {
-            "HTTP_HOST" : "example.org",
-            "SCRIPT_NAME" : "/stuff",
-            "PATH_INFO" : "/things",
-            "SERVER_PORT" : "443",
-            "wsgi.url_scheme" : "https",
+            "HTTP_HOST": "example.org",
+            "SCRIPT_NAME": "/stuff",
+            "PATH_INFO": "/things",
+            "SERVER_PORT": "443",
+            "wsgi.url_scheme": "https",
         }
         self.assertEqual(
             wsgi.Request(environ).url, URL(
@@ -124,10 +124,10 @@ class TestRequest(RequestTestMixin, TestCase):
 
     def test_host_no_path_no_query_string(self):
         environ = {
-            "HTTP_HOST" : "example.com",
-            "SERVER_NAME" : "localhost",
-            "SERVER_PORT" : "80",
-            "wsgi.url_scheme" : "http",
+            "HTTP_HOST": "example.com",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "80",
+            "wsgi.url_scheme": "http",
         }
         self.assertEqual(
             wsgi.Request(environ).url,
@@ -136,9 +136,9 @@ class TestRequest(RequestTestMixin, TestCase):
 
     def test_no_host_no_path_no_query_string(self):
         environ = {
-            "SERVER_NAME" : "localhost",
-            "SERVER_PORT" : "80",
-            "wsgi.url_scheme" : "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "80",
+            "wsgi.url_scheme": "http",
         }
         self.assertEqual(
             wsgi.Request(environ).url,
@@ -151,15 +151,15 @@ class TestRequestIntegration(RequestIntegrationTestMixin, TestCase):
         app = TestApp(wsgi.create_app(self.minion))
         response = app.get(
             url,
-            headers=[(k, b",".join(v)) for k , v in headers.canonicalized()],
+            headers=[(k, b",".join(v)) for k, v in headers.canonicalized()],
         )
         return response.body
 
     def test_script_name(self):
-        self.minion.route(b"/home")(lambda request : Response(b"Hi!"))
+        self.minion.route(b"/home")(lambda request: Response(b"Hi!"))
         app = TestApp(
             wsgi.create_app(self.minion),
-            extra_environ={"SCRIPT_NAME" : "/app"},
+            extra_environ={"SCRIPT_NAME": "/app"},
         )
         response = app.get(b"/app/home")
         self.assertEqual(response.body, b"Hi!")

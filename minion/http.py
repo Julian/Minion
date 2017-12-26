@@ -5,12 +5,8 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 from bisect import insort
 
-from cached_property import cached_property as calculated_once
 from characteristic import Attribute, attributes
-from future.moves.urllib.parse import (
-    parse_qs, unquote, unquote_plus, urlencode,
-)
-from future.utils import iteritems, raise_with_traceback, viewkeys
+from future.utils import iteritems, viewkeys
 
 
 _CANONICAL_HEADER_NAMES = {
@@ -22,7 +18,7 @@ _CANONICAL_HEADER_NAMES = {
     b"www-authenticate": b"WWW-Authenticate",
     b"x-xss-protection": b"X-XSS-Protection",
 }
-DEFAULT_PORTS = {b"http" : 80, b"https" : 443}
+DEFAULT_PORTS = {b"http": 80, b"https": 443}
 
 
 class NoSuchHeader(LookupError):

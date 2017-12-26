@@ -1,8 +1,6 @@
-from collections import OrderedDict
 from unittest import TestCase
 
 from future.utils import PY3
-from testscenarios import with_scenarios
 
 from minion import http
 
@@ -247,15 +245,17 @@ class TestAccept(TestCase):
             http.MediaRange(
                 type=b"text",
                 subtype=b"plain",
-                parameters={b"format" : b"flowed"},
+                parameters={b"format": b"flowed"},
             ),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
 
     def test_quality_factors(self):
         accept = http.Accept.from_header(
-            header=b"text/*;q=0.3, text/html;q=0.7, text/html;level=1, "
-                   b"text/html;level=2;q=0.4, */*;q=0.5",
+            header=(
+                b"text/*;q=0.3, text/html;q=0.7, text/html;level=1, "
+                b"text/html;level=2;q=0.4, */*;q=0.5"
+            ),
         )
         media_types = (
             http.MediaRange(type=b"text", quality=0.3),
@@ -263,7 +263,7 @@ class TestAccept(TestCase):
                 type=b"text",
                 subtype=b"html",
                 quality=0.4,
-                parameters={b"level" : b"2"},
+                parameters={b"level": b"2"},
             ),
             http.MediaRange(quality=0.5),
             http.MediaRange(type=b"text", subtype=b"html", quality=0.7),

@@ -51,12 +51,19 @@ def create_app(application, request_class=Request):
     """
     Create a WSGI application out of the given Minion app.
 
-    :argument Application application: a minion app
-    :argument request_class: a class to use for constructing incoming requests
-        out of the WSGI environment. It will be passed a single arg, the
-        environ. By default, this is :class:`minion.request.WSGIRequest` if
-        unprovided.
+    Arguments:
 
+        application (Application):
+
+            a minion app
+
+        request_class (callable):
+
+            a class to use for constructing incoming requests out of the WSGI
+            environment. It will be passed a single arg, the environ.
+
+            By default, this is :class:`minion.request.WSGIRequest` if
+            unprovided.
     """
 
     def wsgi(environ, start_response):

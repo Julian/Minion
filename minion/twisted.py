@@ -13,8 +13,11 @@ class MinionResource(object):
     """
     Wrap a Minion application in a :class:`twisted.web.resource.IResource`\ .
 
-    :argument Application application: a minion app
+    Arguments:
 
+        application (Application):
+
+            a minion app
     """
 
     isLeaf = True

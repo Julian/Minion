@@ -35,7 +35,7 @@ class TreeResource(object):
 
     """
 
-    _no_such_child = LeafResource(render=lambda request : Response(code=404))
+    _no_such_child = LeafResource(render=lambda request: Response(code=404))
 
     def get_child(self, name, request):
         child = self._children.get(name)
@@ -53,10 +53,10 @@ def method_delegate(**methods):
 
     """
 
-    methods = {k.upper() : v for k, v in iteritems(methods)}
+    methods = {k.upper(): v for k, v in iteritems(methods)}
 
     if PY3:
-        methods = {k.encode("utf-8") : v for k, v in iteritems(methods)}
+        methods = {k.encode("utf-8"): v for k, v in iteritems(methods)}
 
     def render(request):
         renderer = methods.get(request.method)

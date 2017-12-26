@@ -9,20 +9,38 @@ class Application(object):
     """
     A Minion application.
 
-    :argument :class:`collections.MutableMapping` config: any app configuration
-    :argument :class:`assets.Bin` bin: an asset bin containing assets
-        used by views. If unprovided, an empty one will be created (until it
-        is populated).
-    :argument :class:`request.Manager` manager: a request manager, which
-        managers state during each request. If unprovided, one will be created
-        and used.
-    :argument router: an object satisfying the router interface (see
-        :mod:`minion.routing`) to use for route addition and generation for
-        this application. If unprovided, a router with simple dictionary lookup
-        will be used.
-    :argument :class:`jinja2.Environment` jinja: a pre-configured jinja2
-        environment, if using jinja2 is desired. (One can be added later, or
-        multiple environments used, by calling :meth:`bind_jinja_environment`.)
+    Arguments:
+
+        config (collections.MutableMapping):
+
+            any app configuration
+
+        bin (assets.Bin):
+
+            an asset bin containing assets used by views.
+
+            If unprovided, an empty one will be created (until it is
+            populated).
+
+        manager (request.Manager):
+
+            a request manager, which managers state during each request.
+
+            If unprovided, one will be created and used.
+
+        router:
+
+            an object satisfying the router interface (see `minion.routing`) to
+            use for route addition and generation for this application.
+
+            If unprovided, a router with simple dictionary lookup will be used.
+
+        jinja (jinja2.Environment):
+
+            a pre-configured jinja2 environment, if using jinja2 is desired.
+
+            (One can be added later, or multiple environments used, by calling
+            `bind_jinja_environment`.)
 
     """
 
@@ -80,15 +98,25 @@ class Application(object):
         """
         Bind useful pieces of the application to the given Jinja2 environment.
 
-        :type environment: :class:`jinja2.Environment`
-        :argument str asset_name: the name to bind the environment in
-            the application's asset bin. The default is ``'jinja'``.
+        Arguments:
+
+            environment (jinja2.Environment):
+
+                the environment to bind
+
+            asset_name (str):
+
+                a name to bind to in the application's asset bin.
+
+                The default is ``'jinja'``.
 
         """
 
         self.bin.globals[asset_name] = environment
-        environment.globals.update([
-            ("app", self),
-            ("config", self.config),
-            ("router", self.router),
-        ])
+        environment.globals.update(
+            [
+                ("app", self),
+                ("config", self.config),
+                ("router", self.router),
+            ],
+        )

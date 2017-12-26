@@ -21,15 +21,16 @@ if PY3:
         Klein = run = route = resource = flattenString = None
         Element = object
         XMLString = str
-        renderer = lambda fn : None
         TagLoader = object
 
+        def renderer(fn):
+            pass
 
     with patch.dict(
         sys.modules, {
-            "StringIO" : io,
-            "klein.app" : EverythingIsTerrible,
-            "twisted.web.template" : EverythingIsTerrible,
+            "StringIO": io,
+            "klein.app": EverythingIsTerrible,
+            "twisted.web.template": EverythingIsTerrible,
         },
     ):
         from klein.test_resource import (
@@ -67,7 +68,7 @@ class TestMinionResource(SynchronousTestCase):
             )
 
         request = makeRequest(
-            path=b"/foo/bar", headers={b"X-Foo" : [b"Hello"]},
+            path=b"/foo/bar", headers={b"X-Foo": [b"Hello"]},
         )
         response = render(resource=self.resource, request=request)
         self.assertRedirected(
@@ -95,7 +96,7 @@ class TestRequestIntegration(RequestIntegrationTestMixin, SynchronousTestCase):
         return request.getWrittenData()
 
     def test_it_properly_routes_when_mounted_on_a_subpath(self):
-        self.minion.route(b"/hello")(lambda request : Response(b"World"))
+        self.minion.route(b"/hello")(lambda request: Response(b"World"))
         request = makeRequest(path=b"/minion/hello")
         request.prepath.append(request.postpath.pop(0))
         render(resource=MinionResource(self.minion), request=request)

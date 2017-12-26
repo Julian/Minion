@@ -30,7 +30,9 @@ class Responder(object):
         """
         Return a deferred that will fire after the request is finished.
 
-        :returns: a new :class:`Deferred` for each call to this function.
+        Returns:
+
+            Deferred: a new deferred that will fire appropriately
 
         """
 
@@ -56,13 +58,19 @@ class Manager(object):
         """
         Call the given callable after the given request has its response.
 
-        :argument request: the request to piggyback
-        :argument fn: a callable that takes at least two arguments, the request
-            and the response (in that order), along with any additional
-            positional and keyword arguments passed to this function which will
-            be passed along. If the callable returns something other than
-            ``None``, it will be used as the new response.
+        Arguments:
 
+            request:
+
+                the request to piggyback
+
+            fn (callable):
+
+                a callable that takes at least two arguments, the request and
+                the response (in that order), along with any additional
+                positional and keyword arguments passed to this function which
+                will be passed along. If the callable returns something other
+                than ``None``, it will be used as the new response.
         """
 
         self._requests[id(request)]["callbacks"].append((fn, args, kwargs))

@@ -18,7 +18,8 @@ class TestMinion(TestCase):
         def show(request):
             return Response(b"Hello World!")
 
-        response = minion.serve(Request(url=URL(path=[u"show"])), path=u"/show")
+        url = URL(path=[u"show"])
+        response = minion.serve(Request(url=url), path=u"/show")
         self.assertEqual(response, Response(b"Hello World!"))
 
 
@@ -28,7 +29,7 @@ class RequestIntegrationTestMixin(object):
 
         @self.minion.route(b"/respond", renderer=JSON())
         def respond(request):
-            return {"url" : request.url.to_text().encode("utf-8")}
+            return {"url": request.url.to_text().encode("utf-8")}
 
     def get_request(self, *args, **kwargs):
         kwargs.setdefault("headers", Headers())

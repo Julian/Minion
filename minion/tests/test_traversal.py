@@ -46,15 +46,15 @@ class TestLeafResource(TestCase):
 
     def test_it_is_a_leaf_resource(self):
         self.assertTrue(
-            traversal.LeafResource(render=lambda request : Response()).is_leaf,
+            traversal.LeafResource(render=lambda request: Response()).is_leaf,
         )
 
 
 class TestMethodDelegate(TestCase):
     def test_known_HTTP_methods_use_associated_renderer(self):
         render = traversal.method_delegate(
-            GET=lambda request : b"foo",
-            put=lambda request : request.method,
+            GET=lambda request: b"foo",
+            put=lambda request: request.method,
         )
         get = Request(url=URL(path=[u""]), method=b"GET")
         self.assertEqual(render(get), b"foo")
@@ -63,7 +63,7 @@ class TestMethodDelegate(TestCase):
         self.assertEqual(render(put), b"PUT")
 
     def test_unknown_HTTP_methods_return_405s(self):
-        render = traversal.method_delegate(get=lambda _ : b"foo")
+        render = traversal.method_delegate(get=lambda _: b"foo")
         request = Request(url=URL(path=[u""]), method=b"PUT")
         self.assertEqual(render(request).code, 405)
 

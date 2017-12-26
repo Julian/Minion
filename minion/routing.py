@@ -85,7 +85,7 @@ else:
             match = self._mapper.match(
                 request.url.to_text(),
                 # Yes seriously. This seems to be the only way to do this.
-                environ={"REQUEST_METHOD" : request.method},
+                environ={"REQUEST_METHOD": request.method},
             )
             if match is None:
                 return None
@@ -132,7 +132,7 @@ else:
                     method=request.method,
                 )
             except werkzeug.routing.RequestRedirect as redirect_exception:
-                return lambda request : redirect(
+                return lambda request: redirect(
                     to=redirect_exception.new_url,
                     code=redirect_exception.code,
                 )

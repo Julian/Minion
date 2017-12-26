@@ -21,7 +21,7 @@ class TestApplication(TestCase):
         """
 
         subdict = dict(subdict)
-        matches = {k : v for k, v in iteritems(of) if k in subdict}
+        matches = {k: v for k, v in iteritems(of) if k in subdict}
         self.assertEqual(subdict, matches)
 
     def test_it_delegates_routes_to_the_router(self):
@@ -30,6 +30,7 @@ class TestApplication(TestCase):
                 self.added = route, fn, baz
 
         application = core.Application(router=Router())
+
         @application.route("/foo", baz=2)
         def fn(request):
             pass
@@ -86,7 +87,7 @@ class TestApplicationIntegration(TestCase):
 
     def test_it_serves_mapped_requests(self):
         self.router.add(
-            self.request.url.path, lambda request : Response(b"Hello"),
+            self.request.url.path, lambda request: Response(b"Hello"),
         )
         self.assertEqual(
             self.app.serve(self.request, path=self.request.url.path),

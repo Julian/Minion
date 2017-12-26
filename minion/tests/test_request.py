@@ -44,6 +44,7 @@ class TestManager(TestCase):
         new_response = mock.Mock()
 
         self.manager.request_started(self.request)
+
         def set_thing(response):
             return new_response
 
@@ -55,6 +56,7 @@ class TestManager(TestCase):
 
     def test_after_response_chaining(self):
         self.manager.request_started(self.request)
+
         def set_thing(response):
             response.thing = 2
 

@@ -13,8 +13,8 @@ class TestDeferred(TestCase):
 
     def assertResultedIn(self, success=None, error=None, second=None):
         self.assertEqual(
-            {"success" : self.success, "error" : self.error},
-            {"success" : success, "error" : error},
+            {"success": self.success, "error": self.error},
+            {"success": success, "error": error},
         )
         self.assertEqual(self.second, second)
 
@@ -32,7 +32,7 @@ class TestDeferred(TestCase):
         deferred = Deferred()
         deferred.chain.on_success(self._succeeded, "world", end="!")
         deferred.succeed("hello")
-        self.assertResultedIn(success=(("hello", "world"), {"end" : "!"}))
+        self.assertResultedIn(success=(("hello", "world"), {"end": "!"}))
 
     def test_succeed_without_args(self):
         deferred = Deferred()

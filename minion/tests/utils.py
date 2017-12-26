@@ -2,8 +2,8 @@
 Helpers and utilities for testing Minion applications.
 
 Unlike the rest of the test modules, this module *is* public API.
-
 """
+
 
 class ResponseHelpersMixin(object):
     def assertRedirected(self, response, to, code=302):
