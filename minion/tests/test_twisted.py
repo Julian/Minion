@@ -62,7 +62,7 @@ class TestMinionResource(SynchronousTestCase):
             self.assertEqual(request.headers.get(b"X-Foo"), [b"Hello"])
             return Response(
                 code=302,
-                content=request.url.path,
+                content=b"/" + u"/".join(request.url.path).encode("ascii"),
                 headers=Headers([(b"Location", [b"http://example.com"])]),
             )
 

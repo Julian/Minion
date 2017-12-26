@@ -1,12 +1,13 @@
 from unittest import TestCase, skipIf
 
 from future.utils import PY3
+from hyperlink import URL
 from webtest import TestApp
 from werkzeug.test import create_environ
 
 from minion import wsgi
 from minion.core import Application
-from minion.http import Headers, URL
+from minion.http import Headers
 from minion.request import Response
 from minion.tests.test_integration import RequestIntegrationTestMixin
 from minion.tests.test_request import RequestTestMixin
@@ -77,9 +78,9 @@ class TestRequest(RequestTestMixin, TestCase):
         }
         self.assertEqual(
             wsgi.Request(environ).url, URL(
-                scheme=b"http",
-                host=b"example.com",
-                query={b"foo" : [b"bar"]},
+                scheme=u"http",
+                host=u"example.com",
+                query=[(u"foo", u"bar")],
             ),
         )
 
@@ -91,7 +92,7 @@ class TestRequest(RequestTestMixin, TestCase):
         }
         self.assertEqual(
             wsgi.Request(environ).url,
-            URL(scheme=b"http", host=b"localhost", port=None),
+            URL(scheme=u"http", host=u"localhost", port=None),
         )
 
     def test_non_default_port(self):
@@ -102,7 +103,7 @@ class TestRequest(RequestTestMixin, TestCase):
         }
         self.assertEqual(
             wsgi.Request(environ).url,
-            URL(scheme=b"http", host=b"localhost", port=8080),
+            URL(scheme=u"http", host=u"localhost", port=8080),
         )
 
     def test_script_name(self):
@@ -114,8 +115,11 @@ class TestRequest(RequestTestMixin, TestCase):
             "wsgi.url_scheme" : "https",
         }
         self.assertEqual(
-            wsgi.Request(environ).url,
-            URL(scheme=b"https", host=b"example.org", path=b"/stuff/things"),
+            wsgi.Request(environ).url, URL(
+                scheme=u"https",
+                host=u"example.org",
+                path=[u"stuff", u"things"],
+            ),
         )
 
     def test_host_no_path_no_query_string(self):
@@ -127,7 +131,7 @@ class TestRequest(RequestTestMixin, TestCase):
         }
         self.assertEqual(
             wsgi.Request(environ).url,
-            URL(scheme=b"http", host=b"example.com"),
+            URL(scheme=u"http", host=u"example.com"),
         )
 
     def test_no_host_no_path_no_query_string(self):
@@ -138,7 +142,7 @@ class TestRequest(RequestTestMixin, TestCase):
         }
         self.assertEqual(
             wsgi.Request(environ).url,
-            URL(scheme=b"http", host=b"localhost"),
+            URL(scheme=u"http", host=u"localhost"),
         )
 
 

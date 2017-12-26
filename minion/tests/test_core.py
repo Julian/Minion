@@ -1,6 +1,7 @@
 from unittest import TestCase, skipIf
 
 from future.utils import iteritems
+from hyperlink import URL
 
 try:
     import jinja2
@@ -8,7 +9,6 @@ except ImportError:
     jinja2 = None
 
 from minion import core, assets
-from minion.http import URL
 from minion.request import Manager, Request, Response
 from minion.routing import Router, SimpleMapper
 
@@ -82,7 +82,7 @@ class TestApplicationIntegration(TestCase):
         self.manager = Manager()
         self.router = Router(mapper=SimpleMapper())
         self.app = core.Application(manager=self.manager, router=self.router)
-        self.request = Request(url=URL(path=b"/"))
+        self.request = Request(url=URL(path=[u""]))
 
     def test_it_serves_mapped_requests(self):
         self.router.add(

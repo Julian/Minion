@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 
+from hyperlink import URL
 from twisted.web.resource import IResource
 from zope.interface import implementer
 
-from minion.http import Headers, URL
+from minion.http import Headers
 from minion.request import Request
 
 
@@ -28,15 +29,20 @@ class MinionResource(object):
         raise NotImplementedError()
 
     def render(self, twistedRequest):
+        path = twistedRequest.uri.lstrip("/").decode("ascii").split(u"/")
         request = Request(
             content=twistedRequest.content,
             headers=Headers(twistedRequest.requestHeaders.getAllRawHeaders()),
             method=twistedRequest.method,
             url=URL(
-                scheme=b"https" if twistedRequest.isSecure() else b"http",
-                host=twistedRequest.getRequestHostname(),
-                path=twistedRequest.uri,
-                query=twistedRequest.args,
+                scheme=u"https" if twistedRequest.isSecure() else u"http",
+                host=twistedRequest.getRequestHostname().decode("ascii"),
+                path=path,
+                query=[
+                    (k.decode("ascii"), each.decode("ascii"))
+                    for k, v in twistedRequest.args.items()
+                    for each in v
+                ],
             ),
         )
         response = self.application.serve(

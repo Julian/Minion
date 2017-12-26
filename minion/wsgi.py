@@ -1,8 +1,9 @@
 from cached_property import cached_property as calculated_once
-from future.moves.urllib.parse import parse_qs
+from future.moves.urllib.parse import parse_qsl
 from future.utils import iteritems
+from hyperlink import URL
 
-from minion.http import Accept, Headers, URL
+from minion.http import Accept, Headers
 
 
 class Request(object):
@@ -32,12 +33,17 @@ class Request(object):
     @calculated_once
     def url(self):
         environ = self.environ
-        return URL.normalized(
-            host=environ.get("HTTP_HOST") or environ["SERVER_NAME"],
+        host = environ.get("HTTP_HOST") or environ["SERVER_NAME"]
+        path = environ.get("SCRIPT_NAME", "") + environ.get("PATH_INFO", "")
+        return URL(
+            host=host.decode("ascii"),
             port=int(environ["SERVER_PORT"]),
-            path=environ.get("SCRIPT_NAME", "") + environ.get("PATH_INFO", ""),
-            query=parse_qs(environ.get("QUERY_STRING", "")),
-            scheme=environ["wsgi.url_scheme"],
+            path=path.lstrip("/").decode("ascii").split(u"/"),
+            query=[
+                (k.decode("ascii"), v.decode("ascii"))
+                for k, v in parse_qsl(environ.get("QUERY_STRING", ""))
+            ],
+            scheme=environ["wsgi.url_scheme"].decode("ascii"),
         )
 
 

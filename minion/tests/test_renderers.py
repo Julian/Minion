@@ -3,14 +3,16 @@ from collections import OrderedDict
 from unittest import TestCase
 import json
 
+from hyperlink import URL
+
 from minion import renderers
-from minion.http import Headers, URL
+from minion.http import Headers
 from minion.request import Request, Response
 
 
 class TestUnicodeRenderer(TestCase):
 
-    request = Request(url=URL(path=b"/"))
+    request = Request(url=URL(path=[u""]))
 
     def test_it_renders_via_the_given_encoding(self):
         renderer = renderers.Unicode(encoding="utf-8")
@@ -70,7 +72,7 @@ class TestJSON(TestCase):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
         request = Request(
-            url=URL(path=b"/"),
+            url=URL(path=[u""]),
             headers=Headers([("Accept", ["*/*"])]),
         )
         self.assertPretty(content, render(request))
@@ -78,13 +80,13 @@ class TestJSON(TestCase):
     def test_it_dumps_pretty_json_for_humans_no_accept_header(self):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
-        self.assertPretty(content, render(Request(url=URL(path=b"/"))))
+        self.assertPretty(content, render(Request(url=URL(path=[u""]))))
 
     def test_it_dumps_practical_json_for_machines(self):
         content = ["a", "b", "c"]
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
         request = Request(
-            url=URL(path=b"/"),
+            url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
         )
         self.assertNotPretty(content, render(request))
@@ -93,7 +95,7 @@ class TestJSON(TestCase):
         content = OrderedDict([("foo", "bar"), ("baz", "quux")])
         render = renderers.bind(renderers.JSON(), to=lambda _ : content)
         request = Request(
-            url=URL(path=b"/"),
+            url=URL(path=[u""]),
             headers=Headers([("Accept", ["*/*"])]),
         )
         self.assertPretty(content, render(request))
@@ -101,7 +103,7 @@ class TestJSON(TestCase):
     def test_separators(self):
         render = renderers.bind(renderers.JSON(), to=lambda _ : dict(a=1, b=2))
         request = Request(
-            url=URL(path=b"/"),
+            url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
         )
         response = render(request)
@@ -123,7 +125,7 @@ class TestJSON(TestCase):
         renderer = renderers.JSON(default=lambda obj : 23)
         render = renderers.bind(renderer, to=lambda _ : {"foo" : object()})
         request = Request(
-            url=URL(path=b"/"),
+            url=URL(path=[u""]),
             headers=Headers([("Accept", ["application/json"])]),
         )
         self.assertEqual(
@@ -133,7 +135,7 @@ class TestJSON(TestCase):
             ),
         )
         self.assertEqual(
-            render(Request(url=URL(path=b"/"))), Response(
+            render(Request(url=URL(path=[u""]))), Response(
                 content=b'{\n  "foo": 23\n}',
                 headers=Headers([("Content-Type", ["application/json"])]),
             ),
@@ -142,7 +144,7 @@ class TestJSON(TestCase):
 
 class TestSimpleJSON(TestCase):
 
-    request = Request(url=URL(path=b"/"))
+    request = Request(url=URL(path=[u""]))
 
     def test_it_dumps_json(self):
         renderer = renderers.SimpleJSON()

@@ -83,7 +83,7 @@ else:
 
         def map(self, request, path):
             match = self._mapper.match(
-                request.url.path,
+                request.url.to_text(),
                 # Yes seriously. This seems to be the only way to do this.
                 environ={"REQUEST_METHOD" : request.method},
             )
@@ -128,7 +128,8 @@ else:
         def map(self, request, path):
             try:
                 render, kwargs = self._adapter.match(
-                    path_info=request.url.path, method=request.method,
+                    path_info=request.url.to_text(),
+                    method=request.method,
                 )
             except werkzeug.routing.RequestRedirect as redirect_exception:
                 return lambda request : redirect(

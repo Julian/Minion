@@ -2,9 +2,9 @@ from unittest import TestCase, skipIf
 import json
 
 from future.utils import PY3
+from hyperlink import URL
 
 from minion import routing
-from minion.http import URL
 from minion.request import Request, Response, redirect
 from minion.traversal import LeafResource
 
@@ -24,18 +24,18 @@ class TestRouter(TestCase):
 
     def test_route(self):
         self.router.add(b"/", view)
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
         response = self.router.route(request, path=b"/")
         self.assertEqual(response, view(request))
 
     def test_unknown_route(self):
-        request = Request(url=URL(path=b"/404"))
+        request = Request(url=URL(path=[u"404"]))
         response = self.router.route(request, path=b"/404")
         self.assertEqual(response, Response(code=404))
 
     def test_specified_renderer(self):
         self.router.add(b"/", view, renderer=ReverseRenderer())
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
         response = self.router.route(request, path=b"/")
         self.assertEqual(response, Response(b"}{"))
 
@@ -45,11 +45,11 @@ class TestRouter(TestCase):
             b"/", view, methods=[b"POST"], renderer=ReverseRenderer(),
         )
 
-        get = Request(url=URL(path=b"/"), method=b"GET")
+        get = Request(url=URL(path=[u""]), method=b"GET")
         response = self.router.route(get, path=b"/")
         self.assertEqual(response, Response(b"{}"))
 
-        post = Request(url=URL(path=b"/"), method=b"POST")
+        post = Request(url=URL(path=[u""]), method=b"POST")
         response = self.router.route(post, path=b"/")
         self.assertEqual(response, Response(b"}{"))
 
@@ -62,7 +62,7 @@ class TestRouter(TestCase):
                 return Response(response.content + exc.__class__.__name__)
 
         self.router.add(b"/", view, renderer=RendererWithErrorHandler())
-        response = self.router.route(Request(url=URL(path=b"/")), path=b"/")
+        response = self.router.route(Request(url=URL(path=[u""])), path=b"/")
         self.assertEqual(response, Response(b"{}ZeroDivisionError"))
 
     def test_renderer_without_error_handler(self):
@@ -71,7 +71,7 @@ class TestRouter(TestCase):
                 raise ZeroDivisionError()
 
         self.router.add(b"/", view, renderer=RendererWithoutErrorHandler())
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
 
         with self.assertRaises(ZeroDivisionError):
             self.router.route(request, path=b"/")
@@ -88,7 +88,7 @@ class TestRouter(TestCase):
             raise IndexError()
 
         self.router.add(b"/", boom, renderer=RendererWithErrorHandler())
-        response = self.router.route(Request(url=URL(path=b"/")), path=b"/")
+        response = self.router.route(Request(url=URL(path=[u""])), path=b"/")
         self.assertEqual(response, Response(b"IndexError"))
 
 
@@ -100,13 +100,13 @@ class TestRouterDefaultRenderer(TestCase):
 
     def test_default_renderer(self):
         self.router.add(b"/", view)
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
         response = self.router.route(request, path=b"/")
         self.assertEqual(response, Response(b"}{"))
 
     def test_disable_default_renderer(self):
         self.router.add(b"/", view, renderer=None)
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
         response = self.router.route(request, path=b"/")
         self.assertEqual(response, Response(b"{}"))
 
@@ -123,26 +123,30 @@ class MapperTestMixin(object):
     def test_it_maps_routes(self):
         self.mapper.add(b"/route", view)
         render = self.mapper.map(
-            Request(url=URL(path=b"/route")), path=b"/route",
+            Request(url=URL(path=[u"route"], rooted=True)),
+            path=b"/route",
         )
         self.assertIs(render, view)
 
     def test_it_maps_routes_for_specified_methods(self):
         self.mapper.add(b"/route", view, methods=[b"POST"])
-        request = Request(url=URL(path=b"/route"), method=b"POST")
+        request = Request(
+            url=URL(path=[u"route"], rooted=True),
+            method=b"POST",
+        )
         self.assertEqual(self.mapper.map(request, path=b"/route"), view)
 
     def test_it_does_not_map_routes_for_unspecified_methods(self):
         self.mapper.add(b"/route", view, methods=[b"POST"])
-        request = Request(url=URL(path=b"/route"), method=b"GET")
+        request = Request(url=URL(path=[u"route"]), method=b"GET")
         self.assertIsNone(self.mapper.map(request, path=b"/route"))
 
     def test_it_maps_multiple_routes_for_specified_methods(self):
         self.mapper.add(b"/", lambda r : Response(b"GET"), methods=[b"GET"])
         self.mapper.add(b"/", lambda r : Response(b"POST"), methods=[b"POST"])
 
-        get = Request(url=URL(path=b"/"), method=b"GET")
-        post = Request(url=URL(path=b"/"), method=b"POST")
+        get = Request(url=URL(path=[u""], rooted=True), method=b"GET")
+        post = Request(url=URL(path=[u""], rooted=True), method=b"POST")
         map = self.mapper.map
         self.assertEqual(
             (map(get, path=b"/")(get), map(post, path=b"/")(post)),
@@ -157,7 +161,7 @@ class MapperTestMixin(object):
         self.assertEqual(self.mapper.lookup(b"/work"), b"/work")
 
     def test_it_does_not_map_unknown_paths(self):
-        request = Request(url=URL(path=b"/route"))
+        request = Request(url=URL(path=[u"route"]))
         render = self.mapper.map(request, path=b"/route")
         self.assertIsNone(render)
 
@@ -176,7 +180,7 @@ class TestTraversalMapper(TestCase):
                 )
 
         mapper = routing.TraversalMapper(root=Resource())
-        request = Request(url=URL(path=b"/world"))
+        request = Request(url=URL(path=[u"world"]))
         render = mapper.map(request, path=b"/world")
         self.assertEqual(render(request), Response(content=b"Hello world"))
 
@@ -194,7 +198,7 @@ class TestRoutesMapper(MapperTestMixin, TestCase):
 
     def test_it_maps_routes_with_arguments(self):
         self.mapper.add(b"/route/{year}", view, stuff=b"12")
-        request = Request(url=URL(path=b"/route/2013"))
+        request = Request(url=URL(path=[u"route", u"2013"], rooted=True))
         render = self.mapper.map(request, path=b"/route/2013")
         self.assertEqual(
             json.loads(render(request).content),
@@ -215,7 +219,7 @@ class TestWerkzeugMapper(MapperTestMixin, TestCase):
 
     def test_it_maps_routes_with_arguments(self):
         self.mapper.add(b"/route/<int:year>", view)
-        request = Request(url=URL(path=b"/route/2013"))
+        request = Request(url=URL(path=[u"route", u"2013"], rooted=True))
         render = self.mapper.map(request, path=b"/route/2013")
         self.assertEqual(json.loads(render(request).content), {b"year" : 2013})
 
@@ -226,7 +230,7 @@ class TestWerkzeugMapper(MapperTestMixin, TestCase):
 
     def test_it_handles_routing_redirects(self):
         self.mapper.add(b"/<int:year>/", view)
-        request = Request(url=URL(path=b"/2013"))
+        request = Request(url=URL(path=[u"2013"], rooted=True))
         render = self.mapper.map(request, path=b"/2013")
         self.assertEqual(
             render(request), redirect(b"http:///2013/", code=301),

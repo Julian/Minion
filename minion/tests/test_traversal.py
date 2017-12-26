@@ -1,7 +1,8 @@
 from unittest import TestCase
 
+from hyperlink import URL
+
 from minion import traversal
-from minion.http import URL
 from minion.request import Request, Response
 
 
@@ -13,35 +14,34 @@ def path_view(request):
 
     """
 
-    return Response(content=request.url.path)
+    path = b"/" + b"/".join(each.encode("ascii") for each in request.url.path)
+    return Response(content=path)
 
 
 class TestTreeResource(TestCase):
     def test_it_renders_what_its_told(self):
         resource = traversal.TreeResource(render=path_view)
-        request = Request(url=URL(path=b"/bar"))
+        request = Request(url=URL(path=[u"bar"]))
         self.assertEqual(resource.render(request), Response(content=b"/bar"))
 
     def test_it_supports_adding_children(self):
         resource = traversal.TreeResource(render=path_view)
         child = traversal.LeafResource(render=path_view)
         resource.set_child(b"foo", child)
-        request = Request(url=URL(path=b"/bar"))
+        request = Request(url=URL(path=[u"bar"]))
         self.assertEqual(resource.get_child(b"foo", request=request), child)
 
     def test_it_returns_404s_for_unknown_children(self):
         resource = traversal.TreeResource(render=path_view)
-        request = Request(url=URL(path=b"/foo"))
+        request = Request(url=URL(path=[u"foo"]))
         child = resource.get_child(b"foo", request=request)
         self.assertEqual(child.render(request), Response(code=404))
 
 
 class TestLeafResource(TestCase):
     def test_it_renders_what_its_told(self):
-        resource = traversal.LeafResource(
-            render=lambda request : Response(content=request.url.path)
-        )
-        request = Request(url=URL(path=b"/foo"))
+        resource = traversal.LeafResource(render=path_view)
+        request = Request(url=URL(path=[u"foo"]))
         self.assertEqual(resource.render(request), Response(content=b"/foo"))
 
     def test_it_is_a_leaf_resource(self):
@@ -56,15 +56,15 @@ class TestMethodDelegate(TestCase):
             GET=lambda request : b"foo",
             put=lambda request : request.method,
         )
-        get = Request(url=URL(path=b"/"), method=b"GET")
+        get = Request(url=URL(path=[u""]), method=b"GET")
         self.assertEqual(render(get), b"foo")
 
-        put = Request(url=URL(path=b"/"), method=b"PUT")
+        put = Request(url=URL(path=[u""]), method=b"PUT")
         self.assertEqual(render(put), b"PUT")
 
     def test_unknown_HTTP_methods_return_405s(self):
         render = traversal.method_delegate(get=lambda _ : b"foo")
-        request = Request(url=URL(path=b"/"), method=b"PUT")
+        request = Request(url=URL(path=[u""]), method=b"PUT")
         self.assertEqual(render(request).code, 405)
 
 
@@ -88,7 +88,7 @@ class LineDelimiterResource(object):
 class TestTraverse(TestCase):
     def test_it_traverses_resources(self):
         root = LineDelimiterResource()
-        request = Request(url=URL(path=b"/foo/bar/baz"))
+        request = Request(url=URL(path=[u"foo", u"bar", u"baz"]))
         renderer = traversal.traverse(
             path=b"/foo/bar/baz", resource=root, request=request,
         )
@@ -96,7 +96,7 @@ class TestTraverse(TestCase):
 
     def test_single_level(self):
         root = LineDelimiterResource()
-        request = Request(url=URL(path=b"/foo"))
+        request = Request(url=URL(path=[u"foo"]))
         renderer = traversal.traverse(
             path=b"/foo", resource=root, request=request,
         )
@@ -104,7 +104,7 @@ class TestTraverse(TestCase):
 
     def test_zero_levels(self):
         root = LineDelimiterResource()
-        request = Request(url=URL(path=b"/"))
+        request = Request(url=URL(path=[u""]))
         renderer = traversal.traverse(
             path=b"/", resource=root, request=request,
         )
@@ -125,7 +125,7 @@ class TestTraverse(TestCase):
                 return self.name
 
         root = Resource()
-        request = Request(url=URL(path=b"/0/1/2/3/4/5"))
+        request = Request(url=URL(path=[u"0", u"1", u"2", u"3", u"4", u"5"]))
         renderer = traversal.traverse(
             path=b"/0/1/2/3/4/5", resource=root, request=request,
         )
