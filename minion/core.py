@@ -95,7 +95,7 @@ class Application(object):
             router=self.router,
         )
 
-    def bound_jinja_environment(self, environment, asset_name="jinja"):
+    def bind_jinja_environment(self, environment, asset_name="jinja"):
         """
         Bind useful pieces of the application to the given Jinja2 environment.
 
