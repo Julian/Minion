@@ -1,6 +1,7 @@
 from functools import wraps
 
-from future.utils import viewkeys
+from pyrsistent import m, pset
+import attr
 
 
 class DuplicateAsset(Exception):
@@ -11,19 +12,21 @@ class NoSuchAsset(LookupError):
     pass
 
 
+@attr.s
 class Bin(object):
-    def __init__(self, manager, globals=()):
-        self._manager = manager
-        self._assets = {}
-        self._needs_request = set()
-        self.globals = dict(globals)
+
+    _manager = attr.ib()
+    _globals = attr.ib(default=m())
+
+    _assets = attr.ib(default=m())
+    _needs_request = attr.ib(default=pset())
 
     def __contains__(self, asset):
-        return asset in self._assets or asset in self.globals
+        return asset in self._assets or asset in self._globals
 
     @property
     def assets(self):
-        return viewkeys(self._assets) | viewkeys(self.globals)
+        return pset(self._assets).update(self._globals)
 
     def provides(self, asset, needs_request=False):
         """
@@ -44,13 +47,16 @@ class Bin(object):
         def _provides(fn):
             if asset in self:
                 raise DuplicateAsset(asset)
-            self._assets[asset] = fn
+            self._assets = self._assets.set(asset, fn)
 
             if needs_request:
-                self._needs_request.add(asset)
+                self._needs_request = self._needs_request.add(asset)
 
             return fn
         return _provides
+
+    def with_globals(self, **globals):
+        return attr.evolve(self, globals=self._globals.update(globals))
 
     def needs(self, assets):
         """
@@ -85,7 +91,7 @@ class Bin(object):
 
         """
 
-        asset = self.globals.get(name)
+        asset = self._globals.get(name)
         if asset is not None:
             return asset
 
@@ -117,9 +123,9 @@ class Bin(object):
 
         """
 
-        self._needs_request.discard(asset)
-        self._assets.pop(asset, None)
-        self.globals.pop(asset, None)
+        self._needs_request = self._needs_request.discard(asset)
+        self._assets = self._assets.discard(asset)
+        self._globals = self._globals.discard(asset)
 
     def update(self, bin):
         """
@@ -127,6 +133,6 @@ class Bin(object):
 
         """
 
-        self._needs_request.update(bin._needs_request)
-        self._assets.update(bin._assets)
-        self.globals.update(bin.globals)
+        self._needs_request = self._needs_request.update(bin._needs_request)
+        self._assets = self._assets.update(bin._assets)
+        self._globals = self._globals.update(bin._globals)

@@ -26,8 +26,7 @@ class TestAssetBin(TestCase):
 
     def test_it_contains_globals(self):
         self.assertNotIn("cheese", self.bin)
-        self.bin.globals["cheese"] = 12
-        self.assertIn("cheese", self.bin)
+        self.assertIn("cheese", self.bin.with_globals(cheese=12))
 
     def test_it_provides_assets_to_things_that_need_them(self):
         @self.bin.provides("iron")
@@ -81,10 +80,10 @@ class TestAssetBin(TestCase):
 
         """
 
-        self.bin.globals["iron"] = 12
-        self.bin.needs(["iron"])(self.fn)()
+        bin = self.bin.with_globals(iron=12)
+        bin.needs(["iron"])(self.fn)()
         self.fn.assert_called_once_with(iron=12)
-        self.bin.needs(["iron"])(self.fn)(self.request)
+        bin.needs(["iron"])(self.fn)(self.request)
         self.fn.assert_called_with(self.request, iron=12)
 
     def test_useful_exception_for_missing_request(self):
@@ -116,10 +115,8 @@ class TestAssetBin(TestCase):
         def make_iron():
             return 12
 
-        self.bin.globals["cheese"] = 18
-        self.bin.globals["wine"] = 13
-
-        self.bin.needs(["wine", "iron", "cheese"])(self.fn)(
+        bin = self.bin.with_globals(cheese=18, wine=13)
+        bin.needs(["wine", "iron", "cheese"])(self.fn)(
             request=self.request, iron=24, wine=1,
         )
 
@@ -128,9 +125,9 @@ class TestAssetBin(TestCase):
         )
 
     def test_it_provides_globals(self):
-        self.assertEqual(self.bin.globals, {})
-        important = self.bin.globals["important"] = mock.Mock()
-        self.bin.needs(["important"])(self.fn)(self.request)
+        important = mock.Mock()
+        bin = self.bin.with_globals(important=important)
+        bin.needs(["important"])(self.fn)(self.request)
         self.fn.assert_called_once_with(self.request, important=important)
 
     def test_direct_provision(self):
@@ -142,8 +139,8 @@ class TestAssetBin(TestCase):
     def test_it_knows_its_assets(self):
         self.bin.provides("milk")(mock.Mock())
         self.bin.provides("honey")(mock.Mock())
-        self.bin.globals["gold"] = mock.Mock()
-        self.assertEqual(self.bin.assets, {"milk", "honey", "gold"})
+        bin = self.bin.with_globals(gold=mock.Mock())
+        self.assertEqual(bin.assets, {"milk", "honey", "gold"})
 
     def test_a_non_existent_asset_raises_an_exception_when_called(self):
         fn = self.bin.needs(["iron"])(self.fn)
@@ -173,10 +170,10 @@ class TestAssetBin(TestCase):
         self.assertNotIn("gold", self.bin)
 
     def test_remove_global(self):
-        self.bin.globals["silver"] = mock.Mock()
-        self.assertIn("silver", self.bin)
-        self.bin.remove("silver")
-        self.assertNotIn("silver", self.bin)
+        bin = self.bin.with_globals(silver=mock.Mock())
+        self.assertIn("silver", bin)
+        bin.remove("silver")
+        self.assertNotIn("silver", bin)
 
     def test_quashing_an_existing_asset_raises_an_exception(self):
         self.bin.provides("iron")(mock.Mock())
@@ -184,9 +181,9 @@ class TestAssetBin(TestCase):
             self.bin.provides("iron")(mock.Mock())
 
     def test_quashing_an_existing_global_raises_an_exception(self):
-        self.bin.globals["iron"] = mock.Mock()
+        bin = self.bin.with_globals(iron=mock.Mock())
         with self.assertRaises(assets.DuplicateAsset):
-            self.bin.provides("iron")(mock.Mock())
+            bin.provides("iron")(mock.Mock())
 
     def test_providers_can_ask_for_the_request_when_called(self):
         provider = mock.Mock()

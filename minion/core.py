@@ -58,12 +58,11 @@ class Application(object):
 
         self._response_callbacks = defaultdict(list)
 
-        self.bin = bin
         self.config = config
         self.manager = manager
         self.router = router
 
-        self.bind_bin(bin)
+        self.bin = self.bound_bin(bin)
         if jinja is not None:
             self.bind_jinja_environment(jinja)
 
@@ -79,22 +78,24 @@ class Application(object):
         self.manager.request_served(request, response)
         return response
 
-    def bind_bin(self, bin):
+    def bound_bin(self, bin):
         """
         Bind an asset bin to this application.
 
-        Simply adds the application to the bin globals.
+        Returns:
+
+            Bin: a bin containing this application's relevant globals
 
         """
 
-        bin.globals.update([
-            ("app", self),
-            ("config", self.config),
-            ("manager", self.manager),
-            ("router", self.router),
-        ])
+        return bin.with_globals(
+            app=self,
+            config=self.config,
+            manager=self.manager,
+            router=self.router,
+        )
 
-    def bind_jinja_environment(self, environment, asset_name="jinja"):
+    def bound_jinja_environment(self, environment, asset_name="jinja"):
         """
         Bind useful pieces of the application to the given Jinja2 environment.
 
@@ -112,7 +113,6 @@ class Application(object):
 
         """
 
-        self.bin.globals[asset_name] = environment
         environment.globals.update(
             [
                 ("app", self),
@@ -120,3 +120,4 @@ class Application(object):
                 ("router", self.router),
             ],
         )
+        self.bin = self.bin.with_globals(**{asset_name: environment})

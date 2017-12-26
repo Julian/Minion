@@ -2,6 +2,8 @@ from unittest import TestCase, skipIf
 
 from future.utils import iteritems
 from hyperlink import URL
+from pyrsistent import m
+import attr
 
 try:
     import jinja2
@@ -39,28 +41,29 @@ class TestApplication(TestCase):
 
     def test_binds_to_its_bin(self):
         app = core.Application()
-        self.assertSubdict(
-            [
-                ("app", app),
-                ("config", app.config),
-                ("manager", app.manager),
-                ("router", app.router),
-            ],
-            app.bin.globals,
+        self.assertEqual(
+            app.bin, attr.evolve(
+                app.bin, globals=m(
+                    app=app,
+                    config=app.config,
+                    manager=app.manager,
+                    router=app.router,
+                ),
+            ),
         )
 
     def test_it_can_bind_to_other_bins(self):
         app = core.Application()
         bin = assets.Bin(manager=app.manager)
-        app.bind_bin(bin)
-        self.assertSubdict(
-            [
-                ("app", app),
-                ("config", app.config),
-                ("manager", app.manager),
-                ("router", app.router),
-            ],
-            bin.globals,
+        self.assertEqual(
+            app.bound_bin(bin), attr.evolve(
+                bin, globals=m(
+                    app=app,
+                    config=app.config,
+                    manager=app.manager,
+                    router=app.router,
+                ),
+            ),
         )
 
     @skipIf(jinja2 is None, "jinja2 not found")
