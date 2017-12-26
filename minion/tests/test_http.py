@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from future.utils import PY3
+from pyrsistent import pmap
 
 from minion import http
 
@@ -245,7 +246,7 @@ class TestAccept(TestCase):
             http.MediaRange(
                 type=b"text",
                 subtype=b"plain",
-                parameters={b"format": b"flowed"},
+                parameters=pmap({b"format": b"flowed"}),
             ),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
@@ -263,12 +264,14 @@ class TestAccept(TestCase):
                 type=b"text",
                 subtype=b"html",
                 quality=0.4,
-                parameters={b"level": b"2"},
+                parameters=pmap({b"level": b"2"}),
             ),
             http.MediaRange(quality=0.5),
             http.MediaRange(type=b"text", subtype=b"html", quality=0.7),
             http.MediaRange(
-                type=b"text", subtype=b"html", parameters={b"level": b"1"},
+                type=b"text",
+                subtype=b"html",
+                parameters=pmap({b"level": b"1"}),
             ),
         )
         self.assertEqual(accept, http.Accept(media_types=media_types))
@@ -369,7 +372,11 @@ class TestMediaRange(TestCase):
     def test_lt_parameters_same_type_and_subtype(self):
         self.assertLess(
             http.MediaRange(type="bar", subtype="foo"),
-            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}),
+            http.MediaRange(
+                type="bar",
+                subtype="foo",
+                parameters=pmap({"a": "b"}),
+            ),
         )
 
     def test_not_lt_same_type_and_subtype(self):
@@ -386,20 +393,29 @@ class TestMediaRange(TestCase):
 
     def test_not_lt_parameters(self):
         self.assertFalse(
-            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}) <
-            http.MediaRange(type="bar", subtype="foo"),
+            http.MediaRange(
+                type="bar",
+                subtype="foo",
+                parameters=pmap({"a": "b"}),
+            ) < http.MediaRange(type="bar", subtype="foo"),
         )
 
     def test_not_lt_parameters_different_type(self):
         self.assertFalse(
-            http.MediaRange(type="foo", subtype="foo") <
-            http.MediaRange(type="bar", subtype="foo", parameters={"a": "b"}),
+            http.MediaRange(type="foo", subtype="foo") < http.MediaRange(
+                type="bar",
+                subtype="foo",
+                parameters=pmap({"a": "b"}),
+            ),
         )
 
     def test_not_lt_parameters_different_subtype(self):
         self.assertFalse(
-            http.MediaRange(type="bar", subtype="foo") <
-            http.MediaRange(type="bar", subtype="baz", parameters={"a": "b"}),
+            http.MediaRange(type="bar", subtype="foo") < http.MediaRange(
+                type="bar",
+                subtype="baz",
+                parameters=pmap({"a": "b"}),
+            ),
         )
 
     def test_not_lt_ranged_subtype(self):
@@ -429,14 +445,14 @@ class TestMediaRange(TestCase):
     def test_hash_parameters(self):
         self.assertEqual(
             {
-                http.MediaRange(type="a", parameters={"a": "b"}),
-                http.MediaRange(type="a", parameters={"a": "b"}),
+                http.MediaRange(type="a", parameters=pmap({"a": "b"})),
+                http.MediaRange(type="a", parameters=pmap({"a": "b"})),
             },
-            {http.MediaRange(type="a", parameters={"a": "b"})},
+            {http.MediaRange(type="a", parameters=pmap({"a": "b"}))},
         )
 
     def test_hash_different_parameters(self):
         self.assertNotEqual(
-            hash(http.MediaRange(type="a", parameters={"a": "b"})),
-            hash(http.MediaRange(type="a", parameters={"a": "c"})),
+            hash(http.MediaRange(type="a", parameters=pmap({"a": "b"}))),
+            hash(http.MediaRange(type="a", parameters=pmap({"a": "c"}))),
         ),

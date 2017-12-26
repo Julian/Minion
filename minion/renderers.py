@@ -1,7 +1,7 @@
 from functools import partial, wraps
 import json
 
-from characteristic import Attribute, attributes
+import attr
 
 from minion.http import Headers, MediaRange
 from minion.request import Response
@@ -43,13 +43,12 @@ class SimpleJSON(object):
         return Response(self._dumps(jsonable))
 
 
-@attributes(
-    [
-        Attribute(name="encoding"),
-        Attribute(name="errors", default_value="strict"),
-    ],
-)
+@attr.s
 class Unicode(object):
+
+    encoding = attr.ib()
+    errors = attr.ib(default="strict")
+
     def render(self, request, text):
         return Response(
             text.encode(encoding=self.encoding, errors=self.errors),

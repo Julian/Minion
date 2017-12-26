@@ -17,22 +17,21 @@ perform these operations in various ways.
 from collections import defaultdict
 from functools import partial
 
-from characteristic import Attribute, attributes
 from future.utils import listitems as items
 from future.moves.urllib.parse import urlencode
+import attr
 
 from minion.renderers import bind
 from minion.request import Response, redirect
 from minion.traversal import traverse
 
 
-@attributes(
-    [
-        Attribute(name="mapper"),
-        Attribute(name="default_renderer", default_value=None),
-    ],
-)
+@attr.s
 class Router(object):
+
+    mapper = attr.ib()
+    default_renderer = attr.ib(default=None)
+
     def add(
         self,
         route,

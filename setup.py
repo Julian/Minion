@@ -24,10 +24,11 @@ setup(
     packages=find_packages(),
     setup_requires=["vcversioner"],
     install_requires=[
+        "attrs",
         "cached-property",
-        "characteristic>=14.2.0",
         "future",
         "itsdangerous",
+        "pyrsistent",
         "Werkzeug",
     ],
     author="Julian Berman",

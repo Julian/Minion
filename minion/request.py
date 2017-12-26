@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from io import BytesIO
 
-from characteristic import Attribute, attributes
 from cached_property import cached_property as calculated_once
 from future.utils import iteritems
 from werkzeug.http import HTTP_STATUS_CODES as HTTP_STATUS_PHRASES
+import attr
 
 from minion.deferred import Deferred
 from minion.http import Accept, Headers, MutableHeaders
@@ -87,18 +87,15 @@ class Manager(object):
         return response
 
 
-@attributes(
-    [
-        Attribute(name="content", default_factory=BytesIO),
-        Attribute(name="headers", default_factory=Headers),
-        Attribute(name="url"),
-        Attribute(name="method", default_value=b"GET"),
-        Attribute(
-            name="messages", default_factory=list, exclude_from_cmp=True,
-        ),
-    ],
-)
+@attr.s
 class Request(object):
+
+    url = attr.ib()
+    content = attr.ib(default=attr.Factory(BytesIO))
+    headers = attr.ib(default=attr.Factory(Headers))
+    method = attr.ib(default=b"GET")
+    messages = attr.ib(default=attr.Factory(list), cmp=False)
+
     @calculated_once
     def accept(self):
         header = self.headers.get("Accept")
@@ -110,28 +107,26 @@ class Request(object):
         self.messages.append(_Message(content=message))
 
 
-@attributes(
-    [
-        Attribute(name="content", exclude_from_init=True),
-        Attribute(name="code", default_value=200),
-        Attribute(name="headers", default_factory=MutableHeaders),
-    ],
-)
+@attr.s
 class Response(object):
-    def __init__(self, content=""):
-        self.content = content
+
+    content = attr.ib(default="")
+    code = attr.ib(default=200)
+    headers = attr.ib(default=attr.Factory(MutableHeaders))
 
     @property
     def status(self):
         return HTTP_STATUS_CODES[self.code]
 
 
-@attributes(["content"])
+@attr.s
 class _Message(object):
     """
     A flashed message.
 
     """
+
+    content = attr.ib()
 
 
 def redirect(to, code=302):

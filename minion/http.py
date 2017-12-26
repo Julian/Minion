@@ -5,8 +5,9 @@ APIs for storing and retrieving HTTP headers and cookies.
 
 from bisect import insort
 
-from characteristic import Attribute, attributes
 from future.utils import iteritems, viewkeys
+from pyrsistent import m
+import attr
 
 
 _CANONICAL_HEADER_NAMES = {
@@ -106,16 +107,14 @@ class MutableHeaders(Headers):
             raise NoSuchHeader(name)
 
 
-@attributes(
-    [
-        Attribute(name="media_types"),
-    ],
-)
+@attr.s
 class Accept(object):
     """
     A parsed representation of an HTTP Accept header (see :rfc:`7231#5.3.2`\ ).
 
     """
+
+    media_types = attr.ib()
 
     @classmethod
     def from_header(cls, header):
@@ -176,15 +175,7 @@ class _Star(object):
 STAR = _Star()
 
 
-@attributes(
-    [
-        Attribute(name="type", default_value=STAR),
-        Attribute(name="subtype", default_value=STAR),
-        Attribute(name="parameters", default_factory=dict),
-        Attribute(name="quality", default_value=1.0),
-    ],
-    apply_with_cmp=False,
-)
+@attr.s(cmp=False, hash=True)
 class MediaRange(object):
     """
     A media range.
@@ -194,13 +185,15 @@ class MediaRange(object):
 
     """
 
+    type = attr.ib(default=STAR)
+    subtype = attr.ib(default=STAR)
+    parameters = attr.ib(default=m())
+    quality = attr.ib(default=1.0)
+
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return all(
-            getattr(self, attribute.name) == getattr(other, attribute.name)
-            for attribute in self.characteristic_attributes
-        )
+        return attr.astuple(self) == attr.astuple(other)
 
     def __ne__(self, other):
         if not isinstance(other, self.__class__):
@@ -223,14 +216,6 @@ class MediaRange(object):
             return self.subtype is STAR
 
         return viewkeys(self.parameters) < viewkeys(other.parameters)
-
-    def __hash__(self):
-        values = tuple(
-            getattr(self, attr.name)
-            for attr in self.characteristic_attributes
-            if attr.name != b"parameters"
-        )
-        return hash(values + tuple(self.parameters.items()))
 
 
 Accept.ALL = Accept(media_types=(MediaRange(),))
