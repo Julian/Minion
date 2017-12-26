@@ -70,7 +70,8 @@ class TestApplication(TestCase):
     def test_it_can_bind_to_jinja_environments(self):
         environment = jinja2.Environment()
         app = core.Application(jinja=environment)
-        self.assertEqual(app.bin.globals["jinja"], environment)
+        bin = app.bin.with_globals(jinja=environment)
+        self.assertEqual(app.bin, bin)
         self.assertSubdict(
             [
                 ("app", app),
