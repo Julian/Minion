@@ -1,10 +1,13 @@
 from collections import defaultdict
 
+import attr
+
 from minion import assets
 from minion.request import Manager
 from minion.routing import Router, SimpleMapper
 
 
+@attr.s
 class Application(object):
     """
     A Minion application.
@@ -44,27 +47,20 @@ class Application(object):
 
     """
 
-    def __init__(
-        self, config=None, bin=None, manager=None, router=None, jinja=None,
-    ):
-        if config is None:
-            config = {}
-        if manager is None:
-            manager = Manager()
-        if bin is None:
-            bin = assets.Bin(manager=manager)
-        if router is None:
-            router = Router(mapper=SimpleMapper())
+    config = attr.ib(default=attr.Factory(dict))
+    manager = attr.ib(default=attr.Factory(Manager), repr=False)
+    bin = attr.ib(default=None, repr=False)
+    router = attr.ib(
+        default=attr.Factory(lambda: Router(mapper=SimpleMapper())),
+    )
+    _jinja = attr.ib(default=None)
 
-        self._response_callbacks = defaultdict(list)
-
-        self.config = config
-        self.manager = manager
-        self.router = router
-
-        self.bin = self.bound_bin(bin)
-        if jinja is not None:
-            self.bind_jinja_environment(jinja)
+    def __attrs_post_init__(self):
+        if self.bin is None:
+            self.bin = assets.Bin(manager=self.manager)
+        self.bin = self.bound_bin(self.bin)
+        if self._jinja is not None:
+            self.bind_jinja_environment(self._jinja)
 
     def route(self, route, **kwargs):
         def _add_route(fn):

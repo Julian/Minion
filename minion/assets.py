@@ -12,7 +12,7 @@ class NoSuchAsset(LookupError):
     pass
 
 
-@attr.s
+@attr.s(repr=False)
 class Bin(object):
 
     _manager = attr.ib()
@@ -23,6 +23,11 @@ class Bin(object):
 
     def __contains__(self, asset):
         return asset in self._assets or asset in self._globals
+
+    def __repr__(self):
+        return "<{self.__class__.__name__} assets={self.assets}>".format(
+            self=self,
+        )
 
     @property
     def assets(self):
