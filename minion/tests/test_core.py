@@ -2,8 +2,6 @@ from unittest import TestCase, skipIf
 
 from future.utils import iteritems
 from hyperlink import URL
-from pyrsistent import m
-import attr
 
 try:
     import jinja2
@@ -42,27 +40,33 @@ class TestApplication(TestCase):
     def test_binds_to_its_bin(self):
         app = core.Application()
         self.assertEqual(
-            app.bin, attr.evolve(
-                app.bin, globals=m(
-                    app=app,
-                    config=app.config,
-                    manager=app.manager,
-                    router=app.router,
-                ),
+            (
+                app.bin.provide("app"),
+                app.bin.provide("config"),
+                app.bin.provide("manager"),
+                app.bin.provide("router"),
+            ), (
+                app,
+                app.config,
+                app.manager,
+                app.router,
             ),
         )
 
     def test_it_can_bind_to_other_bins(self):
         app = core.Application()
-        bin = assets.Bin(manager=app.manager)
+        bin = app.bound_bin(assets.Bin())
         self.assertEqual(
-            app.bound_bin(bin), attr.evolve(
-                bin, globals=m(
-                    app=app,
-                    config=app.config,
-                    manager=app.manager,
-                    router=app.router,
-                ),
+            (
+                bin.provide("app"),
+                bin.provide("config"),
+                bin.provide("manager"),
+                bin.provide("router"),
+            ), (
+                app,
+                app.config,
+                app.manager,
+                app.router,
             ),
         )
 
@@ -70,16 +74,7 @@ class TestApplication(TestCase):
     def test_it_can_bind_to_jinja_environments(self):
         environment = jinja2.Environment()
         app = core.Application(jinja=environment)
-        bin = app.bin.with_globals(jinja=environment)
-        self.assertEqual(app.bin, bin)
-        self.assertSubdict(
-            [
-                ("app", app),
-                ("config", app.config),
-                ("router", app.router),
-            ],
-            environment.globals,
-        )
+        self.assertEqual(app.bin.provide("jinja"), environment)
 
 
 class TestApplicationIntegration(TestCase):

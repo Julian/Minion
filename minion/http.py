@@ -219,16 +219,3 @@ class MediaRange(object):
 
 
 Accept.ALL = Accept(media_types=(MediaRange(),))
-
-
-def _vars(instance):
-    for attr in instance.characteristic_attributes:
-        name = attr.name
-        yield attr.init_aliaser(name), getattr(instance, name)
-
-
-def _replace(instance, **new):
-    for name, value in _vars(instance):
-        if name not in new:
-            new[name] = value
-    return instance.__class__(**new)

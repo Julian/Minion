@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import attr
 
 from minion import assets
@@ -57,7 +55,7 @@ class Application(object):
 
     def __attrs_post_init__(self):
         if self.bin is None:
-            self.bin = assets.Bin(manager=self.manager)
+            self.bin = assets.Bin().add(manager=self.manager)
         self.bin = self.bound_bin(self.bin)
         if self._jinja is not None:
             self.bind_jinja_environment(self._jinja)
@@ -84,11 +82,11 @@ class Application(object):
 
         """
 
-        return bin.with_globals(
-            app=self,
-            config=self.config,
-            manager=self.manager,
-            router=self.router,
+        return bin.add(
+            app=lambda bin: self,
+            config=lambda bin: self.config,
+            manager=lambda bin: self.manager,
+            router=lambda bin: self.router,
         )
 
     def bind_jinja_environment(self, environment, asset_name="jinja"):
@@ -116,4 +114,4 @@ class Application(object):
                 ("router", self.router),
             ],
         )
-        self.bin = self.bin.with_globals(**{asset_name: environment})
+        self.bin = self.bin.add(**{asset_name: lambda bin: environment})
