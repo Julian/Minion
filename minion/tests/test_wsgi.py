@@ -106,6 +106,54 @@ class TestRequest(RequestTestMixin, TestCase):
             URL(scheme=u"http", host=u"localhost", port=8080),
         )
 
+    def test_http_host_present(self):
+        environ = {
+            "HTTP_HOST": "example.org:1234",
+            "PATH_INFO": "/",
+            "SERVER_PORT": "1234",
+            "wsgi.url_scheme": "https",
+        }
+        self.assertEqual(
+            wsgi.Request(environ).url, URL(
+                scheme=u"https",
+                host=u"example.org",
+                path=[u""],
+                port=1234,
+            ),
+        )
+
+    def test_http_host_present_default_port(self):
+        environ = {
+            "HTTP_HOST": "example.org:80",
+            "SERVER_PORT": "80",
+            "PATH_INFO": "/",
+            "wsgi.url_scheme": "https",
+        }
+        self.assertEqual(
+            wsgi.Request(environ).url, URL(
+                scheme=u"https",
+                host=u"example.org",
+                path=[u""],
+                port=80,
+            ),
+        )
+
+    def test_no_http_host_present(self):
+        environ = {
+            "SERVER_NAME": "example.org",
+            "SERVER_PORT": "1234",
+            "PATH_INFO": "/",
+            "wsgi.url_scheme": "https",
+        }
+        self.assertEqual(
+            wsgi.Request(environ).url, URL(
+                scheme=u"https",
+                host=u"example.org",
+                path=[u""],
+                port=1234,
+            ),
+        )
+
     def test_script_name(self):
         environ = {
             "HTTP_HOST": "example.org",

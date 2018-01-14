@@ -33,11 +33,20 @@ class Request(object):
     @calculated_once
     def url(self):
         environ = self.environ
-        host = environ.get("HTTP_HOST") or environ["SERVER_NAME"]
+
+        # See https://www.python.org/dev/peps/pep-0333/#url-reconstruction
+        host = environ.get("HTTP_HOST")
+        if host is not None:
+            host, _, port = host.partition(":")
+            port = int(port) if port else None
+        else:
+            host = environ["SERVER_NAME"]
+            port = int(environ["SERVER_PORT"])
+
         path = environ.get("SCRIPT_NAME", "") + environ.get("PATH_INFO", "")
         return URL(
             host=host.decode("ascii"),
-            port=int(environ["SERVER_PORT"]),
+            port=port,
             path=path.lstrip("/").decode("ascii").split(u"/"),
             query=[
                 (k.decode("ascii"), v.decode("ascii"))
