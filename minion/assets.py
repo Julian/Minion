@@ -24,6 +24,13 @@ class Bin(object):
     def add(self, **assets):
         return attr.evolve(self, assets=self._assets.update(assets))
 
+    def with_globals(self, **kwargs):
+        def _global(thing):
+            return lambda bin: thing
+        return self.add(
+            **{name: _global(thing) for name, thing in kwargs.items()}
+        )
+
     def provide(self, name):
         try:
             provider = self._assets[name]
