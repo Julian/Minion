@@ -21,8 +21,21 @@ classifiers = [
 
 setup(
     name="minion",
+    url="https://github.com/Julian/Minion",
+    description="A microframework based on evil intentions and "
+                "whatever else you've got",
+    license="MIT",
+    classifiers=classifiers,
+    long_description=long_description,
+
+    author="Julian Berman",
+    author_email="Julian@GrayVines.com",
+
     packages=find_packages(),
-    setup_requires=["vcversioner"],
+
+    setup_requires=["setuptools_scm"],
+    use_scm_version=True,
+
     install_requires=[
         "attrs",
         "cached-property",
@@ -31,13 +44,4 @@ setup(
         "pyrsistent",
         "Werkzeug",
     ],
-    author="Julian Berman",
-    author_email="Julian@GrayVines.com",
-    classifiers=classifiers,
-    license="MIT",
-    long_description=long_description,
-    url="https://github.com/Julian/Minion",
-    description="A microframework based on evil intentions and "
-                "whatever else you've got",
-    vcversioner={"version_module_paths" : ["minion/_version.py"]},
 )
