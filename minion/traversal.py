@@ -27,7 +27,7 @@ class TreeResource(object):
 
     """
 
-    render = attr.ib()
+    render = attr.ib(default=lambda request: Response(code=404))
     _children = attr.ib(default=attr.Factory(dict))
 
     _no_such_child = LeafResource(render=lambda request: Response(code=404))

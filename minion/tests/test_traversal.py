@@ -37,6 +37,11 @@ class TestTreeResource(TestCase):
         child = resource.get_child(b"foo", request=request)
         self.assertEqual(child.render(request), Response(code=404))
 
+    def test_it_returns_404s_by_default(self):
+        resource = traversal.TreeResource()
+        request = Request(url=URL(path=[]))
+        self.assertEqual(resource.render(request), Response(code=404))
+
 
 class TestLeafResource(TestCase):
     def test_it_renders_what_its_told(self):
